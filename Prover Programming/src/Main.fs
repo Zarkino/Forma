@@ -8,7 +8,6 @@ open Fable.Core.JsInterop
 importSideEffects "./styles/global.scss"
 
 // Test
-ReactDOM.render(
-    Components.HelloWorld(),
-    document.getElementById "feliz-app"
-)
+let root = ReactDOM.createRoot(document.getElementById "feliz-app")
+
+root.render(Components.HelloWorld())
