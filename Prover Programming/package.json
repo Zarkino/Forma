@@ -11,6 +11,7 @@
         "test": "dotnet fable tests --outDir dist/tests && mocha dist/tests -r esm"
     },
     "dependencies": {
+        "@monaco-editor/react": "^4.4.6",
         "bulma": "^0.9.4",
         "date-fns": "^2.29.3",
         "react": "^18.2.0",
