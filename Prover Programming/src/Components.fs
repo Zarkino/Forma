@@ -2,6 +2,7 @@ namespace App
 
 open Feliz
 open Feliz.Router
+open MonacoEditor
 
 type Components =
     /// <summary>
@@ -41,4 +42,16 @@ type Components =
                 | [ "counter" ] -> Components.Counter()
                 | otherwise -> Html.h1 "Not found"
             ]
+        ]
+    
+    [<ReactComponent>]
+    static member Editor() =
+        let (value, setValue) = React.useState("")
+        MonacoEditor.create [
+            MonacoEditor.Value "let x = 10\nlet f x = x * x"
+            MonacoEditor.Language "fsharp"
+            MonacoEditor.Height "90vh"
+            MonacoEditor.Theme Light
+            MonacoEditor.Options {| minimap = {| enabled = false |}; |}
+            MonacoEditor.OnChange setValue
         ]

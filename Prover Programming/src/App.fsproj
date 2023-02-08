@@ -4,9 +4,9 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include="index.html" />
+        <Compile Include="MonacoEditor.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
-        <Compile Include="MonacoEditor.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
