@@ -1,4 +1,8 @@
+// Overwrite navigation bar breakpoint
+$navbar-breakpoint: "0";
+
 @import "~bulma";
+@import "~bulma-switch";
 
 html, body {
   margin: 0;
