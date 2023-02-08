@@ -45,12 +45,12 @@ type Components =
         ]
     
     [<ReactComponent>]
-    static member Editor(value, setValue, readonly) =
+    static member Editor(value, setValue, readonly, theme) =
         MonacoEditor.create [
             MonacoEditor.Value value
             MonacoEditor.Language "fsharp"
             MonacoEditor.Height "90vh"
-            MonacoEditor.Theme Light
+            MonacoEditor.Theme theme
             MonacoEditor.Options {| minimap = {| enabled = false |}; readOnly = readonly; |}
             MonacoEditor.OnChange setValue
         ]

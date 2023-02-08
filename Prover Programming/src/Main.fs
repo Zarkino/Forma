@@ -4,8 +4,11 @@ open Feliz
 open Feliz.Bulma
 open App
 open Fable.Core.JsInterop
+open Feliz.style
 
-importSideEffects "./styles/global.scss"
+let theme = 1
+
+if theme > 0 then importSideEffects "./styles/light.scss" else importSideEffects "./styles/dark.scss"
 
 let marko_polo (x: string) = x.Replace("marko", "polo")
 
@@ -13,16 +16,20 @@ let marko_polo (x: string) = x.Replace("marko", "polo")
 let Main () =
     let (value, setValue) = React.useState("let x = 10\nlet f x = x * x")
     Html.div [
-        Html.h1 [
-            prop.text "Editor"
-        ]
-        Bulma.columns [
-            Bulma.column [
-                Components.Editor(value, setValue, false)
+        prop.style [ style.backgroundColor color.black ]
+        prop.children [
+            Html.h1 [
+                prop.text "Editor"
+                prop.className "title"
             ]
-            Bulma.column [
-                Components.Editor(marko_polo (value), (fun _ -> ()), true)
-                
+            Bulma.columns [
+                Bulma.column [
+                    Components.Editor(value, setValue, false, MonacoEditor.Dark)
+                ]
+                Bulma.column [
+                    Components.Editor(marko_polo (value), (fun _ -> ()), true, MonacoEditor.Dark)
+                    
+                ]
             ]
         ]
     ]
