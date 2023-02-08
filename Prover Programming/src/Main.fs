@@ -32,18 +32,19 @@ let Main () =
                             Bulma.navbarItem.a [ prop.text "About" ]
                         ]
                         Bulma.navbarEnd.div [
-                            prop.style [ style.marginRight 10 ]
-                            prop.children [
-                                Switch.checkbox [
-                                    prop.id "theme_switch"
-                                    color.isDark
-                                    switch.isRounded
-                                    switch.isMedium
-                                    prop.onClick (fun _ -> setTheme(if theme.Equals("light") then "dark" else "light"))
-                                ]
-                                Html.label [
-                                    prop.htmlFor "theme_switch"
-                                    prop.text ""
+                            Bulma.navbarItem.div [
+                                Bulma.field.div [
+                                    Switch.checkbox [
+                                        prop.id "theme_switch"
+                                        color.isDark
+                                        switch.isRounded
+                                        switch.isMedium
+                                        prop.onClick (fun _ -> setTheme(if theme.Equals("light") then "dark" else "light"))
+                                    ]
+                                    Html.label [
+                                        prop.htmlFor "theme_switch"
+                                        prop.text ""
+                                    ]
                                 ]
                             ]
                         ]
