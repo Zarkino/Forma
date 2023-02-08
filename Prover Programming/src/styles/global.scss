@@ -1,2 +1,23 @@
 @import "~bulma";
 
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+div.dark {
+  background-color: black;
+}
+
+div.light {
+  background-color: white;
+}
+
+.column.dark {
+  background-color: black;
+}
+
+.column.light {
+  background-color: white;
+}

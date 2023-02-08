@@ -2,33 +2,52 @@ module Main
 
 open Feliz
 open Feliz.Bulma
-open App
 open Fable.Core.JsInterop
-open Feliz.style
+open App
 
-let theme = 1
-
-if theme > 0 then importSideEffects "./styles/light.scss" else importSideEffects "./styles/dark.scss"
+importSideEffects "./styles/global.scss"
 
 let marko_polo (x: string) = x.Replace("marko", "polo")
 
 [<ReactComponent>]
 let Main () =
+    let (theme, setTheme) = React.useState("light")
     let (value, setValue) = React.useState("let x = 10\nlet f x = x * x")
+    
     Html.div [
-        prop.style [ style.backgroundColor color.black ]
+        prop.className theme
         prop.children [
             Html.h1 [
-                prop.text "Editor"
-                prop.className "title"
+                prop.text "Prover Programming"
+                prop.className theme
+            ]
+            Bulma.button.button [
+                prop.text "Switch Theme"
+                prop.style [
+                    style.color theme
+                ]
+                prop.onClick (fun _ -> setTheme(if theme.Equals("light") then "dark" else "light"))
             ]
             Bulma.columns [
                 Bulma.column [
-                    Components.Editor(value, setValue, false, MonacoEditor.Dark)
+                    prop.className theme
+                    prop.children [
+                        Html.h1 [
+                            prop.text "Input"
+                            prop.className "subtitle"
+                        ]
+                        Components.Editor(value, setValue, false, theme)
+                    ]
                 ]
                 Bulma.column [
-                    Components.Editor(marko_polo (value), (fun _ -> ()), true, MonacoEditor.Dark)
-                    
+                    prop.className theme
+                    prop.children [
+                        Html.h1 [
+                            prop.text "Output"
+                            prop.className "subtitle"
+                        ]
+                        Components.Editor(marko_polo (value), (fun _ -> ()), true, theme)
+                    ]
                 ]
             ]
         ]
