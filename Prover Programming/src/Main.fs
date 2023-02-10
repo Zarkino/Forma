@@ -51,27 +51,94 @@ let Main () =
                     ]
                 ]
             ]
+            Bulma.field.div [
+                field.hasAddons
+                prop.children [
+                    Bulma.control.p [
+                        Bulma.button.button [
+                            Html.span [ prop.text "Format" ]
+                        ]
+                    ]
+                    Bulma.control.p [
+                        Bulma.button.button [
+                            Html.span [ prop. text "Download" ]
+                        ]
+                    ]
+                    Bulma.control.p [
+                        Bulma.button.button [
+                            Html.span [ prop.text "Upload" ]
+                        ]
+                    ]
+                    Bulma.control.p [
+                        Bulma.button.button [
+                            Html.span [ prop.text "Help" ]
+                        ]
+                    ]
+                    Bulma.control.p [
+                        Bulma.button.button [
+                            Html.span [ prop.text "Examples" ]
+                        ]
+                    ]
+                ]
+            ]
             Bulma.columns [
-                Bulma.column [
-                    prop.className theme
-                    prop.children [
-                        Html.h1 [
-                            prop.text "Input"
-                            prop.className "subtitle"
+                columns.isGapless
+                prop.children [
+                    Bulma.column [
+                        column.isHalf
+                        prop.className theme
+                        prop.children [
+                            Bulma.columns [
+                                Bulma.column [
+                                    column.isNarrow
+                                    prop.children [
+                                        Html.h1 [
+                                            prop.text "Input"
+                                            prop.className "subtitle"
+                                        ]
+                                    ]
+                                ]
+                                Bulma.column [
+                                    prop.children [
+                                        Bulma.button.button [
+                                        prop.text "Copy to clipboard"
+                                        ]
+                                    ]
+                                ]
+                            ]
+                            Components.Editor(value, setValue, false, theme)
                         ]
-                        Components.Editor(value, setValue, false, theme)
+                    ]
+                    Bulma.column [
+                        column.isHalf
+                        prop.className theme
+                        prop.children [
+                            Bulma.columns [
+                                Bulma.column [
+                                    column.isNarrow
+                                    prop.children [
+                                        Html.h1 [
+                                            prop.text "Output"
+                                            prop.className "subtitle"
+                                        ]
+                                    ]
+                                ]
+                                Bulma.column [
+                                    prop.children [
+                                        Bulma.button.button [
+                                        prop.text "Copy to clipboard"
+                                        ]
+                                    ]
+                                ]
+                            ]
+                            Components.Editor(marko_polo (value), (fun _ -> ()), true, theme)
+                        ]
                     ]
                 ]
-                Bulma.column [
-                    prop.className theme
-                    prop.children [
-                        Html.h1 [
-                            prop.text "Output"
-                            prop.className "subtitle"
-                        ]
-                        Components.Editor(marko_polo (value), (fun _ -> ()), true, theme)
-                    ]
-                ]
+            ]
+            Html.footer [
+                prop.text "DTU copyright or something idk"
+                prop.className "smallbottomtext"
             ]
         ]
     ]
