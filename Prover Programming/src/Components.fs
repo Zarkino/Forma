@@ -49,7 +49,7 @@ type Components =
         MonacoEditor.create [
             MonacoEditor.Value value
             MonacoEditor.Language "fsharp"
-            MonacoEditor.Height "90vh"
+            MonacoEditor.Height "100%"
             MonacoEditor.Theme (if theme.Equals("dark") then Dark else Light)
             MonacoEditor.Options {| minimap = {| enabled = false |}; readOnly = readonly; |}
             MonacoEditor.OnChange setValue

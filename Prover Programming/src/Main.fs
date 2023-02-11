@@ -52,6 +52,7 @@ let Main () =
                 ]
             ]
             Bulma.field.div [
+                prop.className "mb-0"
                 field.hasAddons
                 prop.children [
                     Bulma.control.p [
@@ -83,6 +84,7 @@ let Main () =
             ]
             Bulma.columns [
                 columns.isGapless
+                prop.className "mb-0"
                 prop.children [
                     Bulma.column [
                         column.isHalf
@@ -106,7 +108,12 @@ let Main () =
                                     ]
                                 ]
                             ]
-                            Components.Editor(value, setValue, false, theme)
+                            Html.div [
+                                prop.className "editor"
+                                prop.children [
+                                    Components.Editor(value, setValue, false, theme)
+                                ]
+                            ]
                         ]
                     ]
                     Bulma.column [
@@ -131,7 +138,12 @@ let Main () =
                                     ]
                                 ]
                             ]
-                            Components.Editor(marko_polo (value), (fun _ -> ()), true, theme)
+                            Html.div [
+                                prop.className "editor"
+                                prop.children [
+                                    Components.Editor(marko_polo (value), (fun _ -> ()), true, theme)
+                                ]
+                            ]
                         ]
                     ]
                 ]

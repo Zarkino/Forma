@@ -8,10 +8,22 @@ html, body {
   margin: 0;
   padding: 0;
   border: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.theme {
+  
 }
 
 .subtitle{
   font-size: 24px;
+}
+
+div.editor {
+  height: calc(100vh - 72px - 40px - 64px - 24px);
+  //72 header, 40 buttongroup, 64 subtitles, 24 footer
+  //flex: 1 1 auto;
 }
 
 div.dark {
