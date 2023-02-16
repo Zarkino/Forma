@@ -48,20 +48,21 @@ type Components =
     [<ReactComponent>]
     static member Editor(value, setValue, readonly, theme) =
         let ASP_FORMAT: obj = import "ASP_FORMAT" "./language/asp.ts"
-        let ASP_THEME: obj = import "ASP_THEME" "./language/asp.ts"
+        let ASP_THEME_LIGHT: obj = import "ASP_THEME_LIGHT" "./language/asp.ts"
+        let ASP_THEME_DARK: obj = import "ASP_THEME_DARK" "./language/asp.ts"
         
         MonacoEditor.create [
             MonacoEditor.Value value
-            MonacoEditor.Language "asp"
+            MonacoEditor.Language "asp-lang"
             MonacoEditor.Height "100%"
-            MonacoEditor.Theme (if theme.Equals("dark") then Dark else Light)
+            MonacoEditor.Theme (if theme.Equals("dark") then "asp-theme-dark" else "asp-theme-light")
             MonacoEditor.Options {| minimap = {| enabled = false |}; readOnly = readonly; |}
             MonacoEditor.BeforeMount
                 (fun monaco ->
-                    monaco?languages?register$({| id = "asp" |})
-                    monaco?languages?setMonarchTokensProvider$("asp", ASP_FORMAT)
-                    monaco?editor?defineTheme$("asp", ASP_THEME)
-                    //Browser.Dom.console.log(monaco?languages?getLanguages())
+                    monaco?languages?register$({| id = "asp-lang" |})
+                    monaco?languages?setMonarchTokensProvider$("asp-lang", ASP_FORMAT)
+                    monaco?editor?defineTheme$("asp-theme-light", ASP_THEME_LIGHT)
+                    monaco?editor?defineTheme$("asp-theme-dark", ASP_THEME_DARK)
                 )
             MonacoEditor.OnChange setValue
         ]

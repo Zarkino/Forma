@@ -1,26 +1,41 @@
-﻿export const ASP_FORMAT = {
+﻿let keywords = ['class', 'new', 'string', 'number', 'boolean', 'private', 'public']
+
+export const ASP_FORMAT = {
+    keywords,
     tokenizer: {
         root: [
-            [/\[error.*/, "custom-error"],
-            [/\[notice.*/, "custom-notice"],
-            [/\[info.*/, "custom-info"],
-            [/\[[a-zA-Z 0-9:]+\]/, "custom-date"],
-        ],
-    },
+            [/@?[a-zA-Z][\w$]*/, {
+                cases: {
+                    '@keywords': 'keyword',
+                    '@default': 'variable',
+                }
+            }],
+            [/".*?"/, 'string'],
+            [/\/\//, 'comment'],
+        ]
+    }
 };
 
-export const ASP_THEME = {
+export const ASP_THEME_LIGHT = {
     base: 'vs',
     inherit: true,
     rules: [
-        { token: "comment", foreground: "87a1c4" },
-        { token: "number", foreground: "256fd1"},
-        { token: "identifier", foreground: "586677" },
-        { token: "keyword", foreground: "29ff00"},
-        { token: "string", foreground: "7c71f2"}
+        { token: 'keyword', foreground: '#FF6600', fontStyle: 'bold' },
+        { token: 'comment', foreground: '#999999' },
+        { token: 'string', foreground: '#009966'},
+        { token: 'variable', foreground: '#006699'}
     ],
-    colors: {
-        "editorCursor.foreground": "#586677",
-        "editor.lineHighlightBackground": "#f9fcff",
-    }
+    colors: {}
+}
+
+export const ASP_THEME_DARK = {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+        { token: 'keyword', foreground: '#FF6600', fontStyle: 'bold' },
+        { token: 'comment', foreground: '#999999' },
+        { token: 'string', foreground: '#009966'},
+        { token: 'variable', foreground: '#006699'}
+    ],
+    colors: {}
 }

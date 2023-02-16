@@ -21,7 +21,7 @@ type MonacoEditor =
     static member inline Value (value: string) = "value" ==> value
     static member inline Language (value: string) = "language" ==> value
     static member inline Path (value: string) = "path" ==> value
-    static member inline Theme (value: Theme) = "theme" ==> value
+    static member inline Theme (value: string) = "theme" ==> value
     static member inline Line (value: int) = "line" ==> value
     static member inline Loading (value: ReactElement) = "loading" ==> value
     static member inline Options (value: obj) = "options" ==> value                     // monaco.editor.IStandaloneEditorConstructionOptions
