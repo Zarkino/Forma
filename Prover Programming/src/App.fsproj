@@ -4,6 +4,7 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include="index.html" />
+        <TypeScriptCompile Include="language\asp.ts" />
         <Compile Include="MonacoEditor.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />

@@ -9,6 +9,11 @@ type Theme =
     | [<CompiledName("vs-dark")>]   Dark
     | [<CompiledName("light")>]     Light
 
+[<Erase>]
+type Size =
+    | String of string
+    | Number of int
+
 type MonacoEditor =
     static member inline DefaultValue (value: string) = "defaultValue" ==> value
     static member inline DefaultLanguage (value: string) = "defaultLanguage" ==> value

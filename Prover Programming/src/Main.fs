@@ -7,6 +7,12 @@ open App
 
 importSideEffects "./styles/global.scss"
 
+(*
+let monaco: obj = importAll "monaco-editor/esm/vs/editor/editor.api"
+
+Browser.Dom.console.log(monaco?languages?getLanguages())
+*)
+
 let marko_polo (x: string) = x.Replace("marko", "polo")
 
 [<ReactComponent>]
