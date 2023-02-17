@@ -4,30 +4,21 @@ $navbar-breakpoint: "0";
 @import "~bulma";
 @import "~bulma-switch";
 
-html, body {
-  margin: 0;
-  padding: 0;
-  border: 0;
+:root {
+  --main-color-dark: #121212;
+}
+
+html {
   overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.theme {
-  
-}
-
-.subtitle{
-  font-size: 24px;
 }
 
 div.editor {
-  height: calc(100vh - 72px - 40px - 64px - 24px);
-  //72 header, 40 buttongroup, 64 subtitles, 24 footer
-  //flex: 1 1 auto;
+  height: calc(100vh - 72px - 40px - 54px - 24px);
+  //72 header, 40 buttongroup, 54 subtitles, 24 footer
 }
 
 div.dark {
-  background-color: black;
+  background-color: var(--main-color-dark);
 }
 
 div.light {
@@ -35,9 +26,17 @@ div.light {
 }
 
 .column.dark {
-  background-color: black;
+  background-color: var(--main-color-dark);
 }
 
 .column.light {
   background-color: white;
+}
+
+button.dark {
+  background-color: var(--main-color-dark);
+}
+
+button.light {
+  background-color: #f5f5f5;
 }

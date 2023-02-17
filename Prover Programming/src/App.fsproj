@@ -4,7 +4,9 @@
     </PropertyGroup>
     <ItemGroup>
         <None Include="index.html" />
-        <Compile Include="MonacoEditor.fs" />
+        <Compile Include="Navigation Bar.fs" />
+        <Compile Include="Button Level.fs" />
+        <Compile Include="Monaco Editor.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Main.fs" />

@@ -1,4 +1,4 @@
-﻿module MonacoEditor
+﻿module Monaco_Editor
 
 open Fable.Core
 open Fable.Core.JsInterop
