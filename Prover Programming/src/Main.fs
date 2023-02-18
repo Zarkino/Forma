@@ -13,12 +13,37 @@ let monaco: obj = importAll "monaco-editor/esm/vs/editor/editor.api"
 Browser.Dom.console.log(monaco?languages?getLanguages())
 *)
 
+let initialContent = "/*
+Just some example arguments from wikipedia,
+mainly a language feature demonstrator.
+*/
+
+((p -> q) & p) ||= q                //Modus Ponens
+((p -> q) & !q) ||= !p              //Modus Tollens
+((p | q) & !p) ||= q                //Disjunctive Syllogism
+(p <> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
+
+//Some wikipedia FOL example - currently showcasing issues lol
+AxAy(P(f(x)) -> !(P(x) -> Q(f(y), x, z)))
+
+//Constants can be used like so
+Ax(_c)
+
+//using a macro
+.myMacro
+
+//defining a macro
+def myMacro {
+    //Macro containing Modus Ponens
+    ((p -> q) & p) ||= q
+}"
+
 let marko_polo (x: string) = x.Replace("marko", "polo")
 
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState("let x = 10\nlet f x = x * x")
+    let (value, setValue) = React.useState(initialContent)
     
     Html.div [
         prop.className theme
