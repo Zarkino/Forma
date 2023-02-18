@@ -33,6 +33,14 @@ div.light {
   background-color: white;
 }
 
+nav.dark {
+  background-color: var(--main-color-dark);
+}
+
+nav.light {
+  background-color: white;
+}
+
 button.dark {
   background-color: var(--main-color-dark);
 }
