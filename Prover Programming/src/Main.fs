@@ -70,7 +70,7 @@ let Main () =
                                     column.isFull
                                     prop.className "editor"
                                     prop.children [
-                                        Components.Editor(theme, value, readonly = Some true)
+                                        Components.Editor(theme, marko_polo value, readonly = Some true)
                                     ]
                                 ]
                             ]
