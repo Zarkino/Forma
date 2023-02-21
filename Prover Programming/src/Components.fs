@@ -55,7 +55,7 @@ type Components =
                     o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
                         oMinimap.enabled <- Some false
                     ))
-                    o.readOnly <- defaultArg readonly (Some false)
+                    o.readOnly <- defaultArg (Some readonly) (Some false)
                 ))
             Monaco_Editor.Props.onChange (defaultArg setValue (fun _ -> ()))
         ]
