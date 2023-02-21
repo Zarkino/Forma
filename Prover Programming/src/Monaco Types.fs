@@ -74,7 +74,7 @@ type EditorProps =
     static member inline onMount (onMount: Monaco.Editor.IStandaloneCodeEditor * obj -> unit) = Interop.mkAttr "onMount" onMount
     /// Signature: function(value: string | undefined, ev: monaco.editor.IModelContentChangedEvent) => void
     /// An event is emitted when the content of the current model is changed
-    static member inline onChange (onChange: string -> unit) = Interop.mkAttr "onChange" onChange // string option * Monaco.Editor.IModelContentChangedEvent
+    static member inline onChange (onChange: string option * Monaco.Editor.IModelContentChangedEvent -> unit) = Interop.mkAttr "onChange" onChange
     /// Signature: function(markers: monaco.editor.IMarker[]) => void
     /// An event is emitted when the content of the current model is changed
     /// and tthe current model markers are ready

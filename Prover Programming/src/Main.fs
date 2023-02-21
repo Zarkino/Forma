@@ -54,7 +54,7 @@ let Main () =
                                                         oMinimap.enabled <- Some false
                                                     ))
                                                 ))
-                                            Monaco_Types.EditorProps.onChange setValue
+                                            Monaco_Types.EditorProps.onChange (fun value -> setValue(value.ToString()))
                                         ]
                                     ]
                                 ]
