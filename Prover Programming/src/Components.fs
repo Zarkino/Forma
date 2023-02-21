@@ -2,7 +2,7 @@ namespace App
 
 open Feliz
 open Feliz.Router
-open Monaco_Editor
+open Fable.Core.JsInterop
 
 type Components =
     /// <summary>
@@ -46,11 +46,16 @@ type Components =
     
     [<ReactComponent>]
     static member Editor(theme, value, ?setValue, ?readonly) =
-        MonacoEditor.create [
-            MonacoEditor.Value value
-            MonacoEditor.Language "fsharp"
-            MonacoEditor.Height "100%"
-            MonacoEditor.Theme (if theme.Equals("dark") then Dark else Light)
-            MonacoEditor.Options {| minimap = {| enabled = false |}; readOnly = defaultArg readonly false; |}
-            MonacoEditor.OnChange (defaultArg setValue (fun _ -> ()))
+        Monaco_Editor.Editor.create [
+            Monaco_Editor.Props.value value
+            Monaco_Editor.Props.language "fsharp"
+            Monaco_Editor.Props.theme (if theme.Equals("dark") then !^Monaco_Editor.Dark else !^Monaco_Editor.Light)
+            Monaco_Editor.Props.options
+                (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
+                    o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
+                        oMinimap.enabled <- Some false
+                    ))
+                    o.readOnly <- defaultArg readonly (Some false)
+                ))
+            Monaco_Editor.Props.onChange (defaultArg setValue (fun _ -> ()))
         ]

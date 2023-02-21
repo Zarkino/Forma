@@ -44,18 +44,7 @@ let Main () =
                                     column.isFull
                                     prop.className "editor"
                                     prop.children [
-                                        Monaco_Types.ReactEditor.editor [
-                                            Monaco_Types.EditorProps.value value
-                                            Monaco_Types.EditorProps.language "fsharp"
-                                            Monaco_Types.EditorProps.theme (!^theme)
-                                            Monaco_Types.EditorProps.options
-                                                (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
-                                                    o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
-                                                        oMinimap.enabled <- Some false
-                                                    ))
-                                                ))
-                                            Monaco_Types.EditorProps.onChange (fun value -> setValue(value.ToString()))
-                                        ]
+                                        Components.Editor(theme, value, (fun value -> setValue(value.ToString())))
                                     ]
                                 ]
                             ]
@@ -81,18 +70,7 @@ let Main () =
                                     column.isFull
                                     prop.className "editor"
                                     prop.children [
-                                        Monaco_Types.ReactEditor.editor [
-                                            Monaco_Types.EditorProps.value (marko_polo value)
-                                            Monaco_Types.EditorProps.language "fsharp"
-                                            Monaco_Types.EditorProps.theme (!^theme)
-                                            Monaco_Types.EditorProps.options
-                                                (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
-                                                    o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
-                                                        oMinimap.enabled <- Some false
-                                                    ))
-                                                    o.readOnly <- Some true
-                                                ))
-                                        ]
+                                        Components.Editor(theme, value, readonly = Some true)
                                     ]
                                 ]
                             ]
