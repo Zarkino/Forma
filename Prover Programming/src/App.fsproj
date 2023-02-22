@@ -6,6 +6,10 @@
         <None Include="index.html" />
         <TypeScriptCompile Include="language\asp.ts" />
         <Compile Include="MonacoEditor.fs" />
+        <Compile Include="Navigation Bar.fs" />
+        <Compile Include="Button Level.fs" />
+        <Compile Include="Libs\Monaco.fs" />
+        <Compile Include="Monaco Editor.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Main.fs" />

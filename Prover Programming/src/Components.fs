@@ -3,7 +3,6 @@ namespace App
 open Feliz
 open Feliz.Router
 open Fable.Core.JsInterop
-open MonacoEditor
 
 type Components =
     /// <summary>
@@ -46,23 +45,28 @@ type Components =
         ]
     
     [<ReactComponent>]
-    static member Editor(value, setValue, readonly, theme) =
+    static member Editor(theme, value, ?setValue, ?readonly) =
         let ASP_FORMAT: obj = import "ASP_FORMAT" "./language/asp.ts"
         let ASP_THEME_LIGHT: obj = import "ASP_THEME_LIGHT" "./language/asp.ts"
         let ASP_THEME_DARK: obj = import "ASP_THEME_DARK" "./language/asp.ts"
         
-        MonacoEditor.create [
-            MonacoEditor.Value value
-            MonacoEditor.Language "asp-lang"
-            MonacoEditor.Height "100%"
-            MonacoEditor.Theme (if theme.Equals("dark") then "asp-theme-dark" else "asp-theme-light")
-            MonacoEditor.Options {| minimap = {| enabled = false |}; readOnly = readonly; |}
-            MonacoEditor.BeforeMount
+        Monaco_Editor.Editor.create [
+            Monaco_Editor.Props.value value
+            Monaco_Editor.Props.language "fsharp"
+            Monaco_Editor.Props.theme (if theme.Equals("dark") then !^Monaco_Editor.Dark else !^Monaco_Editor.Light)
+            Monaco_Editor.Props.options
+                (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
+                    o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
+                        oMinimap.enabled <- Some false
+                    ))
+                    o.readOnly <- defaultArg (Some readonly) (Some false)
+                ))
+            Monaco_Editor.Props.beforeMount
                 (fun monaco ->
                     monaco?languages?register$({| id = "asp-lang" |})
                     monaco?languages?setMonarchTokensProvider$("asp-lang", ASP_FORMAT)
                     monaco?editor?defineTheme$("asp-theme-light", ASP_THEME_LIGHT)
                     monaco?editor?defineTheme$("asp-theme-dark", ASP_THEME_DARK)
                 )
-            MonacoEditor.OnChange setValue
+            Monaco_Editor.Props.onChange (defaultArg setValue (fun _ -> ()))
         ]
