@@ -5,7 +5,6 @@
     <ItemGroup>
         <None Include="index.html" />
         <TypeScriptCompile Include="language\asp.ts" />
-        <Compile Include="MonacoEditor.fs" />
         <Compile Include="Navigation Bar.fs" />
         <Compile Include="Button Level.fs" />
         <Compile Include="Libs\Monaco.fs" />

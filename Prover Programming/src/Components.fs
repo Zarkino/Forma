@@ -52,8 +52,8 @@ type Components =
         
         Monaco_Editor.Editor.create [
             Monaco_Editor.Props.value value
-            Monaco_Editor.Props.language "fsharp"
-            Monaco_Editor.Props.theme (if theme.Equals("dark") then !^Monaco_Editor.Dark else !^Monaco_Editor.Light)
+            Monaco_Editor.Props.language "asp-lang"
+            Monaco_Editor.Props.theme (if theme.Equals("dark") then !^"asp-theme-dark" else !^"asp-theme-light")
             Monaco_Editor.Props.options
                 (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
                     o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
