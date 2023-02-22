@@ -49,6 +49,9 @@ type Components =
         let ASP_FORMAT: obj = import "ASP_FORMAT" "./language/asp.ts"
         let ASP_THEME_LIGHT: obj = import "ASP_THEME_LIGHT" "./language/asp.ts"
         let ASP_THEME_DARK: obj = import "ASP_THEME_DARK" "./language/asp.ts"
+        let REGEX_TEST: obj = import "REGEX_TEST" "./language/asp.ts"
+        
+        Browser.Dom.console.log(REGEX_TEST.ToString())
         
         Monaco_Editor.Editor.create [
             Monaco_Editor.Props.value value

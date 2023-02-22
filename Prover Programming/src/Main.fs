@@ -19,15 +19,15 @@ mainly a language feature demonstrator.
 */
 
 ((p -> q) & p) ||= q                //Modus Ponens
-((p -> q) & !q) ||= !p              //Modus Tollens
-((p | q) & !p) ||= q                //Disjunctive Syllogism
-(p <> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
+((p -> q) & ~q) ||= ~p              //Modus Tollens
+((p | q) & ~p) ||= q                //Disjunctive Syllogism
+(p <-> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
 
-//Some wikipedia FOL example - currently showcasing issues lol
-AxAy(P(f(x)) -> !(P(x) -> Q(f(y), x, z)))
+//Wikipedia FOL example
+!x!y(P(f(x)) -> ~(P(x) -> Q(f(y), x, z)))
 
 //Constants can be used like so
-Ax(_c)
+!x(_c)
 
 //using a macro
 .myMacro
@@ -45,7 +45,7 @@ let Main () =
     let (theme, setTheme) = React.useState("light")
     let (value, setValue) = React.useState(initialContent)
     
-    React.fragment [
+    React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
         Button_Level.Button_Level(theme)
         Bulma.columns [
