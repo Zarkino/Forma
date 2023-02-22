@@ -17,6 +17,11 @@ type PromiseLike<'T> = Fable.Core.JS.Promise<'T>
 type ReadonlyArray<'T> = System.Collections.Generic.IReadOnlyList<'T>
 type RegExp = System.Text.RegularExpressions.Regex
 
+let [<Import("MonacoEnvironment","module")>] MonacoEnvironment: Monaco.Environment option = jsNative
+
+type [<AllowNullLiteral>] Window =
+    abstract MonacoEnvironment: Monaco.Environment option with get, set
+
 let [<Import("editor","module/monaco")>] editor: Editor.IExports = jsNative
 let [<Import("languages","module/monaco")>] languages: Languages.IExports = jsNative
 
@@ -103,7 +108,7 @@ type [<AllowNullLiteral>] CancellationToken =
     /// that are registered after cancellation will be called (next event loop run),
     /// but also only once.
     /// </summary>
-    abstract onCancellationRequested: (obj option -> obj option) -> (obj) option -> (ResizeArray<IDisposable>) option -> IDisposable
+    abstract onCancellationRequested: (obj option -> obj option) -> obj option -> ResizeArray<IDisposable> option -> IDisposable
 
 /// <summary>
 /// Uniform Resource Identifier (Uri) <see href="http://tools.ietf.org/html/rfc3986." />
@@ -839,7 +844,7 @@ module Editor =
         abstract commandArgs: obj option with get, set
         abstract ``when``: string option with get, set
 
-    type [<StringEnum>] BuiltinTheme =
+    type [<StringEnum>] [<RequireQualifiedAccess>] BuiltinTheme =
         | Vs
         | [<CompiledName("vs-dark")>] VsDark
         | [<CompiledName("hc-black")>] HcBlack
@@ -2808,7 +2813,7 @@ module Editor =
         abstract strings: QuickSuggestionsValue
 
     type LineNumbersType =
-        U2<(float -> string), string>
+        U2<float -> string, string>
 
     type RenderLineNumbersType =
         | Off = 0
@@ -3209,9 +3214,6 @@ module Editor =
         | TabFocusMode = 137
         | LayoutInfo = 138
         | WrappingInfo = 139
-
-    type EditorOptionsType =
-        obj
 
     type [<AllowNullLiteral>] IEditorConstructionOptions =
         inherit IEditorOptions
@@ -5643,9 +5645,9 @@ module Languages =
         type [<AllowNullLiteral>] CSSDataConfigurationDataProviders =
             [<EmitIndexer>] abstract Item: providerId: string -> CSSDataV1 with get, set
 
-        type CSSDataV1Version =
-            static member N1 = 1
-            static member N1_1 = 1.1
+    type CSSDataV1Version =
+        static member N1 = 1
+        static member N1_1 = 1.1
 
     module Html =
 
@@ -5785,9 +5787,9 @@ module Languages =
         type [<AllowNullLiteral>] HTMLDataConfigurationDataProviders =
             [<EmitIndexer>] abstract Item: providerId: string -> HTMLDataV1 with get, set
 
-        type HTMLDataV1Version =
-            static member N1 = 1
-            static member N1_1 = 1.1
+    type HTMLDataV1Version =
+        static member N1 = 1
+        static member N1_1 = 1.1
 
     module Json =
 
@@ -5859,8 +5861,8 @@ module Languages =
             abstract typescriptVersion: string
             abstract typescriptDefaults: LanguageServiceDefaults
             abstract javascriptDefaults: LanguageServiceDefaults
-            abstract getTypeScriptWorker: unit -> Promise<(ResizeArray<Uri> -> Promise<TypeScriptWorker>)>
-            abstract getJavaScriptWorker: unit -> Promise<(ResizeArray<Uri> -> Promise<TypeScriptWorker>)>
+            abstract getTypeScriptWorker: unit -> Promise<ResizeArray<Uri> -> Promise<TypeScriptWorker>>
+            abstract getJavaScriptWorker: unit -> Promise<ResizeArray<Uri> -> Promise<TypeScriptWorker>>
 
         type ModuleKind =
             | None = 0

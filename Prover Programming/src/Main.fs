@@ -60,23 +60,11 @@ let Main () =
                     column.isHalf
                     prop.children [
                         Bulma.columns [
-                            columns.isMultiline
-                            prop.children [
-                                Bulma.column [
-                                    column.isFull
-                                    prop.children [
-                                        Bulma.subtitle [
-                                            title.is4
-                                            prop.text "Input"
-                                        ]
-                                    ]
-                                ]
-                                Bulma.column [
-                                    column.isFull
-                                    prop.className "editor"
-                                    prop.children [
-                                        Components.Editor(theme, value, (fun value -> setValue(value.ToString())))
-                                    ]
+                            Bulma.column [
+                                column.isFull
+                                prop.className "editor"
+                                prop.children [
+                                    Components.Editor(theme, value, (fun value -> setValue(value.ToString())))
                                 ]
                             ]
                         ]
@@ -86,23 +74,11 @@ let Main () =
                     column.isHalf
                     prop.children [
                         Bulma.columns [
-                            columns.isMultiline
-                            prop.children [
-                                Bulma.column [
-                                    column.isFull
-                                    prop.children [
-                                        Bulma.subtitle [
-                                            title.is4
-                                            prop.text "Output"
-                                        ]
-                                    ]
-                                ]
-                                Bulma.column [
-                                    column.isFull
-                                    prop.className "editor"
-                                    prop.children [
-                                        Components.Editor(theme, marko_polo value, readonly = true)
-                                    ]
+                            Bulma.column [
+                                column.isFull
+                                prop.className "editor"
+                                prop.children [
+                                    Components.Editor(theme, marko_polo value, readonly = true)
                                 ]
                             ]
                         ]
