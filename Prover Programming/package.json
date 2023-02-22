@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@monaco-editor/react": "^4.4.6",
-        "monaco-editor": "^0.25.0",
+        "monaco-editor": "^0.35.0",
         "bulma": "^0.9.4",
         "bulma-switch": "^2.0.4",
         "date-fns": "^2.29.3",
