@@ -83,7 +83,7 @@ export const ASP_THEME_LIGHT = {
         { token: 'variable', foreground: '#ff6b35'},
         { token: 'constant', foreground: '#cc3399'},
         { token: 'predicate', foreground: '#00ff00'},
-        { token: 'function', foreground: '#ff6b35', fontStyle: 'bold'},
+        { token: 'function', foreground: '#ff6b35'},
         { token: 'macro', foreground: '#cc9900'},
         { token: 'value', foreground: '#000000'},
         { token: 'illegal', foreground: '#FF0000', fontStyle: 'bold'}
