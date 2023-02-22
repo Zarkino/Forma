@@ -18,7 +18,7 @@ export const ASP_FORMAT = {
                 }
             }],
 
-            [/[a-z][\w$]*(?<![A-Z!?]a-z*)(?=\s*\()/, {
+            [/[a-z][\w$]*(?<![A-Z!?][a-z]*)(?=\s*\()/, { //TODO: The negative lookbehind is not working as intended in monaco/monarch, we need a fix or alternative
                 cases: {
                     '@keywords': 'keyword',
                     '@values': 'value',
@@ -83,7 +83,7 @@ export const ASP_THEME_LIGHT = {
         { token: 'variable', foreground: '#ff6b35'},
         { token: 'constant', foreground: '#cc3399'},
         { token: 'predicate', foreground: '#00ff00'},
-        { token: 'function', foreground: '#888888', fontStyle: 'bold'},
+        { token: 'function', foreground: '#ff6b35', fontStyle: 'bold'},
         { token: 'macro', foreground: '#cc9900'},
         { token: 'value', foreground: '#000000'},
         { token: 'illegal', foreground: '#FF0000', fontStyle: 'bold'}
@@ -102,4 +102,4 @@ export const ASP_THEME_DARK = { //TODO: transfer tokens to dark mode and fix col
     ],
     colors: {}
 }
-export const REGEX_TEST = RegExp(/[a-z][\w$]*(?<![A-Z!?]a-z*)(?=\s*\()/, "g");
+export const REGEX_TEST = RegExp(/[a-z][\w$]*(?<![A-Z!?][a-z]*)(?=\s*\()/, "g");
