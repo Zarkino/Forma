@@ -23,6 +23,9 @@ mainly a language feature demonstrator.
 ((p | q) & ~p) ||= q                //Disjunctive Syllogism
 (p <-> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
 
+//Pre-determined truth values
+(T -> T) & (F -> T)
+
 //Wikipedia FOL example
 !x!y(P(f(x)) -> ~(P(x) -> Q(f(y), x, z)))
 
