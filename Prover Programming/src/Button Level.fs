@@ -18,27 +18,40 @@ let Button_Level(theme: string) =
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
-                    prop.text "Format"
+                    prop.children [
+                        Html.span [ Html.text "Format" ]
+                    ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
-                    prop.text "Download"
+                    prop.children [
+                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-download" ] ] ]
+                        Html.span [ Html.text "Download" ]
+                    ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
-                    prop.text "Upload"
+                    prop.children [
+                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-upload" ] ] ]
+                        Html.span [ Html.text "Upload" ]
+                    ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
-                    prop.text "Help"
+                    prop.children [
+                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-circle-info" ] ] ]
+                        Html.span [ Html.text "Help" ]
+                    ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
-                    prop.text "Examples"
+                    prop.children [
+                        Html.span [ Html.text "Examples" ]
+                    ]
                 ]
             ]
         ]
