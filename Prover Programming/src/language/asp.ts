@@ -17,8 +17,11 @@ export const ASP_FORMAT = {
                     '@default': 'predicate',
                 }
             }],
-
-            [/[a-z][\w$]*(?<![A-Z!?][a-z]*)(?=\s*\()/, { //TODO: The negative lookbehind is not working as intended in monaco/monarch, we need a fix or alternative
+            
+            //TODO: The negative lookbehind is not working as intended in monaco/monarch, we need a fix or alternative
+            // current workaround is to highlight functions and variables with the same color
+            
+            [/[a-z][\w$]*(?<=[^A-Z!?][a-z]*)(?=\s*\()/, { 
                 cases: {
                     '@keywords': 'keyword',
                     '@values': 'value',
@@ -34,6 +37,8 @@ export const ASP_FORMAT = {
                     '@default': 'illegal',
                 }
             }],
+
+            [/[a-zA-Z][\w$]*(?=\s*\{)/, 'macro'], //Would (maybe?) be better to match behind with the def
             
             [/[a-z][\w$]*/, {
                 cases: {
@@ -81,10 +86,10 @@ export const ASP_THEME_LIGHT = {
         { token: 'operator', foreground: '#0033cc' },
         { token: 'comment', foreground: '#2eb82e' },
         { token: 'variable', foreground: '#ff6b35'},
-        { token: 'constant', foreground: '#cc3399'},
-        { token: 'predicate', foreground: '#00ff00'},
+        { token: 'constant', foreground: '#6B7785'},
+        { token: 'predicate', foreground: '#570861'},
         { token: 'function', foreground: '#ff6b35'},
-        { token: 'macro', foreground: '#cc9900'},
+        { token: 'macro', foreground: '#ff4000'},
         { token: 'value', foreground: '#000000'},
         { token: 'illegal', foreground: '#FF0000', fontStyle: 'bold'}
     ],
@@ -95,10 +100,16 @@ export const ASP_THEME_DARK = { //TODO: transfer tokens to dark mode and fix col
     base: 'vs-dark',
     inherit: true,
     rules: [
-        { token: 'keyword', foreground: '#FF6600', fontStyle: 'bold' },
-        { token: 'comment', foreground: '#999999' },
-        { token: 'string', foreground: '#009966'},
-        { token: 'variable', foreground: '#006699'}
+        { token: 'keyword', foreground: '#ff3300', fontStyle: 'bold'},
+        { token: 'operator', foreground: '#3366ee' },
+        { token: 'comment', foreground: '#1ea81e' },
+        { token: 'variable', foreground: '#ff6b35'},
+        { token: 'constant', foreground: '#B7C9E2'},
+        { token: 'predicate', foreground: '#A020F0'},
+        { token: 'function', foreground: '#ff6b35'},
+        { token: 'macro', foreground: '#ff4000'},
+        { token: 'value', foreground: '#FFFFFF'},
+        { token: 'illegal', foreground: '#FF0000', fontStyle: 'bold'}
     ],
     colors: {}
 }
