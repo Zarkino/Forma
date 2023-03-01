@@ -3,6 +3,8 @@
         <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
+        <Content Include="img\favicon-32x32.png" />
+        <Content Include="img\favicon-16x16.png" />
         <None Include="index.html" />
         <TypeScriptCompile Include="language\asp.ts" />
         <Compile Include="Navigation Bar.fs" />
@@ -12,8 +14,6 @@
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Main.fs" />
-        <Content Include="img\favicon-32x32.png" />
-        <Content Include="img\favicon-16x16.png" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Feliz" Version="2.4.0" />

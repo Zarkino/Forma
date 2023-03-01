@@ -2,7 +2,11 @@ namespace App
 
 open Feliz
 open Feliz.Router
+open Fable.Core
 open Fable.Core.JsInterop
+
+module IMount =
+    let [<ImportMember("./language/asp.ts")>] run(monaco: obj): unit = jsNative
 
 type Components =
     /// <summary>
@@ -46,13 +50,6 @@ type Components =
     
     [<ReactComponent>]
     static member Editor(theme, value, ?setValue, ?readonly) =
-        let ASP_FORMAT: obj = import "ASP_FORMAT" "./language/asp.ts"
-        let ASP_THEME_LIGHT: obj = import "ASP_THEME_LIGHT" "./language/asp.ts"
-        let ASP_THEME_DARK: obj = import "ASP_THEME_DARK" "./language/asp.ts"
-        let REGEX_TEST: obj = import "REGEX_TEST" "./language/asp.ts"
-        
-        Browser.Dom.console.log(REGEX_TEST.ToString())
-        
         Monaco_Editor.Editor.create [
             Monaco_Editor.Props.value value
             Monaco_Editor.Props.language "asp-lang"
@@ -64,12 +61,6 @@ type Components =
                     ))
                     o.readOnly <- defaultArg (Some readonly) (Some false)
                 ))
-            Monaco_Editor.Props.beforeMount
-                (fun monaco ->
-                    monaco?languages?register$({| id = "asp-lang" |})
-                    monaco?languages?setMonarchTokensProvider$("asp-lang", ASP_FORMAT)
-                    monaco?editor?defineTheme$("asp-theme-light", ASP_THEME_LIGHT)
-                    monaco?editor?defineTheme$("asp-theme-dark", ASP_THEME_DARK)
-                )
+            Monaco_Editor.Props.beforeMount (fun monaco -> IMount.run(monaco))
             Monaco_Editor.Props.onChange (defaultArg setValue (fun _ -> ()))
         ]

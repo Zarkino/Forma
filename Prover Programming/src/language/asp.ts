@@ -1,9 +1,12 @@
-﻿
+﻿import * as monaco from '../../node_modules/monaco-editor/esm/vs/editor/editor.api';
+
+type Monaco = typeof monaco;
+
 let keywords = ['Def', 'DEF', 'def']
 let operators = ['and', 'or', 'not', 'imply', 'bicon', 'forall', 'exists', 'thus', '&', '|', '~', '->', '<->', '!', '?', '||=']
 let values = ['True', 'False', 'true', 'false', 'T', 'F']               
 
-export const ASP_FORMAT = {
+const ASP_FORMAT: monaco.languages.IMonarchLanguage = {
     keywords,
     operators,
     values,
@@ -78,7 +81,7 @@ export const ASP_FORMAT = {
     }
 };
 
-export const ASP_THEME_LIGHT = {
+const ASP_THEME_LIGHT: monaco.editor.IStandaloneThemeData = {
     base: 'vs',
     inherit: true,
     rules: [
@@ -96,7 +99,7 @@ export const ASP_THEME_LIGHT = {
     colors: {}
 }
 
-export const ASP_THEME_DARK = { //TODO: transfer tokens to dark mode and fix colors
+const ASP_THEME_DARK: monaco.editor.IStandaloneThemeData = { //TODO: transfer tokens to dark mode and fix colors
     base: 'vs-dark',
     inherit: true,
     rules: [
@@ -113,4 +116,10 @@ export const ASP_THEME_DARK = { //TODO: transfer tokens to dark mode and fix col
     ],
     colors: {}
 }
-export const REGEX_TEST = RegExp(/[a-z][\w$]*(?<![A-Z!?][a-z]*)(?=\s*\()/, "g");
+
+export function run(monaco: Monaco) {
+    monaco.languages.register({ id: "asp-lang" });
+    monaco.languages.setMonarchTokensProvider("asp-lang", ASP_FORMAT);
+    monaco.editor.defineTheme("asp-theme-light", ASP_THEME_LIGHT);
+    monaco.editor.defineTheme("asp-theme-dark", ASP_THEME_DARK);
+}
