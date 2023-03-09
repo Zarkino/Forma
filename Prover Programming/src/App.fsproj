@@ -13,6 +13,8 @@
         <Compile Include="Monaco Editor.fs" />
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
+        <Compile Include="Parsec.fs" />
+        <Compile Include="Language.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
