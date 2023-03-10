@@ -10,9 +10,9 @@ module Grammar =
         | Disjunction of Formula * Formula
         | Implication of Formula * Formula
         | Equivalence of Formula * Formula
-
-    let (formula: Parser<Formula, obj>), formulaRef = createParserForwardedToRef()
-
+    
+    let formula, formulaRef = createParserForwardedToRef()
+    
     let stringLiteral: Parser<string,obj> =
         let escape =  anyOf "\"\\/bfnrt"
                       |>> function
@@ -38,13 +38,14 @@ module Grammar =
         between (pstring "\"") (pstring "\"")
                 (stringsSepBy normalCharSnippet escapedCharSnippet)
     
-    let variable = stringLiteral |>> Variable
-    let negation = (skipString "!") >>. formula |>> Negation
-    let conjunction = (formula .>> skipString "&") .>>. formula |>> Conjunction
-    let disjunction = (formula .>> skipString "|") .>>. formula |>> Disjunction
-    let implication = (formula .>> skipString "->") .>>. formula |>> Implication
-    let equivalence = (formula .>> skipString "<->") .>>. formula |>> Equivalence
+    let variable = regex "\s*^[a-z]" |>> Variable
+    let negation = pstring "!" >>. formula |>> Negation
+    let conjunction = (formula .>> pstring "&") .>>. formula |>> Conjunction
+    let disjunction = (formula .>> pstring "|") .>>. formula |>> Disjunction
+    let implication = (formula .>> pstring "->") .>>. formula |>> Implication
+    let equivalence = (formula .>> pstring "<->") .>>. formula |>> Equivalence
     
+    (*
     do formulaRef.Value <-
         choice [
             variable
@@ -55,22 +56,36 @@ module Grammar =
             equivalence
             between (skipChar '(') (skipChar ')') formula
         ]
+    *)
+    
+    let binaryFormula operator = spaces >>. pstring operator .>> spaces >>. formula
+    
+    do formulaRef.Value <- parse {
+        let! left = choice [
+            variable
+            pstring "!" >>. variable |>> Negation
+            pstring "!" >>. formula |>> Negation
+            pchar '(' >>. formula .>> pchar ')'
+        ]
+        return! choice [
+            binaryFormula "&" |>> (fun right -> Conjunction(left, right))
+            binaryFormula "|" |>> (fun right -> Disjunction(left, right))
+            binaryFormula "->" |>> (fun right -> Implication(left, right))
+            binaryFormula "<->" |>> (fun right -> Equivalence(left, right))
+            preturn left
+        ]
+    }
 
 module Parser =
     open Parsec
     
     open Grammar
     
-    // Discard leading whitespace and ensure the parser reaches end of stream
-    let expression = spaces >>. formula >>. spaces .>> eof
-    
-    let parseExpression input = runString expression input
-    
     let tryParse input =
-        match runString expression None input with
-            | Ok(_, s, state)   -> Ok((), s, state)
+        match runString formula () input with
+            | Ok(v, s, state)   -> Ok(v, s, state)
             | Error e           -> Error e
     
-    let x = match tryParse "!a" with
-            | Ok(v, _, _)   -> sprintf "%A" v
-            | Error(e)      -> sprintf "%A" e
+    let x = match tryParse "!(a -> !b)" with
+            | Ok(v, s, _)   -> sprintf $"Success: %A{v}\nRemaining: %s{s.Value}"
+            | Error(e)      -> sprintf $"Error: %A{e}"
