@@ -35,12 +35,7 @@ def myMacro {
     ((p -> q) & p) ||= q
 }"
 
-let lemma = "
-lemma (A & B) -> (B & A)
- proof {
-    assume A & B
-    show B & A
-}"
+let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\tshow B & A\n}"
 
 let marko_polo (x: string) = x.Replace("marko", "polo")
 

@@ -33,15 +33,15 @@ module Grammar_Proof =
     let proof, proofRef = createParserForwardedToRef()
     
     let statements = many (spaces >>. choice [
-            pstring "assume" >>. formula |>> Assumption
-            pstring "have" >>. formula |>> Intermediate
-            pstring "show" >>. formula |>> Conclusion
+            pstring "assume" >>. spaces1 >>. formula |>> Assumption
+            pstring "have" >>. spaces1 >>. formula |>> Intermediate
+            pstring "show" >>. spaces1 >>. formula |>> Conclusion
             proof |>> Subproof
         ])
     
     proofRef.Value <- pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
     
-    let lemma = spaces >>. pstring "lemma" >>. formula .>>. (spaces >>. proof) |>> (fun (id, proof) -> { Identifier = id; Proof = proof })
+    let lemma = pipe2 (spaces >>. pstring "lemma" >>. spaces1 >>. formula) (spaces >>. proof) (fun id proof -> { Identifier = id; Proof = proof })
 
 module Parser =
     open Grammar_PL
