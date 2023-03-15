@@ -1,17 +1,17 @@
 ﻿module Proof_Interface
 
-type Proposition = string
+open Propositional_Logic
 
 type Proof = {
-    Statements: Statement
-    Conclusion: string
+    Statements: Statement list
 }
 and Statement =
-    | Assumption of string
-    | Intermediate of string
+    | Assumption of Formula
+    | Intermediate of Formula
+    | Conclusion of Formula
     | Subproof of Proof
 
 type Lemma = {
-    Identifier: Proposition
+    Identifier: Formula
     Proof: Proof
 }

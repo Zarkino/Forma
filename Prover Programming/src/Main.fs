@@ -35,12 +35,19 @@ def myMacro {
     ((p -> q) & p) ||= q
 }"
 
+let lemma = "
+lemma (A & B) -> (B & A)
+ proof {
+    assume A & B
+    show B & A
+}"
+
 let marko_polo (x: string) = x.Replace("marko", "polo")
 
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(initialContent)
+    let (value, setValue) = React.useState(lemma)
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
@@ -75,7 +82,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, marko_polo value, readonly = true)
+                                    Components.Editor(theme, Language.Parser.parse_lemma(value), readonly = true)
                                 ]
                             ]
                         ]

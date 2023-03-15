@@ -2,7 +2,7 @@
 
 open Parsec
 
-module Grammar_PL =    
+module Grammar_PL =
     open Propositional_Logic
     
     let formula, formulaRef = createParserForwardedToRef()
@@ -27,31 +27,32 @@ module Grammar_PL =
     }
 
 module Grammar_Proof =
+    open Grammar_PL
     open Proof_Interface
     
-    let (proof: Parser<Proof, unit>), proofRef = createParserForwardedToRef()
+    let proof, proofRef = createParserForwardedToRef()
     
-    let proposition = spaces >>. regex "^[a-z]+"
-    
-    let statement =
-        choice [
-            spaces >>. pstring "assume" >>. proposition |>> Assumption
-            spaces >>. pstring "have" >>. proposition |>> Intermediate
+    let statements = many (spaces >>. choice [
+            pstring "assume" >>. formula |>> Assumption
+            pstring "have" >>. formula |>> Intermediate
+            pstring "show" >>. formula |>> Conclusion
             proof |>> Subproof
-        ]
+        ])
     
-    do proofRef.Value <- parse {
-        let! statements = statement
-        let! conclusion = spaces >>. pstring "show" >>. proposition
-        return { Statements = statements; Conclusion = conclusion }
-    }
+    proofRef.Value <- pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
     
-    let lemma = spaces >>. pstring "lemma" >>. spaces >>. pchar '{' >>. proof .>> pchar '}'
+    let lemma = spaces >>. pstring "lemma" >>. formula .>>. (spaces >>. proof) |>> (fun (id, proof) -> { Identifier = id; Proof = proof })
 
 module Parser =
     open Grammar_PL
+    open Grammar_Proof
     
     let parse_formula input =
         match runString formula () input with
-        | Ok(v, _, _)   -> v
-        | Error(e)      -> failwith $"Error: %A{e}"
+        | Ok(v, _, _)   -> v.ToString()
+        | Error(e)      -> $"Error: %A{e}"
+    
+    let parse_lemma input =
+        match runString lemma () input with
+        | Ok(v, _, _)   -> v.ToString()
+        | Error(e)      -> $"Error: %A{e}"
