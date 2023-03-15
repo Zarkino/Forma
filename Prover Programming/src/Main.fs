@@ -7,12 +7,6 @@ open App
 
 importSideEffects "./styles/global.scss"
 
-(*
-let monaco: obj = importAll "monaco-editor/esm/vs/editor/editor.api"
-
-Browser.Dom.console.log(monaco?languages?getLanguages())
-*)
-
 let initialContent = "/*
 Just some example arguments from wikipedia,
 mainly a language feature demonstrator.
