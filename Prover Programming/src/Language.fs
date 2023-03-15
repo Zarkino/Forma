@@ -9,7 +9,6 @@ module Grammar =
     
     let variable = spaces >>. regex "^[a-z]" |>> Variable
     let negation = spaces >>. pstring "!" >>. spaces >>. (variable <|> formula) |>> Negation
-    
     let binaryFormula operator = spaces >>. pstring operator .>> spaces >>. formula
     
     do formulaRef.Value <- parse {
@@ -32,8 +31,7 @@ module Parser =
     
     open Grammar
     
-    let parse input = runString formula () input
-    
-    let x = match parse "!(a -> !b)" with
-            | Ok(v, s, _)   -> sprintf $"Success: %A{v}\nRemaining: %s{s.Value}"
-            | Error(e)      -> sprintf $"Error: %A{e}"
+    let parse_formula input =
+        match runString formula () input with
+        | Ok(v, _, _)   -> v
+        | Error(e)      -> failwith $"Error: %A{e}"

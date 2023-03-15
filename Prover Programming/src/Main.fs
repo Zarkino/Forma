@@ -48,8 +48,6 @@ let Main () =
     let (theme, setTheme) = React.useState("light")
     let (value, setValue) = React.useState(initialContent)
     
-    Browser.Dom.console.log(Language.Parser.x)
-    
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
         Button_Level.Button_Level(theme)
