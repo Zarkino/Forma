@@ -7,17 +7,17 @@ module Grammar_PL =
     
     let formula, formulaRef = createParserForwardedToRef()
     
-    let variable = spaces >>. regex "^[a-z]" |>> Variable
-    let negation = spaces >>. pstring "!" >>. spaces >>. (variable <|> formula) |>> Negation
-    let binaryFormula operator = spaces >>. pstring operator .>> spaces >>. formula
+    let variable = regex "^[a-zA-Z]" |>> Variable
+    let negation = pchar '!' >>. spaces >>. (variable <|> formula) |>> Negation
+    let binaryFormula operator = pstring operator >>. spaces >>. formula
     
     do formulaRef.Value <- parse {
-        let! left = choice [
+        let! left = spaces >>. choice [
             variable
             negation
             pchar '(' >>. formula .>> pchar ')'
         ]
-        return! choice [
+        return! spaces >>. choice [
             binaryFormula "&" |>> (fun right -> Conjunction(left, right))
             binaryFormula "|" |>> (fun right -> Disjunction(left, right))
             binaryFormula "->" |>> (fun right -> Implication(left, right))
