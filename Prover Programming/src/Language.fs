@@ -1,8 +1,8 @@
 ﻿namespace Language
 
-module Grammar =
-    open Parsec
-    
+open Parsec
+
+module Grammar_PL =    
     open Propositional_Logic
     
     let formula, formulaRef = createParserForwardedToRef()
@@ -26,10 +26,30 @@ module Grammar =
         ]
     }
 
-module Parser =
-    open Parsec
+module Grammar_Proof =
+    open Proof_Interface
     
-    open Grammar
+    let (proof: Parser<Proof, unit>), proofRef = createParserForwardedToRef()
+    
+    let proposition = spaces >>. regex "^[a-z]+"
+    
+    let statement =
+        choice [
+            spaces >>. pstring "assume" >>. proposition |>> Assumption
+            spaces >>. pstring "have" >>. proposition |>> Intermediate
+            proof |>> Subproof
+        ]
+    
+    do proofRef.Value <- parse {
+        let! statements = statement
+        let! conclusion = spaces >>. pstring "show" >>. proposition
+        return { Statements = statements; Conclusion = conclusion }
+    }
+    
+    let lemma = spaces >>. pstring "lemma" >>. spaces >>. pchar '{' >>. proof .>> pchar '}'
+
+module Parser =
+    open Grammar_PL
     
     let parse_formula input =
         match runString formula () input with

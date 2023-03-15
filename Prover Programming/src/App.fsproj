@@ -15,6 +15,7 @@
         <Compile Include="Components.fs" />
         <Compile Include="Parsec.fs" />
         <Compile Include="Propositional Logic.fs" />
+        <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
