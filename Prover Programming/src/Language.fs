@@ -7,7 +7,7 @@ module Grammar_PL =
     
     let formula, formulaRef = createParserForwardedToRef()
     
-    let variable = regex "^[a-zA-Z]" |>> Variable
+    let variable = many1Chars asciiLetter |>> fun x -> Variable(string x)
     let negation = pchar '!' >>. spaces >>. (variable <|> formula) |>> Negation
     let binaryFormula operator = pstring operator >>. spaces >>. formula
     
@@ -15,7 +15,7 @@ module Grammar_PL =
         let! left = spaces >>. choice [
             variable
             negation
-            pchar '(' >>. formula .>> pchar ')'
+            between (pchar '(') (pchar ')') formula
         ]
         return! spaces >>. choice [
             binaryFormula "&" |>> (fun right -> Conjunction(left, right))
