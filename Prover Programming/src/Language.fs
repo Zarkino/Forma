@@ -39,9 +39,9 @@ module Grammar_Proof =
             proof |>> Subproof
         ])
     
-    proofRef.Value <- pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
+    proofRef.Value <- spaces >>. pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
     
-    let lemma = pipe2 (spaces >>. pstring "lemma" >>. spaces1 >>. formula) (spaces >>. proof) (fun id proof -> { Identifier = id; Proof = proof })
+    let lemma = pipe2 (spaces >>. pstring "lemma" >>. spaces1 >>. formula) proof (fun id proof -> { Identifier = id; Proof = proof })
 
 module Parser =
     open Grammar_PL
