@@ -39,5 +39,19 @@ type Formula =
             | Implication(p, q)         -> Implication(f(p, o, n), f(q, o, n))
             | Equivalence(p, q)         -> Equivalence(f(p, o, n), f(q, o, n))
         f (formula, old_val, new_val)
+    static member ToString formula =
+        let rec f x =
+            match x with
+            | Variable(p)               ->  p
+            | Negation(p)               ->  match p with
+                                            | Variable(p')  -> $"¬%s{p'}"
+                                            | Negation(p')  -> $"¬¬(%s{f p'})"
+                                            | p'            -> $"¬(%s{f p'})"
+            | Conjunction(p, q)         -> $"(%s{f p}) ∧ (%s{f q})"
+            | Disjunction(p, q)         -> $"(%s{f p}) ∨ (%s{f q})"
+            | Implication(p, q)         -> $"(%s{f p}) → (%s{f q})"
+            | Equivalence(p, q)         -> $"(%s{f p}) ↔ (%s{f q})"
+        f formula
+    override this.ToString () = Formula.ToString this
 
 let f formula = (formula, Formula.Extract formula |> Seq.indexed) ||> Seq.fold (fun x (i, v) -> Formula.ReplaceVar (x, v, $"%i{i}"))
