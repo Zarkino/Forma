@@ -42,15 +42,15 @@ type Formula =
     static member ToString formula =
         let rec f x =
             match x with
-            | Variable(p)               ->  p
-            | Negation(p)               ->  match p with
-                                            | Variable(p')  -> $"¬%s{p'}"
-                                            | Negation(p')  -> $"¬¬(%s{f p'})"
-                                            | p'            -> $"¬(%s{f p'})"
-            | Conjunction(p, q)         -> $"(%s{f p}) ∧ (%s{f q})"
-            | Disjunction(p, q)         -> $"(%s{f p}) ∨ (%s{f q})"
-            | Implication(p, q)         -> $"(%s{f p}) → (%s{f q})"
-            | Equivalence(p, q)         -> $"(%s{f p}) ↔ (%s{f q})"
+            | Variable(p)       ->  p
+            | Negation(p)       ->  match p with
+                                    | Variable(p')  -> $"¬%s{p'}"
+                                    | Negation(p')  -> $"¬¬(%s{f p'})"
+                                    | p'            -> $"¬(%s{f p'})"
+            | Conjunction(p, q) ->  $"(%s{f p}) ∧ (%s{f q})"
+            | Disjunction(p, q) ->  $"(%s{f p}) ∨ (%s{f q})"
+            | Implication(p, q) ->  $"(%s{f p}) → (%s{f q})"
+            | Equivalence(p, q) ->  $"(%s{f p}) ↔ (%s{f q})"
         f formula
     override this.ToString () = Formula.ToString this
 
