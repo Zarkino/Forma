@@ -37,14 +37,15 @@ def myMacro {
 
 let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
-let marko_polo (x: string) = x.Replace("marko", "polo")
-
-let evaluate value =
+let rec evaluate value =
     match Language.Parser.parse_lemma(value) with
-    | None, error   ->  error
-    | Some(v), _    ->  match Proof_Interface.prove(v.Proof, []) with
-                        | Proof_Interface.Success(_, d) ->  if d then "Success" else "Not Success"
-                        | Proof_Interface.Fail(e)       ->  e
+    | None, error               ->  error
+    | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, []) with
+                                    | Proof_Interface.Success(_, d) ->  if d then "Success" else "Not Success"
+                                    | Proof_Interface.Fail(msg)     ->  msg)
+                                    |> (fun result ->
+                                        if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate remaining}"
+                                        else result)
 
 [<ReactComponent>]
 let Main () =
