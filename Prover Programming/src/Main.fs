@@ -35,9 +35,16 @@ def myMacro {
     ((p -> q) & p) ||= q
 }"
 
-let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A\n\thave B\n\tshow B & A\n}"
+let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
 let marko_polo (x: string) = x.Replace("marko", "polo")
+
+let evaluate value =
+    match Language.Parser.parse_lemma(value) with
+    | None, error   ->  error
+    | Some(v), _    ->  match Proof_Interface.prove(v.Proof, []) with
+                        | Proof_Interface.Success(_, d) ->  if d then "Success" else "Not Success"
+                        | Proof_Interface.Fail(e)       ->  e
 
 [<ReactComponent>]
 let Main () =
@@ -77,7 +84,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, Language.Parser.parse_lemma(value), readonly = true)
+                                    Components.Editor(theme, evaluate value, readonly = true)
                                 ]
                             ]
                         ]

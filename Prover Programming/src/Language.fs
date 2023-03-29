@@ -32,10 +32,12 @@ module Grammar_Proof =
     
     let proof, proofRef = createParserForwardedToRef()
     
+    let rule = rules.Keys |> Seq.map pstring |> List.ofSeq |> choice
+    
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            pstring "have" >>. spaces1 >>. formula |>> Intermediate
-            pstring "show" >>. spaces1 >>. formula |>> Conclusion
+            pipe2 (pstring "have" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Intermediate(left, right))
+            pipe2 (pstring "show" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Conclusion(left, right))
             proof |>> Subproof
         ])
     
@@ -49,10 +51,10 @@ module Parser =
     
     let parse_formula input =
         match runString formula () input with
-        | Ok(v, _, _)   -> v.ToString()
-        | Error(e)      -> $"Error: %A{e}"
+        | Ok(v, r, _)   -> Some v, StringSegment.toString r
+        | Error(e)      -> None, $"Error: %A{e}"
     
     let parse_lemma input =
         match runString lemma () input with
-        | Ok(v, _, _)   -> v.ToString()
-        | Error(e)      -> $"Error: %A{e}"
+        | Ok(v, r, _)   -> Some v, StringSegment.toString r
+        | Error(e)      -> None, $"Error: %A{e}"
