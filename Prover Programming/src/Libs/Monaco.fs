@@ -1,7 +1,7 @@
-﻿// Type definitions for monaco-editor v0.35.0
+﻿// Type definitions for monaco-editor v0.36.1
 // generated with ts2fable from /node_modules/monaco-editor/monaco.d.ts
 
-// ts2fable 0.8.0
+// ts2fable 0.9.0
 module rec Monaco
 
 #nowarn "3390" // disable warnings for invalid XML comments
@@ -36,13 +36,13 @@ type [<AllowNullLiteral>] IExports =
     /// and encoding.
     /// 
     /// <code lang="txt">
-    ///        foo://example.com:8042/over/there?name=ferret#nose
-    ///        \_/   \______________/\_________/ \_________/ \__/
-    ///         |           |            |            |        |
-    ///      scheme     authority       path        query   fragment
-    ///         |   _____________________|__
-    ///        / \ /                        \
-    ///        urn:example:animal:ferret:nose
+    ///       foo://example.com:8042/over/there?name=ferret#nose
+    ///       \_/   \______________/\_________/ \_________/ \__/
+    ///        |           |            |            |        |
+    ///     scheme     authority       path        query   fragment
+    ///        |   _____________________|__
+    ///       / \ /                        \
+    ///       urn:example:animal:ferret:nose
     /// </code>
     /// </summary>
     abstract Uri: UriStatic
@@ -117,13 +117,13 @@ type [<AllowNullLiteral>] CancellationToken =
 /// and encoding.
 /// 
 /// <code lang="txt">
-///        foo://example.com:8042/over/there?name=ferret#nose
-///        \_/   \______________/\_________/ \_________/ \__/
-///         |           |            |            |        |
-///      scheme     authority       path        query   fragment
-///         |   _____________________|__
-///        / \ /                        \
-///        urn:example:animal:ferret:nose
+///       foo://example.com:8042/over/there?name=ferret#nose
+///       \_/   \______________/\_________/ \_________/ \__/
+///        |           |            |            |        |
+///     scheme     authority       path        query   fragment
+///        |   _____________________|__
+///       / \ /                        \
+///       urn:example:animal:ferret:nose
 /// </code>
 /// </summary>
 type [<AllowNullLiteral>] Uri =
@@ -158,10 +158,10 @@ type [<AllowNullLiteral>] Uri =
     /// of UNC paths. See the below sample of a file-uri with an authority (UNC path).
     /// 
     /// <code lang="ts">
-    ///   const u = Uri.parse('file://server/c$/folder/file.txt')
-    ///   u.authority === 'server'
-    ///   u.path === '/shares/c$/file.txt'
-    ///   u.fsPath === '\\server\c$\folder\file.txt'
+    ///  const u = Uri.parse('file://server/c$/folder/file.txt')
+    ///  u.authority === 'server'
+    ///  u.path === '/shares/c$/file.txt'
+    ///  u.fsPath === '\\server\c$\folder\file.txt'
     /// </code>
     /// 
     /// Using <c>Uri#path</c> to read a file (using fs-apis) would not be enough because parts of the path,
@@ -197,13 +197,13 @@ type [<AllowNullLiteral>] UriWithChange =
 /// and encoding.
 /// 
 /// <code lang="txt">
-///        foo://example.com:8042/over/there?name=ferret#nose
-///        \_/   \______________/\_________/ \_________/ \__/
-///         |           |            |            |        |
-///      scheme     authority       path        query   fragment
-///         |   _____________________|__
-///        / \ /                        \
-///        urn:example:animal:ferret:nose
+///       foo://example.com:8042/over/there?name=ferret#nose
+///       \_/   \______________/\_________/ \_________/ \__/
+///        |           |            |            |        |
+///     scheme     authority       path        query   fragment
+///        |   _____________________|__
+///       / \ /                        \
+///       urn:example:animal:ferret:nose
 /// </code>
 /// </summary>
 type [<AllowNullLiteral>] UriStatic =
@@ -711,10 +711,10 @@ type SelectionDirection =
     | RTL = 1
 
 type [<AllowNullLiteral>] Token =
-    abstract _tokenBrand: unit
     abstract offset: float
     abstract ``type``: string
     abstract language: string
+    abstract _tokenBrand: unit
     abstract toString: unit -> string
 
 type [<AllowNullLiteral>] TokenStatic =
@@ -908,9 +908,9 @@ module Editor =
         abstract keybindingContext: string option with get, set
         /// Control if the action should show up in the context menu and where.
         /// The context menu of the editor has these default:
-        ///    navigation - The navigation group comes first in all cases.
-        ///    1_modification - This group comes next and contains commands that modify your code.
-        ///    9_cutcopypaste - The last default group with the basic editing commands.
+        ///   navigation - The navigation group comes first in all cases.
+        ///   1_modification - This group comes next and contains commands that modify your code.
+        ///   9_cutcopypaste - The last default group with the basic editing commands.
         /// You can also create your own group.
         /// Defaults to null (don't show in context menu).
         abstract contextMenuGroupId: string option with get, set
@@ -2509,6 +2509,8 @@ module Editor =
         /// When enabled, this shows a preview of the drop location and triggers an <c>onDropIntoEditor</c> event.
         /// </summary>
         abstract dropIntoEditor: IDropIntoEditorOptions option with get, set
+        /// Controls whether the editor receives tabs or defers them to the workbench for navigation.
+        abstract tabFocusMode: bool option with get, set
 
     type [<AllowNullLiteral>] IDiffEditorBaseOptions =
         /// Allow the user to resize the diff editor split view.
@@ -3215,6 +3217,9 @@ module Editor =
         | LayoutInfo = 138
         | WrappingInfo = 139
 
+    type EditorOptionsType =
+        obj
+
     type [<AllowNullLiteral>] IEditorConstructionOptions =
         inherit IEditorOptions
         /// The initial editor dimension (to avoid measuring the container).
@@ -3292,13 +3297,20 @@ module Editor =
     /// A position for rendering content widgets.
     type [<AllowNullLiteral>] IContentWidgetPosition =
         /// <summary>
-        /// Desired position for the content widget.
-        /// <c>preference</c> will also affect the placement.
+        /// Desired position which serves as an anchor for placing the content widget.
+        /// The widget will be placed above, at, or below the specified position, based on the
+        /// provided preference. The widget will always touch this position.
+        /// 
+        /// Given sufficient horizontal space, the widget will be placed to the right of the
+        /// passed in position. This can be tweaked by providing a <c>secondaryPosition</c>.
         /// </summary>
+        /// <seealso cref="preference"></seealso>
+        /// <seealso cref="secondaryPosition" />
         abstract position: IPosition option with get, set
-        /// Optionally, a secondary position can be provided to further
-        /// define the position of the content widget. The secondary position
-        /// must have the same line number as the primary position.
+        /// Optionally, a secondary position can be provided to further define the placing of
+        /// the content widget. The secondary position must have the same line number as the
+        /// primary position. If possible, the widget will be placed such that it also touches
+        /// the secondary position.
         abstract secondaryPosition: IPosition option with get, set
         /// Placement preference for position, in order of preference.
         abstract preference: ResizeArray<ContentWidgetPositionPreference> with get, set
@@ -3676,8 +3688,9 @@ module Editor =
         abstract getLineDecorations: lineNumber: float -> ResizeArray<IModelDecoration> option
         /// Get all the decorations for a range (filtering out decorations from other editors).
         abstract getDecorationsInRange: range: Range -> ResizeArray<IModelDecoration> option
-        /// All decorations added through this call will get the ownerId of this editor.
-        [<Obsolete("")>]
+        /// <summary>All decorations added through this call will get the ownerId of this editor.</summary>
+        /// <seealso cref="createDecorationsCollection" />
+        [<Obsolete("Use `createDecorationsCollection`")>]
         abstract deltaDecorations: oldDecorations: ResizeArray<string> * newDecorations: ResizeArray<IModelDeltaDecoration> -> ResizeArray<string>
         /// Remove previously added decorations.
         abstract removeDecorations: decorationIds: ResizeArray<string> -> unit
@@ -4400,21 +4413,21 @@ module Languages =
     type [<AllowNullLiteral>] IEncodedLineTokens =
         /// <summary>
         /// The tokens on the line in a binary, encoded format. Each token occupies two array indices. For token i:
-        ///   - at offset 2*i =&gt; startIndex
-        ///   - at offset 2*i + 1 =&gt; metadata
+        ///  - at offset 2*i =&gt; startIndex
+        ///  - at offset 2*i + 1 =&gt; metadata
         /// Meta data is in binary format:
         /// - -------------------------------------------
-        ///      3322 2222 2222 1111 1111 1100 0000 0000
-        ///      1098 7654 3210 9876 5432 1098 7654 3210
+        ///     3322 2222 2222 1111 1111 1100 0000 0000
+        ///     1098 7654 3210 9876 5432 1098 7654 3210
         /// - -------------------------------------------
-        ///      bbbb bbbb bfff ffff ffFF FFTT LLLL LLLL
+        ///     bbbb bbbb bfff ffff ffFF FFTT LLLL LLLL
         /// - -------------------------------------------
-        ///   - L = EncodedLanguageId (8 bits): Use <c>getEncodedLanguageId</c> to get the encoded ID of a language.
-        ///   - T = StandardTokenType (2 bits): Other = 0, Comment = 1, String = 2, RegEx = 3.
-        ///   - F = FontStyle (4 bits): None = 0, Italic = 1, Bold = 2, Underline = 4, Strikethrough = 8.
-        ///   - f = foreground ColorId (9 bits)
-        ///   - b = background ColorId (9 bits)
-        ///   - The color value for each colorId is defined in IStandaloneThemeData.customTokenColors:
+        ///  - L = EncodedLanguageId (8 bits): Use <c>getEncodedLanguageId</c> to get the encoded ID of a language.
+        ///  - T = StandardTokenType (2 bits): Other = 0, Comment = 1, String = 2, RegEx = 3.
+        ///  - F = FontStyle (4 bits): None = 0, Italic = 1, Bold = 2, Underline = 4, Strikethrough = 8.
+        ///  - f = foreground ColorId (9 bits)
+        ///  - b = background ColorId (9 bits)
+        ///  - The color value for each colorId is defined in IStandaloneThemeData.customTokenColors:
         /// e.g. colorId = 1 is stored in IStandaloneThemeData.customTokenColors[1]. Color id = 0 means no color,
         /// id = 1 is for the default foreground color, id = 2 for the default background.
         /// </summary>
@@ -4497,7 +4510,7 @@ module Languages =
         /// If the language supports Unicode identifiers (e.g. JavaScript), it is preferable
         /// to provide a word definition that uses exclusion of known separators.
         /// e.g.: A regex that matches anything except known separators (and dot is allowed to occur in a floating point number):
-        ///    /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g
+        ///   /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g
         abstract wordPattern: RegExp option with get, set
         /// The language's indentation settings.
         abstract indentationRules: IndentationRule option with get, set
@@ -4592,8 +4605,8 @@ module Languages =
         /// Insert new line and indent once (relative to the previous line's indentation).
         | Indent = 1
         /// Insert two new lines:
-        ///   - the first one indented which will hold the cursor
-        ///   - the second one at the same indentation level
+        ///  - the first one indented which will hold the cursor
+        ///  - the second one at the same indentation level
         | IndentOutdent = 2
         /// Insert new line and outdent once (relative to the previous line's indentation).
         | Outdent = 3
@@ -4715,13 +4728,13 @@ module Languages =
         abstract documentation: U2<string, IMarkdownString> option with get, set
         /// <summary>
         /// A string that should be used when comparing this item
-        /// with other items. When <c>falsy</c> the <see cref="CompletionItem.label">label</see>
+        /// with other items. When <c>falsy</c> the <see cref="CompletionItem.labellabel" />
         /// is used.
         /// </summary>
         abstract sortText: string option with get, set
         /// <summary>
         /// A string that should be used when filtering a set of
-        /// completion items. When <c>falsy</c> the <see cref="CompletionItem.label">label</see>
+        /// completion items. When <c>falsy</c> the <see cref="CompletionItem.labellabel" />
         /// is used.
         /// </summary>
         abstract filterText: string option with get, set
@@ -4742,7 +4755,7 @@ module Languages =
         /// current position.
         /// 
         /// *Note:* The range must be a <see cref="Range.isSingleLine">single line</see> and it must
-        /// <see cref="Range.contains">contain</see> the position at which completion has been <see cref="CompletionItemProvider.provideCompletionItems">requested</see>.
+        /// <see cref="Range.contains">contain</see> the position at which completion has been <see cref="CompletionItemProvider.provideCompletionItemsrequested" />.
         /// </summary>
         abstract range: U2<IRange, CompletionItemRanges> with get, set
         /// <summary>
@@ -4771,7 +4784,7 @@ module Languages =
 
     /// <summary>
     /// Contains additional information about the context in which
-    /// <see cref="CompletionItemProvider.provideCompletionItems">completion provider</see> is triggered.
+    /// <see cref="CompletionItemProvider.provideCompletionItemscompletion">provider</see> is triggered.
     /// </summary>
     type [<AllowNullLiteral>] CompletionContext =
         /// How the completion was triggered.
@@ -4789,24 +4802,24 @@ module Languages =
     /// 
     /// When computing *complete* completion items is expensive, providers can optionally implement
     /// the <c>resolveCompletionItem</c>-function. In that case it is enough to return completion
-    /// items with a <see cref="CompletionItem.label">label</see> from the
-    /// <see cref="CompletionItemProvider.provideCompletionItems">provideCompletionItems</see>-function. Subsequently,
+    /// items with a <see cref="CompletionItem.labellabel" /> from the
+    /// <see cref="CompletionItemProvider.provideCompletionItemsprovideCompletionItems" />-function. Subsequently,
     /// when a completion item is shown in the UI and gains focus this provider is asked to resolve
-    /// the item, like adding <see cref="CompletionItem.documentation">doc-comment</see> or <see cref="CompletionItem.detail">details</see>.
+    /// the item, like adding <see cref="CompletionItem.documentationdoc-comment" /> or <see cref="CompletionItem.detaildetails" />.
     /// </summary>
     type [<AllowNullLiteral>] CompletionItemProvider =
         abstract triggerCharacters: ResizeArray<string> option with get, set
         /// Provide completion items for the given position and document.
         abstract provideCompletionItems: model: Editor.ITextModel * position: Position * context: CompletionContext * token: CancellationToken -> ProviderResult<CompletionList>
         /// <summary>
-        /// Given a completion item fill in more data, like <see cref="CompletionItem.documentation">doc-comment</see>
-        /// or <see cref="CompletionItem.detail">details</see>.
+        /// Given a completion item fill in more data, like <see cref="CompletionItem.documentationdoc-comment" />
+        /// or <see cref="CompletionItem.detaildetails" />.
         /// 
         /// The editor will only resolve a completion item once.
         /// </summary>
         abstract resolveCompletionItem: item: CompletionItem * token: CancellationToken -> ProviderResult<CompletionItem>
 
-    /// <summary>How an <see cref="InlineCompletionsProvider">inline completion provider</see> was triggered.</summary>
+    /// <summary>How an <see cref="InlineCompletionsProviderinline">completion provider</see> was triggered.</summary>
     type InlineCompletionTriggerKind =
         /// Completion was triggered automatically while editing.
         /// It is sufficient to return a single completion item in this case.
@@ -4968,7 +4981,7 @@ module Languages =
     type [<AllowNullLiteral>] DocumentHighlight =
         /// The range this highlight applies to.
         abstract range: IRange with get, set
-        /// <summary>The highlight kind, default is <see cref="DocumentHighlightKind.Text">text</see>.</summary>
+        /// <summary>The highlight kind, default is <see cref="DocumentHighlightKind.Texttext" />.</summary>
         abstract kind: DocumentHighlightKind option with get, set
 
     /// The document highlight provider interface defines the contract between extensions and
@@ -5188,12 +5201,12 @@ module Languages =
         /// this color presentation.
         abstract label: string with get, set
         /// <summary>
-        /// An <see cref="TextEdit">edit</see> which is applied to a document when selecting
+        /// An <see cref="TextEditedit" /> which is applied to a document when selecting
         /// this presentation for the color.
         /// </summary>
         abstract textEdit: TextEdit option with get, set
         /// <summary>
-        /// An optional array of additional <see cref="TextEdit">text edits</see> that are applied when
+        /// An optional array of additional <see cref="TextEdittext">edits</see> that are applied when
         /// selecting this color presentation.
         /// </summary>
         abstract additionalTextEdits: ResizeArray<TextEdit> option with get, set
@@ -5235,8 +5248,8 @@ module Languages =
         /// The one-based end line of the range to fold. The folded area ends with the line's last character.
         abstract ``end``: float with get, set
         /// <summary>
-        /// Describes the <see cref="FoldingRangeKind">Kind</see> of the folding range such as <see cref="FoldingRangeKind.Comment">Comment</see> or
-        /// <see cref="FoldingRangeKind.Region">Region</see>. The kind is used to categorize folding ranges and used by commands
+        /// Describes the <see cref="FoldingRangeKindKind" /> of the folding range such as <see cref="FoldingRangeKind.CommentComment" /> or
+        /// <see cref="FoldingRangeKind.RegionRegion" />. The kind is used to categorize folding ranges and used by commands
         /// like 'Fold all comments'. See
         /// <see cref="FoldingRangeKind" /> for an enumeration of standardized kinds.
         /// </summary>
@@ -5255,6 +5268,9 @@ module Languages =
         /// The value of the kind is 'region'.
         /// </summary>
         abstract Region: FoldingRangeKind
+        /// <summary>Returns a <see cref="FoldingRangeKind" /> for the given value.</summary>
+        /// <param name="value">of the kind.</param>
+        abstract fromValue: value: string -> FoldingRangeKind
         /// <summary>Creates a new <see cref="FoldingRangeKind" />.</summary>
         /// <param name="value">of the kind.</param>
         [<EmitConstructor>] abstract Create: value: string -> FoldingRangeKind
@@ -5410,8 +5426,8 @@ module Languages =
         [<EmitIndexer>] abstract Item: key: string -> obj option with get, set
 
     /// A rule is either a regular expression and an action
-    ///  		shorthands: [reg,act] == { regex: reg, action: act}
-    /// 		and       : [reg,act,nxt] == { regex: reg, action: act{ next: nxt }}
+    /// 		shorthands: [reg,act] == { regex: reg, action: act}
+    /// 	and       : [reg,act,nxt] == { regex: reg, action: act{ next: nxt }}
     type IShortMonarchLanguageRule1 =
         U2<string, RegExp> * IMonarchLanguageAction
 
@@ -5645,9 +5661,9 @@ module Languages =
         type [<AllowNullLiteral>] CSSDataConfigurationDataProviders =
             [<EmitIndexer>] abstract Item: providerId: string -> CSSDataV1 with get, set
 
-    type CSSDataV1Version =
-        static member N1 = 1
-        static member N1_1 = 1.1
+        type CSSDataV1Version =
+            static member N1 = 1
+            static member N1_1 = 1.1
 
     module Html =
 
@@ -5787,9 +5803,9 @@ module Languages =
         type [<AllowNullLiteral>] HTMLDataConfigurationDataProviders =
             [<EmitIndexer>] abstract Item: providerId: string -> HTMLDataV1 with get, set
 
-    type HTMLDataV1Version =
-        static member N1 = 1
-        static member N1_1 = 1.1
+        type HTMLDataV1Version =
+            static member N1 = 1
+            static member N1_1 = 1.1
 
     module Json =
 
