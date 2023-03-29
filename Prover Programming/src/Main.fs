@@ -41,7 +41,7 @@ let rec evaluate value =
     match Language.Parser.parse_lemma(value) with
     | None, error               ->  error
     | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, []) with
-                                    | Proof_Interface.Success(_, d) ->  if d then "Success" else "Not Success"
+                                    | Proof_Interface.Success(_, d) ->  (sprintf "%s on %s" (if d then "Success" else "Not Success") $"Lemma %s{lemma.Identifier.ToString()}")
                                     | Proof_Interface.Fail(msg)     ->  msg)
                                     |> (fun result ->
                                         if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate remaining}"
