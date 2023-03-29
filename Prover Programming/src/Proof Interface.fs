@@ -65,7 +65,7 @@ let rec combinations n list =
     match n, list with
     | 0, _      -> [[]]
     | _, []     -> []
-    | k, x::xs  -> List.map ((@) [x]) (combinations (k-1) xs) @ combinations k xs
+    | k, x::xs  -> List.map ((@) [x]) (combinations (k-1) list) @ combinations k xs
 
 type Result =
     | Success of Formula list * bool
