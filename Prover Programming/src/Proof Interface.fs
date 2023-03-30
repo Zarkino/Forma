@@ -74,17 +74,18 @@ type Result =
 let rec prove (proof: Proof, assumptions: Formula List) =
     (Success(assumptions, false), proof.Statements)
     ||> List.fold
-        (fun s v ->
-            match s with
-            | Fail _        -> s
-            | Success(s, d) ->
-                match v with
-                | Assumption(f)         ->  Success(f::s, d)
-                | Intermediate(f, rule) ->  match combinations rules[rule] s |> List.exists (fun a -> apply(rule, a, [f])) with
-                                            | true  -> Success(f::s, d)
+        (fun state statement ->
+            match state with
+            | Fail _                        -> state
+            | Success(formulas, judgement)  ->
+                let fs = List.distinct formulas
+                match statement with
+                | Assumption(f)         ->  Success(f::fs, judgement)
+                | Intermediate(f, rule) ->  match combinations rules[rule] fs |> List.exists (fun a -> apply(rule, a, [f])) with
+                                            | true  -> Success(f::fs, judgement)
                                             | false -> Fail($"Could not have %A{f} by %s{rule}")
-                | Conclusion(f, rule)   ->  match combinations rules[rule] s |> List.exists (fun a -> apply(rule, a, [f])) with
-                                            | true  -> Success(f::s, true)
+                | Conclusion(f, rule)   ->  match combinations rules[rule] fs |> List.exists (fun a -> apply(rule, a, [f])) with
+                                            | true  -> Success(f::fs, true)
                                             | false -> Fail($"Conclusion %A{f} could not be reached using rule %s{rule}")
-                | Subproof(p)           ->  prove(p, s)
+                | Subproof(p)           ->  prove(p, fs)
         )
