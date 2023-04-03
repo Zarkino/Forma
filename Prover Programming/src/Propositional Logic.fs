@@ -39,6 +39,21 @@ type Formula =
             | Implication(p, q)         -> Implication(f(p, o, n), f(q, o, n))
             | Equivalence(p, q)         -> Equivalence(f(p, o, n), f(q, o, n))
         f (formula, old_val, new_val)
+    static member IsLiteral formula =
+        match formula with
+        | Variable _
+        | Negation(Variable _)  -> true
+        | _                     -> false
+    member this.IsLiteral() = Formula.IsLiteral this
+    static member GetOperator formula =
+        match formula with
+        | Variable _    -> ""
+        | Negation _    -> "¬"
+        | Conjunction _ -> "∧"
+        | Disjunction _ -> "∨"
+        | Implication _ -> "→"
+        | Equivalence _ -> "↔"
+    member this.GetOperator() = Formula.GetOperator this
     static member ToString formula =
         let rec f x =
             match x with
@@ -47,10 +62,12 @@ type Formula =
                                     | Variable(p')  -> $"¬%s{p'}"
                                     | Negation(p')  -> $"¬¬(%s{f p'})"
                                     | p'            -> $"¬(%s{f p'})"
-            | Conjunction(p, q) ->  $"(%s{f p}) ∧ (%s{f q})"
-            | Disjunction(p, q) ->  $"(%s{f p}) ∨ (%s{f q})"
-            | Implication(p, q) ->  $"(%s{f p}) → (%s{f q})"
-            | Equivalence(p, q) ->  $"(%s{f p}) ↔ (%s{f q})"
+            | Conjunction(p, q)
+            | Disjunction(p, q)
+            | Implication(p, q)
+            | Equivalence(p, q) ->  let p' = if Formula.IsLiteral p then $"%s{f p}" else $"(%s{f p})"
+                                    let q' = if Formula.IsLiteral q then $"%s{f q}" else $"(%s{f q})"
+                                    $"%s{p'} %s{Formula.GetOperator x} %s{q'}"
         f formula
     override this.ToString () = Formula.ToString this
 
