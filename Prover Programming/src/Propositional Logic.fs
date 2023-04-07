@@ -72,3 +72,17 @@ type Formula =
     override this.ToString () = Formula.ToString this
 
 let f formula = (formula, Formula.Extract formula |> Seq.indexed) ||> Seq.fold (fun x (i, v) -> Formula.ReplaceVar (x, v, $"%i{i}"))
+
+let rec unify x y map =
+    match x, y with
+    | Variable(k), p                            ->  match Map.tryFind k map with
+                                                    | Some(v)   -> p = v, map
+                                                    | None      -> true, Map.add k p map
+    | Negation(p), Negation(p')                 ->  unify p p' map
+    | Conjunction(p, q), Conjunction(p', q')
+    | Disjunction(p, q), Disjunction(p', q')
+    | Implication(p, q), Implication(p', q')
+    | Equivalence(p, q), Equivalence(p', q')    ->  match unify p p' map with
+                                                    | false, _  -> false, map
+                                                    | true, map -> unify q q' map
+    | _, _                                      ->  false, map

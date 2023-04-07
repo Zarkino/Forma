@@ -37,10 +37,33 @@ def myMacro {
 
 let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
+let test = "lemma (A & B) -> (B & A)
+proof {
+	assume A & B
+	have A by Con_E1
+	have B by Con_E2
+	have B | C by Dis_I1
+	have C | B by Dis_I2
+	have A | C by Dis_I1
+	assume !A
+	have B by Dis_E1
+	assume !B
+	have A by Dis_E2
+	have A -> B by Imp_I
+	have B by Imp_E1
+	have !A by Imp_E2
+	have B -> A by Imp_I
+	have A <-> B by Iff_I
+	have A -> B by Iff_E1
+	have B -> A by Iff_E2
+	show B & A by Con_I
+}
+"
+
 let rec evaluate value =
     match Language.Parser.parse_lemma(value) with
     | None, error               ->  error
-    | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, []) with
+    | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty) with
                                     | Proof_Interface.Success(_, d) ->  (sprintf "%s on %s" (if d then "Success" else "Not Success") $"Lemma %s{lemma.Identifier.ToString()}")
                                     | Proof_Interface.Fail(msg)     ->  msg)
                                     |> (fun result ->
@@ -50,7 +73,7 @@ let rec evaluate value =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(lemma)
+    let (value, setValue) = React.useState(test)
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)

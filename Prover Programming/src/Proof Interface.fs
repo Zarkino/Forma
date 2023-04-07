@@ -16,67 +16,51 @@ type Lemma = {
     Proof: Proof
 }
 
-let rules = [
-        ("Con_I",   2)
-        ("Con_E1",  1)
-        ("Con_E2",  1)
-        ("Dis_I1",  1)
-        ("Dis_I2",  1)
-        ("Dis_E1",  2)
-        ("Dis_E2",  2)
-        ("Imp_I",   2)
-        ("Imp_E1",  2)
-        ("Imp_E2",  2)
-        ("Iff_I",   2)
-        ("Iff_E",   1)] |> Map.ofList
+let rules = Map.ofList [
+    ("Con_I",   ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
+    ("Con_E1",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("0")))
+    ("Con_E2",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("1")))
+    ("Dis_I1",  ([Variable("0")],                                               Disjunction(Variable("0"), Variable("1"))))
+    ("Dis_I2",  ([Variable("1")],                                               Disjunction(Variable("0"), Variable("1"))))
+    ("Dis_E1",  ([Disjunction(Variable("0"), Variable("1"))
+                  Negation(Variable("0"))],                                     Variable("1")))
+    ("Dis_E2",  ([Disjunction(Variable("0"), Variable("1"))
+                  Negation(Variable("1"))],                                     Variable("0")))
+    ("Imp_I",   ([Variable("0"); Variable("1")],                                Implication(Variable("0"), Variable("1"))))
+    ("Imp_E1",  ([Implication(Variable("0"), Variable("1")); Variable("0")],    Variable("1")))
+    ("Imp_E2",  ([Implication(Variable("0"), Variable("1"))
+                  Negation(Variable("1"))],                                     Negation(Variable("0"))))
+    ("Iff_I",   ([Implication(Variable("0"), Variable("1"))
+                  Implication(Variable("1"), Variable("0"))],                   Equivalence(Variable("0"), Variable("1"))))
+    ("Iff_E1",   ([Equivalence(Variable("0"), Variable("1"))],                  Implication(Variable("0"), Variable("1"))))
+    ("Iff_E2",   ([Equivalence(Variable("0"), Variable("1"))],                  Implication(Variable("1"), Variable("0"))))
+]
 
-// Most of the following simply inspired by https://en.wikipedia.org/wiki/List_of_rules_of_inference
-let apply (rule, assumptions, result) =
-    match rule, assumptions, result with
-    | "Con_I",  [p; q],                                 [Conjunction(p', q')]                       when p' = p && q' = q                       -> true // Conjunction Introduction
-    | "Con_E1", [Conjunction(p, _)],                    [p']                                        when p' = p                                 -> true // Conjunction Elimination (right)
-    | "Con_E2", [Conjunction(_, q)],                    [q']                                        when q' = q                                 -> true // Conjunction Elimination (left)
-    | "Dis_I1", [p],                                    [Disjunction(p', _)]                        when p' = p                                 -> true // Disjunction Introduction
-    | "Dis_I2", [p],                                    [Disjunction(_, p')]                        when p' = p                                 -> true // Disjunction Introduction
-    | "Dis_E1", [Disjunction(p, q)
-                 Negation(r)],                          [q']                                        when (p = r) && (q' = q)                    -> true // Disjunctive Syllogism (left)
-    | "Dis_E2", [Disjunction(p, q)
-                 Negation(r)],                          [p']                                        when (q = r) && (p' = p)                    -> true // Disjunctive Syllogism (right)
-    | "Imp_I",  [p; q],                                 [Implication(p', q')]                       when p' = p && q' = q                       -> true // Implication Introduction
-    | "Imp_E1", [Implication(p, q); r],                 [q']                                        when (p = r) && (q' = q)                    -> true // Modus Ponens (Elimination)
-    | "Imp_E2", [Implication(p, q)
-                 Negation(r)],                          [Negation(p')]                              when (q = r) && (p' = p)                    -> true // Modus Tollens
-    | "Iff_I",  [Implication(p, q)
-                 Implication(r, s)],                    [Equivalence(p', q')]                       when (p = s && q = r) && (p' = p && q' = q) -> true //
-    | "Iff_E",  [Equivalence(p, q)],                    [Implication(p', q')]                       when p' = p && q' = q                       -> true //
-    | _, _, _                                                                                                                                   -> false //failwith $"The rule %s{rule} could not be applied to %A{assumptions}"
-
-/// Creates all permutations of the list with length n
-let rec combinations n list =
-    match n, list with
-    | 0, _      -> [[]]
-    | _, []     -> []
-    | k, x::xs  -> List.map ((@) [x]) (combinations (k-1) list) @ combinations k xs
+let apply rule a r =
+    match Map.tryFind rule rules with
+    | None          ->  false
+    | Some(a', r')  ->  match unify r' r Map.empty with
+                        | false, _  -> false
+                        | true, map -> List.forall (fun x -> Set.exists (fun y -> unify x y map |> fst) a) a'
 
 type Result =
-    | Success of Formula list * bool
+    | Success of Set<Formula> * bool
     | Fail of string
 
-let rec prove (proof: Proof, assumptions: Formula List) =
+let rec prove (proof: Proof, assumptions: Set<Formula>) =
     (Success(assumptions, false), proof.Statements)
     ||> List.fold
         (fun state statement ->
             match state with
             | Fail _                        -> state
-            | Success(formulas, judgement)  ->
-                let fs = List.distinct formulas
+            | Success(fs, judgement)  ->
                 match statement with
-                | Assumption(f)         ->  Success(f::fs, judgement)
-                | Intermediate(f, rule) ->  match combinations rules[rule] fs |> List.exists (fun a -> apply(rule, a, [f])) with
-                                            | true  -> Success(f::fs, judgement)
+                | Assumption(f)         ->  Success(Set.add f fs, judgement)
+                | Intermediate(f, rule) ->  match apply rule fs f with
+                                            | true  -> Success(Set.add f fs, judgement)
                                             | false -> Fail($"Could not have %A{f} by %s{rule}")
-                | Conclusion(f, rule)   ->  match combinations rules[rule] fs |> List.exists (fun a -> apply(rule, a, [f])) with
-                                            | true  -> Success(f::fs, true)
+                | Conclusion(f, rule)   ->  match apply rule fs f with
+                                            | true  -> Success(Set.add f fs, true)
                                             | false -> Fail($"Conclusion %A{f} could not be reached using rule %s{rule}")
                 | Subproof(p)           ->  prove(p, fs)
         )
