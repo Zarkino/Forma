@@ -1,6 +1,5 @@
 ﻿module Proof_Interface
 
-open Microsoft.FSharp.Quotations
 open Propositional_Logic
 
 type Proof = {

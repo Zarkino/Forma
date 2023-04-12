@@ -23,14 +23,39 @@ let arithmeticTests =
 
 Mocha.runTests arithmeticTests |> ignore
 
-let test_parsing =
-    testList "Parsing tests" [
+let test_formula_parsing =
+    testList "Basic Formula Parsing Tests" [
+        let error_msg = "Incorrect parsing"
         test "Parse constant true" {
-            Expect.equal (fst <| parse_formula "T") (Some(Constant(true))) "Incorrect parsing"
+            Expect.equal (parse_formula "T") (Some(Constant(true)), "") error_msg
         }
         test "Parse constant false" {
-            Expect.equal (fst <| parse_formula "F") (Some(Constant(false))) "Incorrect parsing"
+            Expect.equal (parse_formula "F") (Some(Constant(false)), "") error_msg
+        }
+        test "Parse Variables (Lowercase)" {
+            ['a'..'z'] |> List.map string |> List.iter (fun x -> Expect.equal (parse_formula x) (Some(Variable(x)), "") error_msg)
+        }
+        test "Parse Variables (Uppercase)" {
+            ['A'..'E']@['G'..'S']@['U'..'Z'] |> List.map string |> List.iter (fun x -> Expect.equal (parse_formula x) (Some(Variable(x)), "") error_msg)
+        }
+        test "Parse Negation (Single)" {
+            Expect.equal (parse_formula "~P") (Some(Negation(Variable("P"))), "") error_msg
+        }
+        test "Parse Negation (Multiple)" {
+            Expect.equal (parse_formula "~~~P") (Some(Negation(Negation(Negation(Variable("P"))))), "") error_msg
+        }
+        test "Parse Conjunction" {
+            Expect.equal (parse_formula "P & Q") (Some(Conjunction(Variable("P"), Variable("Q"))), "") error_msg
+        }
+        test "Parse Disjunction" {
+            Expect.equal (parse_formula "P | Q") (Some(Disjunction(Variable("P"), Variable("Q"))), "") error_msg
+        }
+        test "Parse Implication" {
+            Expect.equal (parse_formula "P -> Q") (Some(Implication(Variable("P"), Variable("Q"))), "") error_msg
+        }
+        test "Parse Bi-implication" {
+            Expect.equal (parse_formula "P <-> Q") (Some(Equivalence(Variable("P"), Variable("Q"))), "") error_msg
         }
     ]
 
-Mocha.runTests test_parsing |> ignore
+Mocha.runTests test_formula_parsing |> ignore
