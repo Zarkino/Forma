@@ -45,13 +45,13 @@ proof {
 	have B | C by Dis_I1
 	have C | B by Dis_I2
 	have A | C by Dis_I1
-	assume !A
+	assume ~A
 	have B by Dis_E1
-	assume !B
+	assume ~B
 	have A by Dis_E2
 	have A -> B by Imp_I
-	have B by Imp_E1
-	have !A by Imp_E2
+	have B by Imp_E1    
+	have ~A by Imp_E2
 	have B -> A by Imp_I
 	have A <-> B by Iff_I
 	have A -> B by Iff_E1
@@ -60,7 +60,7 @@ proof {
 }
 "
 
-let test_meta = "!!x. p ==> q\np == q\n!p ==> p ==> q"
+let test_meta = "~~x. p ==> q\np == q\n~p ==> p ==> q"
 
 let rec evaluate_lemma value =
     match Language.Parser.parse_lemma(value) with
@@ -117,7 +117,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, evaluate_meta value, readonly = true)
+                                    Components.Editor(theme, evaluate_lemma value, readonly = true)
                                 ]
                             ]
                         ]
