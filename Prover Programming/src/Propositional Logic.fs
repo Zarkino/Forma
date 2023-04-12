@@ -1,6 +1,7 @@
 ﻿module Propositional_Logic
 
 type Formula =
+    | Constant of bool
     | Variable of string
     | Negation of Formula
     | Conjunction of Formula * Formula
@@ -10,6 +11,7 @@ type Formula =
     static member Extract formula =
         let rec f x =
             match x with
+            | Constant _        -> Seq.empty
             | Variable(p)       -> seq { p }
             | Negation(p)       -> f p
             | Conjunction(p, q)
@@ -20,7 +22,8 @@ type Formula =
     static member Replace (formula, old_val, new_val) =
         let rec f (x, o, n) =
             match x with
-            | x when x = o  -> n
+            | x when x = o      -> n
+            | Constant _
             | Variable _        -> x
             | Negation(p)       -> Negation(f(p, o, n))
             | Conjunction(p, q) -> Conjunction(f(p, o, n), f(q, o, n))
@@ -32,6 +35,7 @@ type Formula =
         let rec f (x, o, n) =
             match x with
             | Variable(p) when p = o    -> Variable(n)
+            | Constant _
             | Variable _                -> x
             | Negation(p)               -> Negation(f(p, o, n))
             | Conjunction(p, q)         -> Conjunction(f(p, o, n), f(q, o, n))
@@ -47,6 +51,7 @@ type Formula =
     member this.IsLiteral() = Formula.IsLiteral this
     static member GetOperator formula =
         match formula with
+        | Constant _
         | Variable _    -> ""
         | Negation _    -> "¬"
         | Conjunction _ -> "∧"
@@ -57,17 +62,26 @@ type Formula =
     static member ToString formula =
         let rec f x =
             match x with
+            | Constant(b)       ->  if b then "⊤" else "⊥"
             | Variable(p)       ->  p
             | Negation(p)       ->  match p with
+                                    | Constant _    -> $"¬%s{f p}"
                                     | Variable(p')  -> $"¬%s{p'}"
                                     | Negation(p')  -> $"¬¬(%s{f p'})"
                                     | p'            -> $"¬(%s{f p'})"
             | Conjunction(p, q)
             | Disjunction(p, q)
             | Implication(p, q)
-            | Equivalence(p, q) ->  let p' = if Formula.IsLiteral p then $"%s{f p}" else $"(%s{f p})"
-                                    let q' = if Formula.IsLiteral q then $"%s{f q}" else $"(%s{f q})"
+            | Equivalence(p, q) ->  let p' = par p
+                                    let q' = par q
                                     $"%s{p'} %s{Formula.GetOperator x} %s{q'}"
+        and par x =
+            match x with
+            | Constant _
+            | Negation(Constant _)
+            | Variable _
+            | Negation(Variable _)  -> $"%s{f x}"
+            | _                     -> $"(%s{f x})"
         f formula
     override this.ToString () = Formula.ToString this
 
@@ -78,6 +92,7 @@ let rec unify x y map =
     | Variable(k), p                            ->  match Map.tryFind k map with
                                                     | Some(v)   -> p = v, map
                                                     | None      -> true, Map.add k p map
+    | Constant(b), Constant(b')                 ->  b = b', map
     | Negation(p), Negation(p')                 ->  unify p p' map
     | Conjunction(p, q), Conjunction(p', q')
     | Disjunction(p, q), Disjunction(p', q')
