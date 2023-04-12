@@ -8,7 +8,8 @@ module Grammar_PL =
     let formula, formulaRef = createParserForwardedToRef()
     
     let constant = pchar 'T' <|> pchar 'F' |>> function | 'T' -> Constant(true) | _ -> Constant(false)
-    let variable = many1Chars asciiLetter |>> fun x -> Variable(string x)
+    let var = many1Chars asciiLetter |>> string
+    let variable = var |>> Variable
     let negation = pchar '!' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
     let binaryFormula operator = pstring operator >>. spaces >>. formula
     
@@ -19,6 +20,26 @@ module Grammar_PL =
             binaryFormula "|" |>> (fun right -> Disjunction(left, right))
             binaryFormula "->" |>> (fun right -> Implication(left, right))
             binaryFormula "<->" |>> (fun right -> Equivalence(left, right))
+            preturn left
+        ]
+    }
+
+module Grammar_ML =
+    open Grammar_PL
+    open Meta_Logic
+    
+    let meta, metaRef = createParserForwardedToRef()
+    
+    let formula_ml = formula |>> Meta.Formula
+    
+    do metaRef.Value <- parse {
+        let! left = spaces >>. (
+            (pipe2 (pstring "!!" >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
+            formula_ml <|>
+            between (pchar '(') (pchar ')') meta)
+        return! spaces >>. choice [
+            pstring "==>" >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
+            pstring "==" >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
             preturn left
         ]
     }
@@ -44,6 +65,7 @@ module Grammar_Proof =
 
 module Parser =
     open Grammar_PL
+    open Grammar_ML
     open Grammar_Proof
     
     let parse_formula input =
@@ -53,5 +75,10 @@ module Parser =
     
     let parse_lemma input =
         match runString lemma () input with
+        | Ok(v, r, _)   -> Some v, StringSegment.toString r
+        | Error(e)      -> None, $"Error: %A{e}"
+    
+    let parse_meta input =
+        match runString meta () input with
         | Ok(v, r, _)   -> Some v, StringSegment.toString r
         | Error(e)      -> None, $"Error: %A{e}"

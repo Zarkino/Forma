@@ -37,7 +37,7 @@ def myMacro {
 
 let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
-let test = "lemma (A & B) -> (B & A)
+let test_lemma = "lemma (A & B) -> (B & A)
 proof {
 	assume A & B
 	have A by Con_E1
@@ -60,20 +60,29 @@ proof {
 }
 "
 
-let rec evaluate value =
+let test_meta = "!!x. p ==> q\np == q\n!p ==> p ==> q"
+
+let rec evaluate_lemma value =
     match Language.Parser.parse_lemma(value) with
     | None, error               ->  error
     | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty) with
                                     | Proof_Interface.Success(_, d) ->  (sprintf "%s on %s" (if d then "Success" else "Not Success") $"Lemma %s{lemma.Identifier.ToString()}")
                                     | Proof_Interface.Fail(msg)     ->  msg)
                                     |> (fun result ->
-                                        if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate remaining}"
+                                        if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
                                         else result)
+
+let rec evaluate_meta value =
+    match Language.Parser.parse_meta(value) with
+    | None, error           ->  error
+    | Some(meta), remaining ->  let result = Meta_Logic.Meta.ToString meta
+                                if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_meta remaining}"
+                                else result
 
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(test)
+    let (value, setValue) = React.useState(test_meta)
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
@@ -108,7 +117,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, evaluate value, readonly = true)
+                                    Components.Editor(theme, evaluate_meta value, readonly = true)
                                 ]
                             ]
                         ]
