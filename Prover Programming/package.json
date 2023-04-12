@@ -5,8 +5,8 @@
         "start": "dotnet tool restore && dotnet fable watch src --runFast vite",
         "build": "dotnet tool restore && dotnet fable src --run vite build",
         "clean": "dotnet fable clean src --yes",
-        "pretest": "dotnet fable tests -o dist/tests",
-        "test": "mocha dist/tests"
+        "pretest": "dotnet fable tests",
+        "test": "mocha tests"
     },
     "dependencies": {
         "@monaco-editor/react": "^4.4.6",
