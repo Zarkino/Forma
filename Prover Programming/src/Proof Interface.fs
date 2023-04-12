@@ -35,10 +35,12 @@ let rules = Map.ofList [
                   Negation(Variable("1"))],                                     Negation(Variable("0"))))
     ("Iff_I",   ([Implication(Variable("0"), Variable("1"))
                   Implication(Variable("1"), Variable("0"))],                   Equivalence(Variable("0"), Variable("1"))))
-    ("Iff_E1",   ([Equivalence(Variable("0"), Variable("1"))],                  Implication(Variable("0"), Variable("1"))))
-    ("Iff_E2",   ([Equivalence(Variable("0"), Variable("1"))],                  Implication(Variable("1"), Variable("0"))))
+    ("Iff_E1",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("0"), Variable("1"))))
+    ("Iff_E2",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("1"), Variable("0"))))
+    ("Abs_P",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Variable("0"),Constant(false))))
+    ("Abs_N",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Negation(Variable("0")),Constant(false))))
 ]
-
+    
 let apply rule a r =
     match Map.tryFind rule rules with
     | None          ->  false
