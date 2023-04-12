@@ -25,7 +25,7 @@ Mocha.runTests arithmeticTests |> ignore
 let testTests =
     testList "Parsing tests" [
         test "Parse constant true" {
-            Expect.equal  "yeet"
+            Expect.equal "" "" "yeet"
         }
     ]
 
