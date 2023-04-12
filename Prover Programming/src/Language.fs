@@ -73,6 +73,11 @@ module Parser =
         | Ok(v, r, _)   -> Some v, StringSegment.toString r
         | Error(e)      -> None, $"Error: %A{e}"
     
+    let parse_proof input =
+        match runString proof () input with
+        | Ok(v, r, _)   -> Some v, StringSegment.toString r
+        | Error(e)      -> None, $"Error: %A{e}"
+    
     let parse_lemma input =
         match runString lemma () input with
         | Ok(v, r, _)   -> Some v, StringSegment.toString r

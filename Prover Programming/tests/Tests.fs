@@ -2,26 +2,8 @@
 
 open Fable.Mocha
 open Propositional_Logic
+open Proof_Interface
 open Language.Parser
-
-let arithmeticTests =
-    testList "Arithmetic tests" [
-        test "plus works" {
-            Expect.equal (1 + 1) 2 "plus"
-        }
-
-        test "Test for falsehood" {
-            Expect.isFalse (1 = 2) "false"
-        }
-
-        testAsync "Test async code" {
-            let! x = async { return 21 }
-            let answer = x * 2
-            Expect.equal 42 answer "async"
-        }
-    ]
-
-Mocha.runTests arithmeticTests |> ignore
 
 let test_formula_parsing =
     testList "Basic Formula Parsing Tests" [
@@ -59,3 +41,26 @@ let test_formula_parsing =
     ]
 
 Mocha.runTests test_formula_parsing |> ignore
+
+let test_proof_parsing =
+    testList "Basic Proof Parsing Tests" [
+        let error_msg = "Incorrect parsing"
+        test "Parse Empty Proof" {
+            Expect.equal (parse_proof "proof {}") (Some({ Statements = [] }), "") error_msg
+        }
+        test "Parse Rules" {
+            rules.Keys |> Seq.iter (fun rule -> Expect.equal
+                                                    (parse_proof (sprintf "proof {have P by %s}" rule))
+                                                    (Some({ Statements = [Intermediate(Variable("P"), rule)] }), "") error_msg)
+        }
+        test "Parse Simple Proof" {
+            Expect.equal
+                (parse_proof "proof {assume P & Q\n\thave P by Con_E1\n\thave Q by Con_E2\n\tshow Q & P by Con_I}")
+                (Some({ Statements = [Assumption(Conjunction(Variable("P"), Variable("Q")))
+                                      Intermediate(Variable("P"), "Con_E1")
+                                      Intermediate(Variable("Q"), "Con_E2")
+                                      Conclusion(Conjunction(Variable("Q"), Variable("P")), "Con_I")] }), "") error_msg
+        }
+    ]
+
+Mocha.runTests test_proof_parsing |> ignore
