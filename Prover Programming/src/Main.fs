@@ -82,7 +82,7 @@ let rec evaluate_meta value =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(test_meta)
+    let (value, setValue) = React.useState(test_lemma)
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
