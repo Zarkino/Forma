@@ -1,7 +1,8 @@
 ﻿module Tests
 
 open Fable.Mocha
-open Main
+open Propositional_Logic
+open Language.Parser
 
 let arithmeticTests =
     testList "Arithmetic tests" [
@@ -22,11 +23,14 @@ let arithmeticTests =
 
 Mocha.runTests arithmeticTests |> ignore
 
-let testTests =
+let test_parsing =
     testList "Parsing tests" [
         test "Parse constant true" {
-            Expect.equal "" "" "yeet"
+            Expect.equal (fst <| parse_formula "T") (Some(Constant(true))) "Incorrect parsing"
+        }
+        test "Parse constant false" {
+            Expect.equal (fst <| parse_formula "F") (Some(Constant(false))) "Incorrect parsing"
         }
     ]
 
-Mocha.runTests testTests |> ignore
+Mocha.runTests test_parsing |> ignore
