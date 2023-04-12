@@ -1,4 +1,4 @@
-﻿// Type definitions for monaco-editor v0.36.1
+﻿// Type definitions for monaco-editor v0.37.1
 // generated with ts2fable from /node_modules/monaco-editor/monaco.d.ts
 
 // ts2fable 0.9.0
@@ -802,12 +802,19 @@ module Editor =
         abstract remeasureFonts: unit -> unit
         /// Register a command.
         abstract registerCommand: id: string * handler: (obj option -> ResizeArray<obj option> -> unit) -> IDisposable
+        /// <summary>
+        /// Registers a handler that is called when a link is opened in any editor. The handler callback should return <c>true</c> if the link was handled and <c>false</c> otherwise.
+        /// The handler that was registered last will be called first when a link is opened.
+        /// 
+        /// Returns a disposable that can unregister the opener again.
+        /// </summary>
+        abstract registerLinkOpener: opener: ILinkOpener -> IDisposable
         abstract TextModelResolvedOptions: TextModelResolvedOptionsStatic
         abstract FindMatch: FindMatchStatic
-        /// Maps a line range in the original text model to a line range in the modified text model.
-        abstract LineRangeMapping: LineRangeMappingStatic
         /// A range of lines (1-based).
         abstract LineRange: LineRangeStatic
+        /// Maps a line range in the original text model to a line range in the modified text model.
+        abstract LineRangeMapping: LineRangeMappingStatic
         /// Maps a range in the original text model to a range in the modified text model.
         abstract RangeMapping: RangeMappingStatic
         /// <summary>The type of the <c>IEditor</c>.</summary>
@@ -818,6 +825,7 @@ module Editor =
         abstract EditorOptions: IExportsEditorOptions
         abstract FontInfo: FontInfoStatic
         abstract BareFontInfo: BareFontInfoStatic
+        abstract EditorZoom: IEditorZoom
 
     type [<AllowNullLiteral>] IDiffNavigator =
         abstract canNavigate: unit -> bool
@@ -843,6 +851,9 @@ module Editor =
         abstract command: string option with get, set
         abstract commandArgs: obj option with get, set
         abstract ``when``: string option with get, set
+
+    type [<AllowNullLiteral>] ILinkOpener =
+        abstract ``open``: resource: Uri -> U2<bool, Promise<bool>>
 
     type [<StringEnum>] [<RequireQualifiedAccess>] BuiltinTheme =
         | Vs
@@ -1184,6 +1195,8 @@ module Editor =
         /// Indicates if this block should be rendered after the last line.
         /// In this case, the range must be empty and set to the last line.
         abstract blockIsAfterEnd: bool option with get, set
+        abstract blockDoesNotCollapse: bool option with get, set
+        abstract blockPadding: obj * obj * obj * obj option with get, set
         /// Message to be rendered when hovering over the glyph margin decoration.
         abstract glyphMarginHoverMessage: U2<IMarkdownString, ResizeArray<IMarkdownString>> option with get, set
         /// Array of MarkdownString to render as the decoration message.
@@ -1659,29 +1672,14 @@ module Editor =
         /// Maps all modified line ranges in the original to the corresponding line ranges in the modified text model.
         abstract changes: ResizeArray<LineRangeMapping>
 
-    /// Maps a line range in the original text model to a line range in the modified text model.
-    type [<AllowNullLiteral>] LineRangeMapping =
-        /// The line range in the original text model.
-        abstract originalRange: LineRange
-        /// The line range in the modified text model.
-        abstract modifiedRange: LineRange
-        /// If inner changes have not been computed, this is set to undefined.
-        /// Otherwise, it represents the character-level diff in this line range.
-        /// The original range of each range mapping should be contained in the original line range (same for modified).
-        /// Must not be an empty array.
-        abstract innerChanges: ResizeArray<RangeMapping> option
-        abstract toString: unit -> string
-
-    /// Maps a line range in the original text model to a line range in the modified text model.
-    type [<AllowNullLiteral>] LineRangeMappingStatic =
-        [<EmitConstructor>] abstract Create: originalRange: LineRange * modifiedRange: LineRange * innerChanges: ResizeArray<RangeMapping> option -> LineRangeMapping
-
     /// A range of lines (1-based).
     type [<AllowNullLiteral>] LineRange =
         /// The start line number.
         abstract startLineNumber: float
         /// The end line number (exclusive).
         abstract endLineNumberExclusive: float
+        /// Indicates if this line range contains the given line number.
+        abstract contains: lineNumber: float -> bool
         /// Indicates if this line range is empty.
         abstract isEmpty: bool
         /// Moves this line range by the given offset of line numbers.
@@ -1691,10 +1689,37 @@ module Editor =
         /// Creates a line range that combines this and the given line range.
         abstract join: other: LineRange -> LineRange
         abstract toString: unit -> string
+        /// The resulting range is empty if the ranges do not intersect, but touch.
+        /// If the ranges don't even touch, the result is undefined.
+        abstract intersect: other: LineRange -> LineRange option
+        abstract overlapOrTouch: other: LineRange -> bool
+        abstract equals: b: LineRange -> bool
 
     /// A range of lines (1-based).
     type [<AllowNullLiteral>] LineRangeStatic =
+        /// <param name="lineRanges">An array of sorted line ranges.</param>
+        abstract joinMany: lineRanges: ResizeArray<ResizeArray<LineRange>> -> ResizeArray<LineRange>
+        /// <param name="lineRanges1">Must be sorted.</param>
+        /// <param name="lineRanges2">Must be sorted.</param>
+        abstract join: lineRanges1: ResizeArray<LineRange> * lineRanges2: ResizeArray<LineRange> -> ResizeArray<LineRange>
         [<EmitConstructor>] abstract Create: startLineNumber: float * endLineNumberExclusive: float -> LineRange
+
+    /// Maps a line range in the original text model to a line range in the modified text model.
+    type [<AllowNullLiteral>] LineRangeMapping =
+        /// The line range in the original text model.
+        abstract originalRange: LineRange
+        /// The line range in the modified text model.
+        abstract modifiedRange: LineRange
+        /// If inner changes have not been computed, this is set to undefined.
+        /// Otherwise, it represents the character-level diff in this line range.
+        /// The original range of each range mapping should be contained in the original line range (same for modified), exceptions are new-lines.
+        /// Must not be an empty array.
+        abstract innerChanges: ResizeArray<RangeMapping> option
+        abstract toString: unit -> string
+
+    /// Maps a line range in the original text model to a line range in the modified text model.
+    type [<AllowNullLiteral>] LineRangeMappingStatic =
+        [<EmitConstructor>] abstract Create: originalRange: LineRange * modifiedRange: LineRange * innerChanges: ResizeArray<RangeMapping> option -> LineRangeMapping
 
     /// Maps a range in the original text model to a range in the modified text model.
     type [<AllowNullLiteral>] RangeMapping =
@@ -1788,7 +1813,7 @@ module Editor =
         abstract label: string
         abstract alias: string
         abstract isSupported: unit -> bool
-        abstract run: unit -> Promise<unit>
+        abstract run: ?args: obj -> Promise<unit>
 
     type IEditorModel =
         U2<ITextModel, IDiffEditorModel>
@@ -2017,6 +2042,8 @@ module Editor =
         /// Flag that indicates that all decorations were lost with this edit.
         /// The model has been reset to a new value.
         abstract isFlush: bool
+        /// Flag that indicates that this event describes an eol change.
+        abstract isEolChange: bool
 
     /// An event describing that model decorations have changed.
     type [<AllowNullLiteral>] IModelDecorationsChangedEvent =
@@ -2114,6 +2141,8 @@ module Editor =
         abstract inDiffEditor: bool option with get, set
         /// The aria label for the editor's textarea (when it is focused).
         abstract ariaLabel: string option with get, set
+        /// Control whether a screen reader announces inline suggestion content immediately.
+        abstract screenReaderAnnounceInlineSuggestion: bool option with get, set
         /// <summary>The <c>tabindex</c> property of the editor's textarea</summary>
         abstract tabIndex: float option with get, set
         /// Render vertical lines at the specified columns.
@@ -2741,6 +2770,8 @@ module Editor =
         abstract enabled: bool option with get, set
         /// Maximum number of sticky lines to show
         abstract maxLineCount: float option with get, set
+        /// Model to choose for sticky scroll by default
+        abstract defaultModel: IEditorStickyScrollOptionsDefaultModel option with get, set
 
     /// Configuration options for editor inlayHints
     type [<AllowNullLiteral>] IEditorInlayHintsOptions =
@@ -2815,7 +2846,7 @@ module Editor =
         abstract strings: QuickSuggestionsValue
 
     type LineNumbersType =
-        U2<float -> string, string>
+        U2<(float -> string), string>
 
     type RenderLineNumbersType =
         | Off = 0
@@ -2942,6 +2973,7 @@ module Editor =
         /// </summary>
         abstract mode: IInlineSuggestOptionsMode option with get, set
         abstract showToolbar: IInlineSuggestOptionsShowToolbar option with get, set
+        abstract suppressSuggestions: bool option with get, set
 
     type [<AllowNullLiteral>] IBracketPairColorizationOptions =
         /// Enable or disable bracket pair colorization.
@@ -3082,140 +3114,141 @@ module Editor =
         | AccessibilityPageSize = 3
         | AriaLabel = 4
         | AutoClosingBrackets = 5
-        | AutoClosingDelete = 6
-        | AutoClosingOvertype = 7
-        | AutoClosingQuotes = 8
-        | AutoIndent = 9
-        | AutomaticLayout = 10
-        | AutoSurround = 11
-        | BracketPairColorization = 12
-        | Guides = 13
-        | CodeLens = 14
-        | CodeLensFontFamily = 15
-        | CodeLensFontSize = 16
-        | ColorDecorators = 17
-        | ColorDecoratorsLimit = 18
-        | ColumnSelection = 19
-        | Comments = 20
-        | Contextmenu = 21
-        | CopyWithSyntaxHighlighting = 22
-        | CursorBlinking = 23
-        | CursorSmoothCaretAnimation = 24
-        | CursorStyle = 25
-        | CursorSurroundingLines = 26
-        | CursorSurroundingLinesStyle = 27
-        | CursorWidth = 28
-        | DisableLayerHinting = 29
-        | DisableMonospaceOptimizations = 30
-        | DomReadOnly = 31
-        | DragAndDrop = 32
-        | DropIntoEditor = 33
-        | EmptySelectionClipboard = 34
-        | ExperimentalWhitespaceRendering = 35
-        | ExtraEditorClassName = 36
-        | FastScrollSensitivity = 37
-        | Find = 38
-        | FixedOverflowWidgets = 39
-        | Folding = 40
-        | FoldingStrategy = 41
-        | FoldingHighlight = 42
-        | FoldingImportsByDefault = 43
-        | FoldingMaximumRegions = 44
-        | UnfoldOnClickAfterEndOfLine = 45
-        | FontFamily = 46
-        | FontInfo = 47
-        | FontLigatures = 48
-        | FontSize = 49
-        | FontWeight = 50
-        | FontVariations = 51
-        | FormatOnPaste = 52
-        | FormatOnType = 53
-        | GlyphMargin = 54
-        | GotoLocation = 55
-        | HideCursorInOverviewRuler = 56
-        | Hover = 57
-        | InDiffEditor = 58
-        | InlineSuggest = 59
-        | LetterSpacing = 60
-        | Lightbulb = 61
-        | LineDecorationsWidth = 62
-        | LineHeight = 63
-        | LineNumbers = 64
-        | LineNumbersMinChars = 65
-        | LinkedEditing = 66
-        | Links = 67
-        | MatchBrackets = 68
-        | Minimap = 69
-        | MouseStyle = 70
-        | MouseWheelScrollSensitivity = 71
-        | MouseWheelZoom = 72
-        | MultiCursorMergeOverlapping = 73
-        | MultiCursorModifier = 74
-        | MultiCursorPaste = 75
-        | MultiCursorLimit = 76
-        | OccurrencesHighlight = 77
-        | OverviewRulerBorder = 78
-        | OverviewRulerLanes = 79
-        | Padding = 80
-        | ParameterHints = 81
-        | PeekWidgetDefaultFocus = 82
-        | DefinitionLinkOpensInPeek = 83
-        | QuickSuggestions = 84
-        | QuickSuggestionsDelay = 85
-        | ReadOnly = 86
-        | RenameOnType = 87
-        | RenderControlCharacters = 88
-        | RenderFinalNewline = 89
-        | RenderLineHighlight = 90
-        | RenderLineHighlightOnlyWhenFocus = 91
-        | RenderValidationDecorations = 92
-        | RenderWhitespace = 93
-        | RevealHorizontalRightPadding = 94
-        | RoundedSelection = 95
-        | Rulers = 96
-        | Scrollbar = 97
-        | ScrollBeyondLastColumn = 98
-        | ScrollBeyondLastLine = 99
-        | ScrollPredominantAxis = 100
-        | SelectionClipboard = 101
-        | SelectionHighlight = 102
-        | SelectOnLineNumbers = 103
-        | ShowFoldingControls = 104
-        | ShowUnused = 105
-        | SnippetSuggestions = 106
-        | SmartSelect = 107
-        | SmoothScrolling = 108
-        | StickyScroll = 109
-        | StickyTabStops = 110
-        | StopRenderingLineAfter = 111
-        | Suggest = 112
-        | SuggestFontSize = 113
-        | SuggestLineHeight = 114
-        | SuggestOnTriggerCharacters = 115
-        | SuggestSelection = 116
-        | TabCompletion = 117
-        | TabIndex = 118
-        | UnicodeHighlighting = 119
-        | UnusualLineTerminators = 120
-        | UseShadowDOM = 121
-        | UseTabStops = 122
-        | WordBreak = 123
-        | WordSeparators = 124
-        | WordWrap = 125
-        | WordWrapBreakAfterCharacters = 126
-        | WordWrapBreakBeforeCharacters = 127
-        | WordWrapColumn = 128
-        | WordWrapOverride1 = 129
-        | WordWrapOverride2 = 130
-        | WrappingIndent = 131
-        | WrappingStrategy = 132
-        | ShowDeprecated = 133
-        | InlayHints = 134
-        | EditorClassName = 135
-        | PixelRatio = 136
-        | TabFocusMode = 137
-        | LayoutInfo = 138
-        | WrappingInfo = 139
+        | ScreenReaderAnnounceInlineSuggestion = 6
+        | AutoClosingDelete = 7
+        | AutoClosingOvertype = 8
+        | AutoClosingQuotes = 9
+        | AutoIndent = 10
+        | AutomaticLayout = 11
+        | AutoSurround = 12
+        | BracketPairColorization = 13
+        | Guides = 14
+        | CodeLens = 15
+        | CodeLensFontFamily = 16
+        | CodeLensFontSize = 17
+        | ColorDecorators = 18
+        | ColorDecoratorsLimit = 19
+        | ColumnSelection = 20
+        | Comments = 21
+        | Contextmenu = 22
+        | CopyWithSyntaxHighlighting = 23
+        | CursorBlinking = 24
+        | CursorSmoothCaretAnimation = 25
+        | CursorStyle = 26
+        | CursorSurroundingLines = 27
+        | CursorSurroundingLinesStyle = 28
+        | CursorWidth = 29
+        | DisableLayerHinting = 30
+        | DisableMonospaceOptimizations = 31
+        | DomReadOnly = 32
+        | DragAndDrop = 33
+        | DropIntoEditor = 34
+        | EmptySelectionClipboard = 35
+        | ExperimentalWhitespaceRendering = 36
+        | ExtraEditorClassName = 37
+        | FastScrollSensitivity = 38
+        | Find = 39
+        | FixedOverflowWidgets = 40
+        | Folding = 41
+        | FoldingStrategy = 42
+        | FoldingHighlight = 43
+        | FoldingImportsByDefault = 44
+        | FoldingMaximumRegions = 45
+        | UnfoldOnClickAfterEndOfLine = 46
+        | FontFamily = 47
+        | FontInfo = 48
+        | FontLigatures = 49
+        | FontSize = 50
+        | FontWeight = 51
+        | FontVariations = 52
+        | FormatOnPaste = 53
+        | FormatOnType = 54
+        | GlyphMargin = 55
+        | GotoLocation = 56
+        | HideCursorInOverviewRuler = 57
+        | Hover = 58
+        | InDiffEditor = 59
+        | InlineSuggest = 60
+        | LetterSpacing = 61
+        | Lightbulb = 62
+        | LineDecorationsWidth = 63
+        | LineHeight = 64
+        | LineNumbers = 65
+        | LineNumbersMinChars = 66
+        | LinkedEditing = 67
+        | Links = 68
+        | MatchBrackets = 69
+        | Minimap = 70
+        | MouseStyle = 71
+        | MouseWheelScrollSensitivity = 72
+        | MouseWheelZoom = 73
+        | MultiCursorMergeOverlapping = 74
+        | MultiCursorModifier = 75
+        | MultiCursorPaste = 76
+        | MultiCursorLimit = 77
+        | OccurrencesHighlight = 78
+        | OverviewRulerBorder = 79
+        | OverviewRulerLanes = 80
+        | Padding = 81
+        | ParameterHints = 82
+        | PeekWidgetDefaultFocus = 83
+        | DefinitionLinkOpensInPeek = 84
+        | QuickSuggestions = 85
+        | QuickSuggestionsDelay = 86
+        | ReadOnly = 87
+        | RenameOnType = 88
+        | RenderControlCharacters = 89
+        | RenderFinalNewline = 90
+        | RenderLineHighlight = 91
+        | RenderLineHighlightOnlyWhenFocus = 92
+        | RenderValidationDecorations = 93
+        | RenderWhitespace = 94
+        | RevealHorizontalRightPadding = 95
+        | RoundedSelection = 96
+        | Rulers = 97
+        | Scrollbar = 98
+        | ScrollBeyondLastColumn = 99
+        | ScrollBeyondLastLine = 100
+        | ScrollPredominantAxis = 101
+        | SelectionClipboard = 102
+        | SelectionHighlight = 103
+        | SelectOnLineNumbers = 104
+        | ShowFoldingControls = 105
+        | ShowUnused = 106
+        | SnippetSuggestions = 107
+        | SmartSelect = 108
+        | SmoothScrolling = 109
+        | StickyScroll = 110
+        | StickyTabStops = 111
+        | StopRenderingLineAfter = 112
+        | Suggest = 113
+        | SuggestFontSize = 114
+        | SuggestLineHeight = 115
+        | SuggestOnTriggerCharacters = 116
+        | SuggestSelection = 117
+        | TabCompletion = 118
+        | TabIndex = 119
+        | UnicodeHighlighting = 120
+        | UnusualLineTerminators = 121
+        | UseShadowDOM = 122
+        | UseTabStops = 123
+        | WordBreak = 124
+        | WordSeparators = 125
+        | WordWrap = 126
+        | WordWrapBreakAfterCharacters = 127
+        | WordWrapBreakBeforeCharacters = 128
+        | WordWrapColumn = 129
+        | WordWrapOverride1 = 130
+        | WordWrapOverride2 = 131
+        | WrappingIndent = 132
+        | WrappingStrategy = 133
+        | ShowDeprecated = 134
+        | InlayHints = 135
+        | EditorClassName = 136
+        | PixelRatio = 137
+        | TabFocusMode = 138
+        | LayoutInfo = 139
+        | WrappingInfo = 140
 
     type EditorOptionsType =
         obj
@@ -3825,6 +3858,11 @@ module Editor =
     type [<AllowNullLiteral>] BareFontInfoStatic =
         [<EmitConstructor>] abstract Create: unit -> BareFontInfo
 
+    type [<AllowNullLiteral>] IEditorZoom =
+        abstract onDidChangeZoomLevel: IEvent<float> with get, set
+        abstract getZoomLevel: unit -> float
+        abstract setZoomLevel: zoomLevel: float -> unit
+
     type IReadOnlyModel =
         ITextModel
 
@@ -3971,6 +4009,7 @@ module Editor =
         abstract accessibilitySupport: IEditorOption<EditorOption, AccessibilitySupport> with get, set
         abstract accessibilityPageSize: IEditorOption<EditorOption, float> with get, set
         abstract ariaLabel: IEditorOption<EditorOption, string> with get, set
+        abstract screenReaderAnnounceInlineSuggestion: IEditorOption<EditorOption, bool> with get, set
         abstract autoClosingBrackets: IEditorOption<EditorOption, IExportsEditorOptionsAutoClosingBracketsIEditorOption> with get, set
         abstract autoClosingDelete: IEditorOption<EditorOption, IExportsEditorOptionsAutoClosingDeleteIEditorOption> with get, set
         abstract autoClosingOvertype: IEditorOption<EditorOption, IExportsEditorOptionsAutoClosingDeleteIEditorOption> with get, set
@@ -4220,6 +4259,11 @@ module Editor =
         | Always
         | Multiline
 
+    type [<StringEnum>] [<RequireQualifiedAccess>] IEditorStickyScrollOptionsDefaultModel =
+        | OutlineModel
+        | FoldingProviderModel
+        | IndentationModel
+
     type [<StringEnum>] [<RequireQualifiedAccess>] IEditorInlayHintsOptionsEnabled =
         | On
         | Off
@@ -4281,8 +4325,13 @@ module Languages =
         /// Get the information of all the registered languages.
         abstract getLanguages: unit -> ResizeArray<ILanguageExtensionPoint>
         abstract getEncodedLanguageId: languageId: string -> float
-        /// <summary>An event emitted when a language is needed for the first time (e.g. a model has it set).</summary>
+        /// <summary>An event emitted when a language is associated for the first time with a text model.</summary>
         abstract onLanguage: languageId: string * callback: (unit -> unit) -> IDisposable
+        /// <summary>
+        /// An event emitted when a language is associated for the first time with a text model or
+        /// whena language is encountered during the tokenization of another language.
+        /// </summary>
+        abstract onLanguageEncountered: languageId: string * callback: (unit -> unit) -> IDisposable
         /// Set the editing configuration for a language.
         abstract setLanguageConfiguration: languageId: string * configuration: LanguageConfiguration -> IDisposable
         /// Change the color map that is used for token colors.
@@ -5136,6 +5185,8 @@ module Languages =
         abstract tabSize: float with get, set
         /// Prefer spaces over tabs.
         abstract insertSpaces: bool with get, set
+        /// The list of multiple ranges to format at once, if the provider supports it.
+        abstract ranges: ResizeArray<Range> option with get, set
 
     /// The document formatting provider interface defines the contract between extensions and
     /// the formatting-feature.
@@ -5154,6 +5205,7 @@ module Languages =
         /// or larger range. Often this is done by adjusting the start and end
         /// of the range to full syntax nodes.
         abstract provideDocumentRangeFormattingEdits: model: Editor.ITextModel * range: Range * options: FormattingOptions * token: CancellationToken -> ProviderResult<ResizeArray<TextEdit>>
+        abstract provideDocumentRangesFormattingEdits: model: Editor.ITextModel * ranges: ResizeArray<Range> * options: FormattingOptions * token: CancellationToken -> ProviderResult<ResizeArray<TextEdit>>
 
     /// The document formatting provider interface defines the contract between extensions and
     /// the formatting-feature.
@@ -6176,9 +6228,7 @@ module Languages =
             /// <summary>Get quick info for the item at the given position in the file.</summary>
             /// <returns><c>Promise&lt;typescript.QuickInfo | undefined&gt;</c></returns>
             abstract getQuickInfoAtPosition: fileName: string * position: float -> Promise<obj option option>
-            /// <summary>Get other ranges which are related to the item at the given position in the file (often used for highlighting).</summary>
-            /// <returns><c>Promise&lt;ReadonlyArray&lt;typescript.ReferenceEntry&gt; | undefined&gt;</c></returns>
-            abstract getOccurrencesAtPosition: fileName: string * position: float -> Promise<ResizeArray<obj option> option>
+            abstract getDocumentHighlights: fileName: string * position: float * filesToSearch: ResizeArray<string> -> Promise<ResizeArray<obj option> option>
             /// <summary>Get the definition of the item at the given position in the file.</summary>
             /// <returns><c>Promise&lt;ReadonlyArray&lt;typescript.DefinitionInfo&gt; | undefined&gt;</c></returns>
             abstract getDefinitionAtPosition: fileName: string * position: float -> Promise<ResizeArray<obj option> option>
@@ -6186,8 +6236,8 @@ module Languages =
             /// <returns><c>Promise&lt;typescript.ReferenceEntry[] | undefined&gt;</c></returns>
             abstract getReferencesAtPosition: fileName: string * position: float -> Promise<ResizeArray<obj option> option>
             /// <summary>Get outline entries for the item at the given position in the file.</summary>
-            /// <returns><c>Promise&lt;typescript.NavigationBarItem[]&gt;</c></returns>
-            abstract getNavigationBarItems: fileName: string -> Promise<ResizeArray<obj option>>
+            /// <returns><c>Promise&lt;typescript.NavigationTree | undefined&gt;</c></returns>
+            abstract getNavigationTree: fileName: string -> Promise<obj option option>
             /// <summary>Get changes which should be applied to format the given file.</summary>
             /// <param name="options"><c>typescript.FormatCodeOptions</c></param>
             /// <returns><c>Promise&lt;typescript.TextChange[]&gt;</c></returns>
