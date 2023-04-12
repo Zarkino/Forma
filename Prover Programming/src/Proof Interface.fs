@@ -67,5 +67,7 @@ let rec prove (proof: Proof, assumptions: Set<Formula>) =
                 | Conclusion(f, rule)   ->  match apply rule fs f with
                                             | true  -> Success(Set.add f fs, true)
                                             | false -> Fail($"Conclusion %A{f} could not be reached using rule %s{rule}")
-                | Subproof(p)           ->  prove(p, fs)
+                | Subproof(p)           ->  match prove(p, fs) with
+                                            | Success _ -> state
+                                            | error     -> error
         )
