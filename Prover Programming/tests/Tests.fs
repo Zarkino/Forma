@@ -1,17 +1,17 @@
 ﻿module Tests
 
 open Fable.Mocha
-open Propositional_Logic
-open Proof_Interface
 open Language.Parser
+
+open Propositional_Logic
 
 let test_formula_parsing =
     testList "Basic Formula Parsing Tests" [
         let error_msg = "Incorrect parsing"
-        test "Parse constant true" {
+        test "Parse Constant true" {
             Expect.equal (parse_formula "T") (Some(Constant(true)), "") error_msg
         }
-        test "Parse constant false" {
+        test "Parse Constant false" {
             Expect.equal (parse_formula "F") (Some(Constant(false)), "") error_msg
         }
         test "Parse Variables (Lowercase)" {
@@ -42,6 +42,8 @@ let test_formula_parsing =
 
 Mocha.runTests test_formula_parsing |> ignore
 
+open Proof_Interface
+
 let test_proof_parsing =
     testList "Basic Proof Parsing Tests" [
         let error_msg = "Incorrect parsing"
@@ -64,3 +66,21 @@ let test_proof_parsing =
     ]
 
 Mocha.runTests test_proof_parsing |> ignore
+
+open Meta_Logic
+
+let test_meta_parsing =
+    testList "Basic Meta-logic Parsing Tests" [
+        let error_msg = "Incorrect parsing"
+        test "Parse Implication" {
+            Expect.equal (parse_meta "p ==> p") (Some(Implication(Formula(Variable("p")), Formula(Variable("p")))), "") error_msg
+        }
+        test "Parse Equality" {
+            Expect.equal (parse_meta "p == p") (Some(Equality(Formula(Variable("p")), Formula(Variable("p")))), "") error_msg
+        }
+        test "Parse Universal Quantifier" {
+            Expect.equal (parse_meta "!!x. p") (Some(Universal("x", Formula(Variable("p")))), "") error_msg
+        }
+    ]
+
+Mocha.runTests test_meta_parsing |> ignore

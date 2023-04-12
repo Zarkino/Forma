@@ -60,7 +60,7 @@ proof {
 }
 "
 
-let test_meta = "~~x. p ==> q\np == q\n~p ==> p ==> q"
+let test_meta = "!!x. p ==> q\np == q\n~p ==> p ==> q"
 
 let rec evaluate_lemma value =
     match Language.Parser.parse_lemma(value) with
