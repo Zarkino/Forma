@@ -1,5 +1,6 @@
 ﻿module Proof_Interface
 
+open Microsoft.FSharp.Quotations
 open Propositional_Logic
 
 type Proof = {
@@ -17,6 +18,9 @@ type Lemma = {
 }
 
 let rules = Map.ofList [
+    ("Neg_I",   ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
+    ("Neg_E",   ([Implication(Variable("0"), Constant(false))
+                  Variable("0")],                                               Variable("1"))) 
     ("Con_I",   ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
     ("Con_E1",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("0")))
     ("Con_E2",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("1")))

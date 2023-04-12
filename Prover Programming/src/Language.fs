@@ -10,7 +10,7 @@ module Grammar_PL =
     let constant = pchar 'T' <|> pchar 'F' |>> function | 'T' -> Constant(true) | _ -> Constant(false)
     let var = many1Chars asciiLetter |>> string
     let variable = var |>> Variable
-    let negation = pchar '!' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
+    let negation = pchar '~' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
     let binaryFormula operator = pstring operator >>. spaces >>. formula
     
     do formulaRef.Value <- parse {
