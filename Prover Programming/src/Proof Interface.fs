@@ -12,6 +12,7 @@ and Statement =
     | Subproof of Proof
 
 type Lemma = {
+    Name: string option
     Identifier: Formula
     Proof: Proof
 }
