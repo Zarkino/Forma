@@ -37,7 +37,7 @@ def myMacro {
 
 let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
-let test_lemma = "lemma (A & B) -> (B & A)
+let test_lemma = "lemma Con_S: (A & B) -> (B & A)
 proof {
 	assume A & B
 	have A by Con_E1
