@@ -59,7 +59,7 @@ module Grammar_Proof =
             proof |>> Subproof
         ])
     
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
+    proofRef.Value <- spaces >>. pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}'
     
     let lemma = pipe3 (spaces >>. pstring "lemma" >>. spaces1 >>. opt (many1CharsTillMax anyChar ':' 10)) formula proof (fun name id proof -> { Name = name; Identifier = id; Proof = proof })
 

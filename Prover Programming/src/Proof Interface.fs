@@ -1,16 +1,19 @@
 ﻿module Proof_Interface
 
-open Fable.Import
 open Propositional_Logic
 
-type Proof = {
-    Statements: Statement list
-}
+type Proof = Statement list
 and Statement =
     | Assumption of Formula
     | Intermediate of Formula * string
     | Conclusion of Formula * string
     | Subproof of Proof
+
+let unfoldConclusion = function
+    | []    ->  None
+    | xs    ->  List.last xs |> function
+                | Conclusion(p, _)  -> Some(p)
+                | _                 -> None
 
 type Lemma = {
     Name: string option
@@ -49,7 +52,7 @@ let apply rule a r rules =
     | Some(a', r')  ->  match unify r' r Map.empty with
                         | false, _  ->  false, $"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}"
                         | true, map ->  match List.forall (fun x -> Set.exists (fun y -> unify x y map |> fst) a) a' with
-                                        | false -> false, "Not all assumptions were met"
+                                        | false -> false, $"Could not apply rule %s{rule}: Not all conditions were met"
                                         | true  -> true, System.String.Empty
 
 type Result =
@@ -57,28 +60,22 @@ type Result =
     | Fail of string
 
 let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
-    (Success(assumptions, false), proof.Statements)
+    (Success(assumptions, false), proof)
     ||> List.fold
         (fun state statement ->
             match state with
-            | Fail _                  -> state
-            | Success(fs, judgement)  ->
+            | Fail _                    ->  state
+            | Success(fs, judgement)    ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
                 | Intermediate(f, rule) ->  match apply rule fs f rules with
-                                            | true, _       -> Success(Set.add f fs, judgement)
-                                            | false, msg    -> Fail(msg)
+                                            | true, _       ->  Success(Set.add f fs, judgement)
+                                            | false, msg    ->  Fail(msg)
                 | Conclusion(f, rule)   ->  match apply rule fs f rules with
-                                            | true, _       -> Success(Set.add f fs, true)
-                                            | false, msg    -> Fail(msg)
-                | Subproof(p)           ->  match prove(p, fs, rules) with
-                                            | Success(_, judgement) ->
-                                                match List.isEmpty p.Statements with
-                                                | true -> state
-                                                | _ ->
-                                                    match List.last p.Statements with
-                                                    | Conclusion (p', _) -> Browser.Dom.console.log("xdd")
-                                                                            Success(Set.add p' fs, judgement)
-                                                    | _                  -> Fail("Conclusion was not last statement in sub-proof")
-                                             | _ -> Fail("Sub-proof does not hold")
-        )
+                                            | true, _       ->  Success(Set.add f fs, true)
+                                            | false, msg    ->  Fail(msg)
+                | Subproof(proof')      ->  match prove(proof', fs, rules) with
+                                            | Success _ ->  match unfoldConclusion proof' with
+                                                            | Some(f)   -> Success(Set.add f fs, judgement)
+                                                            | None      -> Fail("Sub-proof must end with a conclusion")
+                                            | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))
