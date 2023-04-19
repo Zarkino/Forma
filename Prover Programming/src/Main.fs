@@ -8,60 +8,7 @@ open Propositional_Logic
 
 importSideEffects "./styles/global.scss"
 
-let initialContent = "/*
-Just some example arguments from wikipedia,
-mainly a language feature demonstrator.
-*/
-
-((p -> q) & p) ||= q                //Modus Ponens
-((p -> q) & ~q) ||= ~p              //Modus Tollens
-((p | q) & ~p) ||= q                //Disjunctive Syllogism
-(p <-> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
-
-//Pre-determined truth values
-(T -> T) & (F -> T)
-
-//Wikipedia FOL example
-!x!y(P(f(x)) -> ~(P(x) -> Q(f(y), x, z)))
-
-//Constants can be used like so
-!x(_c)
-
-//using a macro
-.myMacro
-
-//defining a macro
-def myMacro {
-    //Macro containing Modus Ponens
-    ((p -> q) & p) ||= q
-}"
-
-let lemma = "lemma (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
-
-let test_lemma = "lemma Con_S: (A & B) -> (B & A)
-proof {
-	assume A & B
-	have A by Con_E1
-	have B by Con_E2
-	have B | C by Dis_I1
-	have C | B by Dis_I2
-	have A | C by Dis_I1
-	assume ~A
-	have B by Dis_E1
-	assume ~B
-	have A by Dis_E2
-	have A -> B by Imp_I
-	have B by Imp_E1
-	have ~A by Imp_E2
-	have B -> A by Imp_I
-	have A <-> B by Iff_I
-	have A -> B by Iff_E1
-	have B -> A by Iff_E2
-	show B & A by Con_I
-}
-"
-
-let test_meta = "!!x. p ==> q\np == q\n~p ==> p ==> q"
+let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
 
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with
@@ -73,7 +20,7 @@ let rec evaluate_meta value =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (input, setInput) = React.useState(test_lemma)
+    let (input, setInput) = React.useState(lemma)
     let (output, setOutput) = React.useState(System.String.Empty)
     let (rules, setRules) = React.useState(Proof_Interface.rules)
     
