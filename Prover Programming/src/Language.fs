@@ -61,7 +61,7 @@ module Grammar_Proof =
     
     proofRef.Value <- spaces >>. pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}' |>> (fun statements -> { Statements = statements })
     
-    let lemma = pipe3 (spaces >>. pstring "lemma" >>. spaces1 >>. many1CharsUntill anyChar ':' 10) formula proof (fun name id proof -> { Name = name; Identifier = id; Proof = proof })
+    let lemma = pipe3 (spaces >>. pstring "lemma" >>. spaces1 >>. opt (many1CharsUntil anyChar ':' 10)) formula proof (fun name id proof -> { Name = name; Identifier = id; Proof = proof })
 
 module Parser =
     open Grammar_PL
