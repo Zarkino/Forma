@@ -83,7 +83,7 @@ let Main () =
             | None, error               ->  error
             | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty, rules) with
                                             | Proof_Interface.Success(_, d) ->
-                                                let lemma_str = $"\"%O{lemma.Name}\": %s{lemma.Identifier.ToString()}"
+                                                let lemma_str = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
                                                 match d with
                                                 | false ->  $"Unsuccessful lemma %s{lemma_str}"
                                                 | true  ->  match lemma.Name with
