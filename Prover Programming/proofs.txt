@@ -1,0 +1,43 @@
+﻿// Some working proof examples
+
+lemma d_neg: a -> ~~a
+proof {
+	assume a
+	proof {
+		assume ~a
+		show ~a -> F by Abs_N
+	}
+	show ~~a by Neg_I
+}
+
+
+lemma b-iimp_eqv: (p <-> q) <-> q <-> p
+proof {
+	proof {
+		assume p <-> q
+		proof {
+			assume q
+			show q -> p by Iff_E2
+		}
+		proof {
+			assume p
+			show p -> q by Iff_E1
+		}
+		show q <-> p by Iff_I
+	}
+	proof {
+		assume q <-> p
+		proof {
+			assume p
+			show p -> q by Iff_E2
+		}
+		proof {
+			assume q
+			show q -> p by Iff_E1
+		}
+		show p <-> q by Iff_I
+	}
+	have (p <-> q) -> (q <-> p) by Imp_I
+	have (q <-> p) -> (p <-> q) by Imp_I
+	show (p <-> q) <-> (q <-> p) by Iff_I
+}
