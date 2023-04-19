@@ -4,6 +4,7 @@ open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
 open App
+open Propositional_Logic
 
 importSideEffects "./styles/global.scss"
 
@@ -62,16 +63,6 @@ proof {
 
 let test_meta = "!!x. p ==> q\np == q\n~p ==> p ==> q"
 
-let rec evaluate_lemma value =
-    match Language.Parser.parse_lemma(value) with
-    | None, error               ->  error
-    | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty) with
-                                    | Proof_Interface.Success(_, d) ->  (sprintf "%s on %s" (if d then "Success" else "Not Success") $"Lemma \"%O{lemma.Name}\": %s{lemma.Identifier.ToString()}")
-                                    | Proof_Interface.Fail(msg)     ->  msg)
-                                    |> (fun result ->
-                                        if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
-                                        else result)
-
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with
     | None, error           ->  error
@@ -82,7 +73,30 @@ let rec evaluate_meta value =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(test_lemma)
+    let (input, setInput) = React.useState(test_lemma)
+    let (output, setOutput) = React.useState(System.String.Empty)
+    let (rules, setRules) = React.useState(Proof_Interface.rules)
+    
+    React.useEffect(fun () ->
+        let rec evaluate_lemma value =
+            match Language.Parser.parse_lemma value with
+            | None, error               ->  error
+            | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty, rules) with
+                                            | Proof_Interface.Success(_, d) ->
+                                                let lemma_str = $"\"%O{lemma.Name}\": %s{lemma.Identifier.ToString()}"
+                                                match d with
+                                                | false ->  $"Unsuccessful lemma %s{lemma_str}"
+                                                | true  ->  match lemma.Name with
+                                                            | None          ->  ()
+                                                            | Some(name)    ->  let a, r = lemma.Identifier |> standardize |> separate
+                                                                                setRules (Map.add name (a, r) rules)
+                                                            $"Successful lemma %s{lemma_str}"                                  
+                                            | Proof_Interface.Fail(msg)     ->  msg)
+                                            |> (fun result ->
+                                                if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
+                                                else result)
+        setOutput(evaluate_lemma input)
+    , [|input :> obj|])
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
@@ -103,7 +117,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, value, (fun value -> setValue(value.ToString())))
+                                    Components.Editor(theme, input, (fun value -> setInput(value.ToString())))
                                 ]
                             ]
                         ]
@@ -117,7 +131,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, evaluate_lemma value, readonly = true)
+                                    Components.Editor(theme, output, readonly = true)
                                 ]
                             ]
                         ]

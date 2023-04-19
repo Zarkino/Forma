@@ -42,7 +42,7 @@ let rules = Map.ofList [
     ("Abs_N",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Negation(Variable("0")), Constant(false))))
 ]
     
-let apply rule a r =
+let apply rule a r rules =
     match Map.tryFind rule rules with
     | None          ->  false, $"Rule \"%s{rule}\" does not exist"
     | Some(a', r')  ->  match unify r' r Map.empty with
@@ -55,7 +55,7 @@ type Result =
     | Success of Set<Formula> * bool
     | Fail of string
 
-let rec prove (proof: Proof, assumptions: Set<Formula>) =
+let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
     (Success(assumptions, false), proof.Statements)
     ||> List.fold
         (fun state statement ->
@@ -64,13 +64,13 @@ let rec prove (proof: Proof, assumptions: Set<Formula>) =
             | Success(fs, judgement)  ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
-                | Intermediate(f, rule) ->  match apply rule fs f with
+                | Intermediate(f, rule) ->  match apply rule fs f rules with
                                             | true, _       -> Success(Set.add f fs, judgement)
                                             | false, msg    -> Fail(msg)
-                | Conclusion(f, rule)   ->  match apply rule fs f with
+                | Conclusion(f, rule)   ->  match apply rule fs f rules with
                                             | true, _       -> Success(Set.add f fs, true)
                                             | false, msg    -> Fail(msg)
-                | Subproof(p)           ->  match prove(p, fs) with
+                | Subproof(p)           ->  match prove(p, fs, rules) with
                                             | Success _ -> state
                                             | error     -> error
         )

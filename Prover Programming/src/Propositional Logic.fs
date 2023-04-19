@@ -85,7 +85,19 @@ type Formula =
         f formula
     override this.ToString () = Formula.ToString this
 
-let f formula = (formula, Formula.Extract formula |> Seq.indexed) ||> Seq.fold (fun x (i, v) -> Formula.ReplaceVar (x, v, $"%i{i}"))
+let standardize formula = (formula, Formula.Extract formula |> Seq.indexed) ||> Seq.fold (fun x (i, v) -> Formula.ReplaceVar (x, v, $"%i{i}"))
+
+/// Separates assumptions from conclusion
+let separate formula =
+    let rec f x acc =
+        match x with
+        | Implication(p, q) -> f q (g p@acc)
+        | _                 -> acc, x
+    and g x =
+        match x with
+        | Implication(p, q) -> g p@g q
+        | _                 -> [x]
+    f formula []
 
 let rec unify x y map =
     match x, y with
