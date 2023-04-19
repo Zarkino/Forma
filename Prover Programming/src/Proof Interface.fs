@@ -9,11 +9,10 @@ and Statement =
     | Conclusion of Formula * string
     | Subproof of Proof
 
-let unfoldConclusion = function
-    | []    ->  None
-    | xs    ->  List.last xs |> function
-                | Conclusion(p, _)  -> Some(p)
-                | _                 -> None
+let unfoldConclusion statements =
+    match List.tryLast statements with
+    | Some(Conclusion(p, _))    -> Some(p)
+    | _                         -> None
 
 type Lemma = {
     Name: string option
