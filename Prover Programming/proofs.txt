@@ -11,6 +11,23 @@ proof {
 }
 
 
+lemma imp_inv: (p -> q) & ~q -> ~p
+proof {
+	assume (p -> q) & ~q
+	proof {
+		assume p
+		have p -> q by Con_E1
+		have q by Imp_E1
+		have ~q by Con_E2
+		have q -> F by Abs_P
+		have F by Imp_E1
+		show p -> F by Imp_I
+	}
+	show ~p by Neg_I
+}
+
+
+
 lemma b-iimp_eqv: (p <-> q) <-> q <-> p
 proof {
 	proof {
