@@ -20,6 +20,32 @@ type Lemma = {
     Identifier: Formula
     Proof: Proof
 }
+with
+    static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
+    override this.ToString() = Lemma.ToString this         
+
+let separate = function
+    | Implication(p, q)
+    | Equivalence(p, q) -> Some(p, q)
+    | _                 -> None
+
+let isValid lemma =
+    match separate lemma.Identifier with
+        | None          ->  false, $"Incomplete lemma %s{lemma.ToString()}"
+        | Some(a, c)    ->
+            (match List.tryHead lemma.Proof with
+            | None              ->  false, "Initial assumption in proof must match assumption from lemma"
+            | Some(assumption)  ->  match assumption with
+                                    | Assumption(a')    when a = a' -> true, System.String.Empty
+                                    | _                             -> false, "Initial assumption in proof must match the assumption from lemma")
+            |> (fun (judgement, msg) ->
+                match judgement with
+                | false ->  judgement, msg
+                | true  ->  match unfoldConclusion lemma.Proof with
+                            | None              ->  false, "The proofs conclusion must match the conclusion in lemma"
+                            | Some(conclusion)  ->  match conclusion with
+                                                    | c' when c = c' -> true, System.String.Empty
+                                                    | _              -> false, "The proofs conclusion must match the conclusion in lemma")
 
 let rules = Map.ofList [
     ("Neg_I",   ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))

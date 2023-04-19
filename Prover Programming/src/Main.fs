@@ -81,20 +81,22 @@ let Main () =
         let rec evaluate_lemma value =
             match Language.Parser.parse_lemma value with
             | None, error               ->  error
-            | Some(lemma), remaining    ->  (match Proof_Interface.prove(lemma.Proof, Set.empty, rules) with
-                                            | Proof_Interface.Success(_, d) ->
-                                                let lemma_str = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
-                                                match d with
-                                                | false ->  $"Unsuccessful lemma %s{lemma_str}"
-                                                | true  ->  match lemma.Name with
-                                                            | None          ->  ()
-                                                            | Some(name)    ->  let a, r = lemma.Identifier |> standardize |> separate
-                                                                                setRules (Map.add name (a, r) rules)
-                                                            $"Successful lemma %s{lemma_str}"                                  
-                                            | Proof_Interface.Fail(msg)     ->  msg)
-                                            |> (fun result ->
-                                                if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
-                                                else result)
+            | Some(lemma), remaining    ->  match Proof_Interface.isValid lemma with
+                                            | false, msg    -> msg
+                                            | true, _       ->
+                                                (match Proof_Interface.prove(lemma.Proof, Set.empty, rules) with
+                                                | Proof_Interface.Success(_, d) ->
+                                                    match d with
+                                                    | false ->  $"Unsuccessful lemma %s{lemma.ToString()}"
+                                                    | true  ->  match lemma.Name with
+                                                                | None          ->  ()
+                                                                | Some(name)    ->  let a, r = lemma.Identifier |> standardize |> separate
+                                                                                    setRules (Map.add name (a, r) rules)
+                                                                $"Successful lemma %s{lemma.ToString()}"
+                                                | Proof_Interface.Fail(msg)     ->  msg)
+                                                |> (fun result ->
+                                                    if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
+                                                    else result)
         setOutput(evaluate_lemma input)
     , [|input :> obj|])
     
