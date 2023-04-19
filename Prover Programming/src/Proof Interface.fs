@@ -1,5 +1,6 @@
 ﻿module Proof_Interface
 
+open Fable.Import
 open Propositional_Logic
 
 type Proof = {
@@ -60,7 +61,7 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
     ||> List.fold
         (fun state statement ->
             match state with
-            | Fail _                        -> state
+            | Fail _                  -> state
             | Success(fs, judgement)  ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
@@ -71,6 +72,13 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
                                             | true, _       -> Success(Set.add f fs, true)
                                             | false, msg    -> Fail(msg)
                 | Subproof(p)           ->  match prove(p, fs, rules) with
-                                            | Success _ -> state
-                                            | error     -> error
+                                            | Success(_, judgement) ->
+                                                match List.isEmpty p.Statements with
+                                                | true -> state
+                                                | _ ->
+                                                    match List.last p.Statements with
+                                                    | Conclusion (p', _) -> Browser.Dom.console.log("xdd")
+                                                                            Success(Set.add p' fs, judgement)
+                                                    | _                  -> Fail("Conclusion was not last statement in sub-proof")
+                                             | _ -> Fail("Sub-proof does not hold")
         )
