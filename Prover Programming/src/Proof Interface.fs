@@ -44,10 +44,12 @@ let rules = Map.ofList [
     
 let apply rule a r =
     match Map.tryFind rule rules with
-    | None          ->  false
+    | None          ->  false, $"Rule \"%s{rule}\" does not exist"
     | Some(a', r')  ->  match unify r' r Map.empty with
-                        | false, _  -> false
-                        | true, map -> List.forall (fun x -> Set.exists (fun y -> unify x y map |> fst) a) a'
+                        | false, _  ->  false, $"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}"
+                        | true, map ->  match List.forall (fun x -> Set.exists (fun y -> unify x y map |> fst) a) a' with
+                                        | false -> false, "Not all assumptions were met"
+                                        | true  -> true, System.String.Empty
 
 type Result =
     | Success of Set<Formula> * bool
@@ -63,11 +65,11 @@ let rec prove (proof: Proof, assumptions: Set<Formula>) =
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
                 | Intermediate(f, rule) ->  match apply rule fs f with
-                                            | true  -> Success(Set.add f fs, judgement)
-                                            | false -> Fail($"Could not have %A{f} by %s{rule}")
+                                            | true, _       -> Success(Set.add f fs, judgement)
+                                            | false, msg    -> Fail(msg)
                 | Conclusion(f, rule)   ->  match apply rule fs f with
-                                            | true  -> Success(Set.add f fs, true)
-                                            | false -> Fail($"Conclusion %A{f} could not be reached using rule %s{rule}")
+                                            | true, _       -> Success(Set.add f fs, true)
+                                            | false, msg    -> Fail(msg)
                 | Subproof(p)           ->  match prove(p, fs) with
                                             | Success _ -> state
                                             | error     -> error
