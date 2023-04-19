@@ -9,11 +9,6 @@ and Statement =
     | Conclusion of Formula * string
     | Subproof of Proof
 
-let unfoldConclusion statements =
-    match List.tryLast statements with
-    | Some(Conclusion(p, _))    -> Some(p)
-    | _                         -> None
-
 type Lemma = {
     Name: string option
     Identifier: Formula
@@ -33,18 +28,13 @@ let isValid lemma =
         | None          ->  false, $"Incomplete lemma %s{lemma.ToString()}"
         | Some(a, c)    ->
             (match List.tryHead lemma.Proof with
-            | None              ->  false, "Initial assumption in proof must match assumption from lemma"
-            | Some(assumption)  ->  match assumption with
-                                    | Assumption(a')    when a = a' -> true, System.String.Empty
-                                    | _                             -> false, "Initial assumption in proof must match the assumption from lemma")
-            |> (fun (judgement, msg) ->
-                match judgement with
-                | false ->  judgement, msg
-                | true  ->  match unfoldConclusion lemma.Proof with
-                            | None              ->  false, "The proofs conclusion must match the conclusion in lemma"
-                            | Some(conclusion)  ->  match conclusion with
-                                                    | c' when c = c' -> true, System.String.Empty
-                                                    | _              -> false, "The proofs conclusion must match the conclusion in lemma")
+            | Some(Assumption(a'))  when a = a' ->  true, System.String.Empty
+            | _                                 ->  false, "Initial assumption in proof must match the assumption from lemma")
+            |> (function
+                | false, msg    ->  false, msg
+                | true, _       ->  match List.tryLast lemma.Proof with
+                                    | Some(Conclusion(c', _))   when c = c' ->  true, System.String.Empty
+                                    | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
 
 let rules = Map.ofList [
     ("Neg_I",   ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
@@ -100,7 +90,7 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
                                             | true, _       ->  Success(Set.add f fs, true)
                                             | false, msg    ->  Fail(msg)
                 | Subproof(proof')      ->  match prove(proof', fs, rules) with
-                                            | Success _ ->  match unfoldConclusion proof' with
-                                                            | Some(f)   -> Success(Set.add f fs, judgement)
-                                                            | None      -> Fail("Sub-proof must end with a conclusion")
-                                            | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))
+                                            | Success _     ->  match List.tryLast proof' with
+                                                                | Some(Conclusion(f, _))    -> Success(Set.add f fs, judgement)
+                                                                | _                         -> Fail("Sub-proof must end with a conclusion")
+                                            | Fail(msg)     ->  Fail($"Sub-proof does not hold: %s{msg}"))
