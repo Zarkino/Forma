@@ -48,20 +48,20 @@ let test_proof_parsing =
     testList "Basic Proof Parsing Tests" [
         let error_msg = "Incorrect parsing"
         test "Parse Empty Proof" {
-            Expect.equal (parse_proof "proof {}") (Some({ Statements = [] }), "") error_msg
+            Expect.equal (parse_proof "proof {}") (Some([]), "") error_msg
         }
         test "Parse Rules" {
             rules.Keys |> Seq.iter (fun rule -> Expect.equal
                                                     (parse_proof (sprintf "proof {have P by %s}" rule))
-                                                    (Some({ Statements = [Intermediate(Variable("P"), rule)] }), "") error_msg)
+                                                    (Some([Intermediate(Variable("P"), rule)]), "") error_msg)
         }
         test "Parse Simple Proof" {
             Expect.equal
                 (parse_proof "proof {assume P & Q\n\thave P by Con_E1\n\thave Q by Con_E2\n\tshow Q & P by Con_I}")
-                (Some({ Statements = [Assumption(Conjunction(Variable("P"), Variable("Q")))
-                                      Intermediate(Variable("P"), "Con_E1")
-                                      Intermediate(Variable("Q"), "Con_E2")
-                                      Conclusion(Conjunction(Variable("Q"), Variable("P")), "Con_I")] }), "") error_msg
+                (Some([Assumption(Conjunction(Variable("P"), Variable("Q")))
+                       Intermediate(Variable("P"), "Con_E1")
+                       Intermediate(Variable("Q"), "Con_E2")
+                       Conclusion(Conjunction(Variable("Q"), Variable("P")), "Con_I")]), "") error_msg
         }
     ]
 
