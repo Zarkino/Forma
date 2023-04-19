@@ -51,7 +51,7 @@ proof {
 	assume ~B
 	have A by Dis_E2
 	have A -> B by Imp_I
-	have B by Imp_E1    
+	have B by Imp_E1
 	have ~A by Imp_E2
 	have B -> A by Imp_I
 	have A <-> B by Iff_I
@@ -97,6 +97,7 @@ let Main () =
                                                 |> (fun result ->
                                                     if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
                                                     else result)
+        setRules(Proof_Interface.rules)
         setOutput(evaluate_lemma input)
     , [|input :> obj|])
     
