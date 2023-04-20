@@ -58,6 +58,7 @@ let Button_Level(theme: string) =
                                     prop.ariaControls "dropdown-menu"
                                     prop.children [
                                         Html.span [ Html.text "Examples" ]
+                                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-angle-down" ] ] ]
                                     ]
                                 ]
                             ]
