@@ -46,11 +46,36 @@ let Button_Level(theme: string) =
                         Html.span [ Html.text "Help" ]
                     ]
                 ]
-                Bulma.button.button [
-                    prop.className "mx-1"
-                    decide_color theme
+                Bulma.dropdown [
+                    dropdown.isHoverable
                     prop.children [
-                        Html.span [ Html.text "Examples" ]
+                        Bulma.dropdownTrigger [
+                            prop.children [
+                                Bulma.button.button [
+                                    prop.className "mx-1"
+                                    decide_color theme
+                                    prop.ariaHasPopup true
+                                    prop.ariaControls "dropdown-menu"
+                                    prop.children [
+                                        Html.span [ Html.text "Examples" ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                        Bulma.dropdownMenu [
+                            prop.id "dropdown-menu"
+                            prop.role "menu"
+                            prop.children [
+                                Bulma.dropdownContent [
+                                    Bulma.dropdownItem.a [
+                                        Html.span [ Html.text "Example 1" ]
+                                    ]
+                                    Bulma.dropdownItem.a [
+                                        Html.span [ Html.text "Example 2" ]
+                                    ]
+                                ]
+                            ]
+                        ]
                     ]
                 ]
             ]
