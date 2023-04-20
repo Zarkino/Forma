@@ -61,14 +61,14 @@ let rules = Map.ofList [
     ("Abs_N",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Negation(Variable("0")), Constant(false))))
 ]
     
-let apply rule a r rules =
+let tryApply rule a r rules =
     match Map.tryFind rule rules with
-    | None          ->  false, $"Rule \"%s{rule}\" does not exist"
+    | None          ->  Some($"Rule \"%s{rule}\" does not exist")
     | Some(a', r')  ->  match unify r' r Map.empty with
-                        | false, _  ->  false, $"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}"
-                        | true, map ->  match List.forall (fun x -> Set.exists (fun y -> unify x y map |> fst) a) a' with
-                                        | false -> false, $"Could not apply rule %s{rule}: Not all conditions were met"
-                                        | true  -> true, System.String.Empty
+                        | false, _  ->  Some($"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}")
+                        | true, map ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) a)) a' with
+                                        | Some(x)   -> Some($"Could not apply rule %s{rule}: Not all conditions were met - Missing %s{Formula.ToString x} in %s{Formula.ToString r'}")
+                                        | None      -> None
 
 type Result =
     | Success of Set<Formula> * bool
@@ -83,14 +83,14 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
             | Success(fs, judgement)    ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
-                | Intermediate(f, rule) ->  match apply rule fs f rules with
-                                            | true, _       ->  Success(Set.add f fs, judgement)
-                                            | false, msg    ->  Fail(msg)
-                | Conclusion(f, rule)   ->  match apply rule fs f rules with
-                                            | true, _       ->  Success(Set.add f fs, true)
-                                            | false, msg    ->  Fail(msg)
+                | Intermediate(f, rule) ->  match tryApply rule fs f rules with
+                                            | None      ->  Success(Set.add f fs, judgement)
+                                            | Some(msg) ->  Fail(msg)
+                | Conclusion(f, rule)   ->  match tryApply rule fs f rules with
+                                            | None      ->  Success(Set.add f fs, true)
+                                            | Some(msg) ->  Fail(msg)
                 | Subproof(proof')      ->  match prove(proof', fs, rules) with
-                                            | Success _     ->  match List.tryLast proof' with
-                                                                | Some(Conclusion(f, _))    -> Success(Set.add f fs, judgement)
-                                                                | _                         -> Fail("Sub-proof must end with a conclusion")
-                                            | Fail(msg)     ->  Fail($"Sub-proof does not hold: %s{msg}"))
+                                            | Success _ ->  match List.tryLast proof' with
+                                                            | Some(Conclusion(f, _))    -> Success(Set.add f fs, judgement)
+                                                            | _                         -> Fail("Sub-proof must end with a conclusion")
+                                            | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))
