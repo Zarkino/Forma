@@ -204,3 +204,7 @@ out
 .ionide
 *.fs.js
 *.fs.js.map
+
+# Exclude build directories
+dist/
+dist-single-file/
