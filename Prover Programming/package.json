@@ -4,7 +4,8 @@
     "scripts": {
         "start": "dotnet tool restore && dotnet fable watch src --runFast vite",
         "build": "dotnet tool restore && dotnet fable src --run vite build",
-        "clean": "dotnet fable clean src --yes",
+        "build-single-file": "dotnet tool restore && dotnet fable src --run vite build --mode single-file",
+        "clean": "dotnet fable clean src --yes && rimraf dist/ dist-single-file/",
         "pretest": "dotnet fable tests",
         "test": "mocha tests"
     },
@@ -18,9 +19,11 @@
     },
     "devDependencies": {
         "@vitejs/plugin-react": "^3.1.0",
+        "mocha": "^10.2.0",
+        "rimraf": "^5.0.0",
         "sass": "^1.62.0",
         "vite": "^4.3.0",
-        "mocha": "^10.2.0"
+        "vite-plugin-singlefile": "^0.13.5"
     },
     "engines": {
         "node": ">=18"

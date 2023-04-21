@@ -205,4 +205,6 @@ out
 *.fs.js
 *.fs.js.map
 
-dist/**
+# Exclude build directories
+dist/
+dist-single-file/
