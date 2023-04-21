@@ -5,7 +5,7 @@
         "start": "dotnet tool restore && dotnet fable watch src --runFast vite",
         "build": "dotnet tool restore && dotnet fable src --run vite build",
         "build-single-file": "dotnet tool restore && dotnet fable src --run vite build --mode single-file",
-        "clean": "dotnet fable clean src --yes && rimraf dist/ dist-single-file/",
+        "clean": "dotnet fable clean --yes && rimraf dist/ dist-single-file/",
         "pretest": "dotnet fable tests",
         "test": "mocha tests"
     },
