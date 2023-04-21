@@ -39,7 +39,7 @@ let isValid lemma =
 let rules = Map.ofList [
     ("Neg_I",   ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
     ("Neg_E",   ([Implication(Variable("0"), Constant(false))
-                  Variable("0")],                                               Variable("1"))) 
+                  Variable("0")],                                               Variable("1")))
     ("Con_I",   ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
     ("Con_E1",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("0")))
     ("Con_E2",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("1")))
@@ -60,15 +60,20 @@ let rules = Map.ofList [
     ("Abs_P",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Variable("0"), Constant(false))))
     ("Abs_N",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Negation(Variable("0")), Constant(false))))
 ]
-    
+
 let tryApply rule a r rules =
     match Map.tryFind rule rules with
     | None          ->  Some($"Rule \"%s{rule}\" does not exist")
     | Some(a', r')  ->  match unify r' r Map.empty with
                         | false, _  ->  Some($"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}")
                         | true, map ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) a)) a' with
-                                        | Some(x)   -> Some($"Could not apply rule %s{rule}: Not all conditions were met - Missing %s{Formula.ToString x} in %s{Formula.ToString r'}")
-                                        | None      -> None
+                                        | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
+                                                            rule
+                                                            (a' |> List.map Formula.ToString |> String.concat "; ")
+                                                            (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
+                                                            (sprintf "(%s, %s)" (Formula.ToString x) (Map.tryFind (Formula.ToString x) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
+                                                        |> Some
+                                        | None      ->  None
 
 type Result =
     | Success of Set<Formula> * bool
