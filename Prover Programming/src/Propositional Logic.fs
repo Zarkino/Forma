@@ -87,8 +87,8 @@ type Formula =
 
 let standardize formula = (formula, Formula.Extract formula |> Seq.indexed) ||> Seq.fold (fun x (i, v) -> Formula.ReplaceVar (x, v, $"%i{i}"))
 
-/// Separates assumptions from conclusion
-let separate formula =
+/// Splits formula into assumptions and conclusion
+let split formula =
     let rec f x acc =
         match x with
         | Implication(p, q) -> f q (g p@acc)
@@ -98,6 +98,12 @@ let separate formula =
         | Implication(p, q) -> g p@g q
         | _                 -> [x]
     f formula []
+
+/// Separates formula into assumption and conclusion
+let separate = function
+    | Implication(p, q)
+    | Equivalence(p, q) -> Some(p, q)
+    | _                 -> None
 
 let rec unify x y map =
     match x, y with

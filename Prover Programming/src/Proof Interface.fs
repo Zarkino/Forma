@@ -16,12 +16,7 @@ type Lemma = {
 }
 with
     static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
-    override this.ToString() = Lemma.ToString this         
-
-let separate = function
-    | Implication(p, q)
-    | Equivalence(p, q) -> Some(p, q)
-    | _                 -> None
+    override this.ToString() = Lemma.ToString this
 
 let isValid lemma =
     match separate lemma.Identifier with
