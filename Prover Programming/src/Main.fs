@@ -5,7 +5,7 @@ open Feliz.Bulma
 open Fable.Core.JsInterop
 open App
 open Propositional_Logic
-`open System.Text.RegularExpressions
+open System.Text.RegularExpressions
 
 importSideEffects "./styles/global.scss"
 
