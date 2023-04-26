@@ -38,8 +38,9 @@ let Main () =
                                                     | false ->  $"Unsuccessful lemma %s{lemma.ToString()}"
                                                     | true  ->  match lemma.Name with
                                                                 | None          ->  ()
-                                                                | Some(name)    ->  let a, r = lemma.Identifier |> standardize |> separate
-                                                                                    setRules (Map.add name (a, r) rules)
+                                                                | Some(name)    ->  match lemma.Identifier |> standardize |> separate with
+                                                                                    | None          -> ()
+                                                                                    | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
                                                                 $"Successful lemma %s{lemma.ToString()}"
                                                 | Proof_Interface.Fail(msg)     ->  msg)
                                                 |> (fun result ->

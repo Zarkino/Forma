@@ -16,12 +16,7 @@ type Lemma = {
 }
 with
     static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
-    override this.ToString() = Lemma.ToString this         
-
-let separate = function
-    | Implication(p, q)
-    | Equivalence(p, q) -> Some(p, q)
-    | _                 -> None
+    override this.ToString() = Lemma.ToString this
 
 let isValid lemma =
     match separate lemma.Identifier with
@@ -38,27 +33,21 @@ let isValid lemma =
 
 let rules = Map.ofList [
     ("Neg_I",   ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
-    ("Neg_E",   ([Implication(Variable("0"), Constant(false))
-                  Variable("0")],                                               Variable("1")))
+    ("Neg_E",   ([Negation(Variable("0")); Variable("0")],                      Variable("1")))
     ("Con_I",   ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
     ("Con_E1",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("0")))
     ("Con_E2",  ([Conjunction(Variable("0"), Variable("1"))],                   Variable("1")))
     ("Dis_I1",  ([Variable("0")],                                               Disjunction(Variable("0"), Variable("1"))))
     ("Dis_I2",  ([Variable("1")],                                               Disjunction(Variable("0"), Variable("1"))))
-    ("Dis_E1",  ([Disjunction(Variable("0"), Variable("1"))
-                  Negation(Variable("0"))],                                     Variable("1")))
-    ("Dis_E2",  ([Disjunction(Variable("0"), Variable("1"))
-                  Negation(Variable("1"))],                                     Variable("0")))
+    ("Dis_E",   ([Disjunction(Variable("0"), Variable("1"))
+                  Implication(Variable("0"), Variable("2"))
+                  Implication(Variable("1"), Variable("2"))],                   Variable("2")))
     ("Imp_I",   ([Variable("0"); Variable("1")],                                Implication(Variable("0"), Variable("1"))))
-    ("Imp_E1",  ([Implication(Variable("0"), Variable("1")); Variable("0")],    Variable("1")))
-    ("Imp_E2",  ([Implication(Variable("0"), Variable("1"))
-                  Negation(Variable("1"))],                                     Negation(Variable("0"))))
+    ("Imp_E",   ([Implication(Variable("0"), Variable("1")); Variable("0")],    Variable("1")))
     ("Iff_I",   ([Implication(Variable("0"), Variable("1"))
                   Implication(Variable("1"), Variable("0"))],                   Equivalence(Variable("0"), Variable("1"))))
     ("Iff_E1",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("0"), Variable("1"))))
     ("Iff_E2",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("1"), Variable("0"))))
-    ("Abs_P",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Variable("0"), Constant(false))))
-    ("Abs_N",   ([Variable("0"); Negation(Variable("0"))],                      Implication(Negation(Variable("0")), Constant(false))))
 ]
 
 let tryApply rule a r rules =
