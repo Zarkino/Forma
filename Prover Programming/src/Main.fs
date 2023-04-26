@@ -5,6 +5,7 @@ open Feliz.Bulma
 open Fable.Core.JsInterop
 open App
 open Propositional_Logic
+`open System.Text.RegularExpressions
 
 importSideEffects "./styles/global.scss"
 
@@ -44,8 +45,11 @@ let Main () =
                                                 |> (fun result ->
                                                     if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
                                                     else result)
+        
+        let evaluate_comment value = Regex.Matches(value, "\/\/.*(?:\n|$)") |> Seq.fold (fun (acc: string) old -> acc.Replace(old.Value, System.String.Empty)) value
+            
         setRules(Proof_Interface.rules)
-        setOutput(evaluate_lemma input)
+        setOutput(evaluate_lemma (evaluate_comment input))
     , [|input :> obj|])
     
     React.fragment [    
