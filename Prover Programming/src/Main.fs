@@ -11,6 +11,8 @@ importSideEffects "./styles/global.scss"
 
 let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tfrom A & B show B & A by Con_I\n}"
 
+let lemma2 = "lemma P -> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show F by Neg_E\n\t}\n}"
+
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with
     | None, error           ->  error
@@ -21,7 +23,7 @@ let rec evaluate_meta value =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (input, setInput) = React.useState(lemma)
+    let (input, setInput) = React.useState(lemma2)
     let (output, setOutput) = React.useState(System.String.Empty)
     let (rules, setRules) = React.useState(Proof_Interface.rules)
     
