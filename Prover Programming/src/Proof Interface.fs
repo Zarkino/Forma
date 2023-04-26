@@ -6,8 +6,7 @@ type Proof = string * Statement list
 and Statement =
     | Assumption of Formula
     | Instant of Formula list * Formula * string
-    | Delayed of Formula
-    | Subproof of Proof
+    | Delayed of Formula * Proof
 
 type Lemma = {
     Name: string option
@@ -80,10 +79,4 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
                 | Instant(a, f, rule)   ->  match tryApply rule fs f rules with
                                             | None      ->  Success(Set.add f fs, judgement)
                                             | Some(msg) ->  Fail(msg)
-                | Delayed(f)            ->  state
-                | Subproof(proof')      ->  match prove(proof', fs, rules) with
-                                            | Success _ ->  match List.tryLast (snd proof') with
-                                                            | Some(Instant(_, f, _))
-                                                            | Some(Delayed(f))          -> Success(Set.add f fs, judgement)
-                                                            | _                         -> Fail("Sub-proof must end with a conclusion")
-                                            | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))
+                | Delayed(f, p)         ->  state)

@@ -59,8 +59,7 @@ module Grammar_Proof =
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
             pipe3 (pstring "from" >>. (sepBy1 formula (pstring "and"))) (keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r))
-            keyword >>. spaces1 >>. formula |>> Delayed
-            proof |>> Subproof
+            pipe2 (keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
         ] .>> spaces)
     
     proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
