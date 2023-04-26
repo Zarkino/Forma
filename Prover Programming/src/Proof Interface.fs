@@ -2,7 +2,7 @@
 
 open Propositional_Logic
 
-type Proof = Statement list
+type Proof = string * Statement list
 and Statement =
     | Assumption of Formula
     | Intermediate of Formula * string
@@ -22,12 +22,12 @@ let isValid lemma =
     match separate lemma.Identifier with
         | None          ->  false, $"Incomplete lemma %s{lemma.ToString()}"
         | Some(a, c)    ->
-            (match List.tryHead lemma.Proof with
+            (match List.tryHead (snd lemma.Proof) with
             | Some(Assumption(a'))  when a = a' ->  true, System.String.Empty
             | _                                 ->  false, "Initial assumption in proof must match the assumption from lemma")
             |> (function
                 | false, msg    ->  false, msg
-                | true, _       ->  match List.tryLast lemma.Proof with
+                | true, _       ->  match List.tryLast (snd lemma.Proof) with
                                     | Some(Conclusion(c', _))   when c = c' ->  true, System.String.Empty
                                     | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
 
@@ -69,7 +69,7 @@ type Result =
     | Fail of string
 
 let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
-    (Success(assumptions, false), proof)
+    (Success(assumptions, false), snd proof)
     ||> List.fold
         (fun state statement ->
             match state with
@@ -84,7 +84,7 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
                                             | None      ->  Success(Set.add f fs, true)
                                             | Some(msg) ->  Fail(msg)
                 | Subproof(proof')      ->  match prove(proof', fs, rules) with
-                                            | Success _ ->  match List.tryLast proof' with
+                                            | Success _ ->  match List.tryLast (snd proof') with
                                                             | Some(Conclusion(f, _))    -> Success(Set.add f fs, judgement)
                                                             | _                         -> Fail("Sub-proof must end with a conclusion")
                                             | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))

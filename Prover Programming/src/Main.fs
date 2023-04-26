@@ -8,7 +8,7 @@ open Propositional_Logic
 
 importSideEffects "./styles/global.scss"
 
-let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof {\n\tassume A & B\n\thave A by Con_E1\n\thave B by Con_E2\n\tshow B & A by Con_I\n}"
+let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tshow B & A by Con_I\n}"
 
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with

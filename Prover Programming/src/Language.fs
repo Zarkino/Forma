@@ -21,7 +21,7 @@ module Grammar_PL =
             binaryFormula "->" |>> (fun right -> Implication(left, right))
             binaryFormula "<->" |>> (fun right -> Equivalence(left, right))
             preturn left
-        ]
+        ] .>> spaces
     }
 
 module Grammar_ML =
@@ -52,14 +52,18 @@ module Grammar_Proof =
     
     let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
     
+    let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
+    
+    let from = pstring "from" >>. (sepBy1 formula (pstring "and"))
+    
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            pipe2 (pstring "have" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Intermediate(left, right))
+            from >>. pipe2 (pstring "have" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Intermediate(left, right))
             pipe2 (pstring "show" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Conclusion(left, right))
             proof |>> Subproof
-        ])
+        ] .>> spaces)
     
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces >>. pchar '{' >>. statements .>> spaces .>> pchar '}'
+    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     
