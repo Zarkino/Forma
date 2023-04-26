@@ -5,8 +5,8 @@ open Propositional_Logic
 type Proof = string * Statement list
 and Statement =
     | Assumption of Formula
-    | Intermediate of Formula * string
-    | Conclusion of Formula * string
+    | Instant of Formula list * Formula * string
+    | Delayed of Formula
     | Subproof of Proof
 
 type Lemma = {
@@ -28,7 +28,7 @@ let isValid lemma =
             |> (function
                 | false, msg    ->  false, msg
                 | true, _       ->  match List.tryLast (snd lemma.Proof) with
-                                    | Some(Conclusion(c', _))   when c = c' ->  true, System.String.Empty
+                                    | Some(Instant(_, c', _))   when c = c' ->  true, System.String.Empty
                                     | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
 
 let rules = Map.ofList [
@@ -77,14 +77,13 @@ let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formu
             | Success(fs, judgement)    ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs, judgement)
-                | Intermediate(f, rule) ->  match tryApply rule fs f rules with
+                | Instant(a, f, rule)   ->  match tryApply rule fs f rules with
                                             | None      ->  Success(Set.add f fs, judgement)
                                             | Some(msg) ->  Fail(msg)
-                | Conclusion(f, rule)   ->  match tryApply rule fs f rules with
-                                            | None      ->  Success(Set.add f fs, true)
-                                            | Some(msg) ->  Fail(msg)
+                | Delayed(f)            ->  state
                 | Subproof(proof')      ->  match prove(proof', fs, rules) with
                                             | Success _ ->  match List.tryLast (snd proof') with
-                                                            | Some(Conclusion(f, _))    -> Success(Set.add f fs, judgement)
+                                                            | Some(Instant(_, f, _))
+                                                            | Some(Delayed(f))          -> Success(Set.add f fs, judgement)
                                                             | _                         -> Fail("Sub-proof must end with a conclusion")
                                             | Fail(msg) ->  Fail($"Sub-proof does not hold: %s{msg}"))

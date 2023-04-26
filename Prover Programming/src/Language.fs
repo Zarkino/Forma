@@ -54,13 +54,12 @@ module Grammar_Proof =
     
     let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
     
-    let from = pstring "from" >>. spaces1 >>. (sepBy1 formula (pstring "and"))
-    let by = pstring "by" >>. spaces1 >>. rule
+    let keyword = choice [pstring "have"; pstring "show"]
     
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            pipe3 (from .>> spaces1) (pstring "have" >>. spaces1 >>. formula) (spaces1 >>. by) (fun a f r -> Intermediate(f, r))
-            pipe3 (from .>> spaces1) (pstring "show" >>. spaces1 >>. formula) (spaces1 >>. by) (fun a f r -> Conclusion(f, r))
+            pipe3 (pstring "from" >>. (sepBy1 formula (pstring "and"))) (keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r))
+            keyword >>. spaces1 >>. formula |>> Delayed
             proof |>> Subproof
         ] .>> spaces)
     
