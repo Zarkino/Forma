@@ -21,7 +21,7 @@ module Grammar_PL =
             binaryFormula "->" |>> (fun right -> Implication(left, right))
             binaryFormula "<->" |>> (fun right -> Equivalence(left, right))
             preturn left
-        ] .>> spaces
+        ]
     }
 
 module Grammar_ML =
@@ -54,12 +54,13 @@ module Grammar_Proof =
     
     let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
     
-    let from = pstring "from" >>. (sepBy1 formula (pstring "and"))
+    let from = pstring "from" >>. spaces1 >>. (sepBy1 formula (pstring "and"))
+    let by = pstring "by" >>. spaces1 >>. rule
     
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            from >>. pipe2 (pstring "have" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Intermediate(left, right))
-            pipe2 (pstring "show" >>. spaces1 >>. formula) (spaces <|> spaces1 >>. pstring "by" >>. spaces1 >>. rule) (fun left right -> Conclusion(left, right))
+            pipe3 (from .>> spaces1) (pstring "have" >>. spaces1 >>. formula) (spaces1 >>. by) (fun a f r -> Intermediate(f, r))
+            pipe3 (from .>> spaces1) (pstring "show" >>. spaces1 >>. formula) (spaces1 >>. by) (fun a f r -> Conclusion(f, r))
             proof |>> Subproof
         ] .>> spaces)
     
