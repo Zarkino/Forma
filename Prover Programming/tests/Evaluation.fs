@@ -23,7 +23,7 @@ let evaluating_Proofs =
                                    | _          -> Test.failtest error_msg
         }
         test "Prove Proof: Double Negation" {
-            match parse_proof "proof {\n\tassume P\n\tproof {\n\t\tassume ~P\n\t\tshow ~P -> F by Abs_N\n\t}\n\tshow ~~P by Neg_I\n}" with
+            match parse_proof "proof {\n\tassume P\n\tproof {\n\t\tassume ~P\n\t\tshow ~P -> F by Neg_E\n\t}\n\tshow ~~P by Neg_I\n}" with
             | None, _           -> Test.failtest "Could not be parsed"
             | Some(proof), _    -> match prove(proof, Set.empty, rules) with
                                    | Success _  -> Expect.pass()
