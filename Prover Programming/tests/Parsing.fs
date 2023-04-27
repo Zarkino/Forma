@@ -46,20 +46,20 @@ let parsing_Proofs =
     testList "Basic Proof Parsing Tests" [
         let error_msg = "Incorrect parsing"
         test "Parse Empty Proof" {
-            Expect.equal (parse_proof "proof {}") (Some([]), "") error_msg
+            Expect.equal (parse_proof "proof (rule Empty) {}") (Some(Proof("Empty", [])), "") error_msg
         }
         test "Parse Rules" {
             rules.Keys |> Seq.iter (fun rule -> Expect.equal
-                                                    (parse_proof (sprintf "proof {have P by %s}" rule))
-                                                    (Some([Intermediate(Variable("P"), rule)]), "") error_msg)
+                                                    (parse_proof (sprintf "proof (rule %s) {}" rule))
+                                                    (Some(Proof(rule, [])), "") error_msg)
         }
         test "Parse Simple Proof" {
             Expect.equal
-                (parse_proof "proof {assume P & Q\n\thave P by Con_E1\n\thave Q by Con_E2\n\tshow Q & P by Con_I}")
-                (Some([Assumption(Conjunction(Variable("P"), Variable("Q")))
-                       Intermediate(Variable("P"), "Con_E1")
-                       Intermediate(Variable("Q"), "Con_E2")
-                       Conclusion(Conjunction(Variable("Q"), Variable("P")), "Con_I")]), "") error_msg
+                (parse_proof "proof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by Con_E1\n\tfrom P & Q have Q by Con_E2\n\tfrom P and Q show Q & P by Con_I\n}")
+                (Some(Proof("Imp_I", [Assumption(Conjunction(Variable("P"), Variable("Q")))
+                                      Instant([Conjunction(Variable("P"), Variable("Q"))], Variable("P"), "Con_E1")
+                                      Instant([Conjunction(Variable("P"), Variable("Q"))], Variable("Q"), "Con_E2")
+                                      Instant([Variable("P"); Variable("Q")], Conjunction(Variable("Q"), Variable("P")), "Con_I")])), "") error_msg
         }
     ]
 
