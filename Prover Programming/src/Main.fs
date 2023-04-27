@@ -29,13 +29,13 @@ let Main () =
     
     React.useEffect(fun () ->
         let parse string =
-            let rec inner string acc =
+            let rec inner string cont =
                 match Language.Parser.parse_lemma string with
-                | None, error               ->  Some(error), acc
+                | None, error               ->  Some(error), cont []
                 | Some(lemma), remaining    ->  match remaining.Trim().Length with
-                                                | 0 -> None, (lemma::acc)
-                                                | _ -> inner remaining (lemma::acc)
-            inner string []
+                                                | 0 -> None, cont [lemma]
+                                                | _ -> inner remaining (fun tail -> cont (lemma::tail))
+            inner string id
         
         let evaluate (lemma: Proof_Interface.Lemma) =
             match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
