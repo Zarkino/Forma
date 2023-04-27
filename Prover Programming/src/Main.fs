@@ -45,10 +45,8 @@ let Main () =
                     if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
                     else result)
         
-        let evaluate_comment value = Regex.Matches(value, "\/\/.*(?:\n|$)") |> Seq.fold (fun (acc: string) old -> acc.Replace(old.Value, System.String.Empty)) value
-            
         setRules(Proof_Interface.rules)
-        setOutput(evaluate_lemma (evaluate_comment input))
+        setOutput(evaluate_lemma (Regex.Replace(input, "\/\/.*(?:\n|$)", System.String.Empty)))
     , [|input :> obj|])
     
     React.fragment [    
