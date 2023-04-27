@@ -66,7 +66,7 @@ module Grammar_Proof =
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     
-    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name formula proof (fun name id proof -> { Name = name; Identifier = id; Proof = proof })
+    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name formula proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
 
 module Parser =
     open Grammar_PL

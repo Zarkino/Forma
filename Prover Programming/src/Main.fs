@@ -11,7 +11,7 @@ importSideEffects "./styles/global.scss"
 
 let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tfrom A & B show B & A by Con_I\n}"
 
-let lemma2 = "lemma P -> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show F by Neg_E\n\t}\n}"
+let lemma2 = "lemma P -> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show ~P -> F by Neg_E\n\t}\n}"
 
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with
@@ -31,23 +31,19 @@ let Main () =
         let rec evaluate_lemma value =
             match Language.Parser.parse_lemma value with
             | None, error               ->  error
-            | Some(lemma), remaining    ->  match Proof_Interface.isValid lemma with
-                                            | false, msg    -> msg
-                                            | true, _       ->
-                                                (match Proof_Interface.prove(lemma.Proof, Set.empty, rules) with
-                                                | Proof_Interface.Success(_, d) ->
-                                                    match d with
-                                                    | false ->  $"Unsuccessful lemma %s{lemma.ToString()}"
-                                                    | true  ->  match lemma.Name with
-                                                                | None          ->  ()
-                                                                | Some(name)    ->  match lemma.Identifier |> standardize |> separate with
-                                                                                    | None          -> ()
-                                                                                    | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
-                                                                $"Successful lemma %s{lemma.ToString()}"
-                                                | Proof_Interface.Fail(msg)     ->  msg)
-                                                |> (fun result ->
-                                                    if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
-                                                    else result)
+            | Some(lemma), remaining    ->
+                (match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
+                 | Proof_Interface.Fail(msg) -> msg
+                 | Proof_Interface.Success _ ->
+                    match lemma.Name with
+                    | None          ->  ()
+                    | Some(name)    ->  match lemma.Goal |> standardize |> separate with
+                                        | None          -> ()
+                                        | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
+                    $"Successful lemma %s{lemma.ToString()}")
+                |> (fun result ->
+                    if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
+                    else result)
         
         let evaluate_comment value = Regex.Matches(value, "\/\/.*(?:\n|$)") |> Seq.fold (fun (acc: string) old -> acc.Replace(old.Value, System.String.Empty)) value
             

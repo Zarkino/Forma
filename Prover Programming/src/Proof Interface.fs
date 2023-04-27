@@ -10,15 +10,15 @@ and Statement =
 
 type Lemma = {
     Name: string option
-    Identifier: Formula
+    Goal: Formula
     Proof: Proof
 }
 with
-    static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Identifier.ToString()}")
+    static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Goal.ToString()}")
     override this.ToString() = Lemma.ToString this
 
 let isValid lemma =
-    match separate lemma.Identifier with
+    match separate lemma.Goal with
         | None          ->  false, $"Incomplete lemma %s{lemma.ToString()}"
         | Some(a, c)    ->
             (match List.tryHead (snd lemma.Proof) with
@@ -64,19 +64,26 @@ let tryApply rule a r rules =
                                         | None      ->  None
 
 type Result =
-    | Success of Set<Formula> * bool
+    | Success of Set<Formula>
     | Fail of string
 
-let rec prove (proof: Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
-    (Success(assumptions, false), snd proof)
+let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
+    (Success(assumptions), statements)
     ||> List.fold
         (fun state statement ->
             match state with
-            | Fail _                    ->  state
-            | Success(fs, judgement)    ->
+            | Fail _        ->  state
+            | Success(fs)   ->
                 match statement with
-                | Assumption(f)         ->  Success(Set.add f fs, judgement)
-                | Instant(a, f, rule)   ->  match tryApply rule fs f rules with
-                                            | None      ->  Success(Set.add f fs, judgement)
+                | Assumption(f)         ->  Success(Set.add f fs)
+                | Instant(a, f, rule)   ->  match tryApply rule (Set.ofList a) f rules with
+                                            | None      ->  Success(Set.add f fs)
                                             | Some(msg) ->  Fail(msg)
-                | Delayed(f, p)         ->  state)
+                | Delayed(f, p)         ->  match prove(f, p, fs, rules) with
+                                            | Fail(msg) ->  Fail(msg)
+                                            | Success _ ->  Success(Set.add f fs))
+    |> function
+        | Fail(msg)     ->  Fail(msg)
+        | Success(fs)   ->  match tryApply proofRule fs goal rules with
+                            | None      -> Success(Set.add goal fs)
+                            | Some(msg) -> Fail(msg)
