@@ -28,25 +28,38 @@ let Main () =
     let (rules, setRules) = React.useState(Proof_Interface.rules)
     
     React.useEffect(fun () ->
-        let rec evaluate_lemma value =
-            match Language.Parser.parse_lemma value with
-            | None, error               ->  error
-            | Some(lemma), remaining    ->
-                (match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
-                 | Proof_Interface.Fail(msg) -> msg
-                 | Proof_Interface.Success _ ->
-                    match lemma.Name with
-                    | None          ->  ()
-                    | Some(name)    ->  match lemma.Goal |> standardize |> separate with
-                                        | None          -> ()
-                                        | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
-                    $"Successful lemma %s{lemma.ToString()}")
-                |> (fun result ->
-                    if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_lemma remaining}"
-                    else result)
+        let parse string =
+            let rec inner string acc =
+                match Language.Parser.parse_lemma string with
+                | None, error               ->  Some(error), acc
+                | Some(lemma), remaining    ->  match remaining.Trim().Length with
+                                                | 0 -> None, (lemma::acc)
+                                                | _ -> inner remaining (lemma::acc)
+            inner string []
+        
+        let evaluate (lemma: Proof_Interface.Lemma) =
+            match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
+            | Proof_Interface.Fail(msg) -> msg
+            | Proof_Interface.Success _ ->
+                match lemma.Name with
+                | None          ->  ()
+                | Some(name)    ->  match lemma.Goal |> standardize |> separate with
+                                    | None          -> ()
+                                    | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
+                $"Successful lemma %s{lemma.ToString()}"
+        
+        let format (msg, list) =
+            (match msg with
+            | None  -> System.String.Empty
+            | Some(msg) -> "\n" + msg)
+            |> sprintf "%s%s" (list |> List.map evaluate |> String.concat "\n")
         
         setRules(Proof_Interface.rules)
-        setOutput(evaluate_lemma (Regex.Replace(input, "\/\/.*(?:\n|$)", System.String.Empty)))
+        
+        Regex.Replace(input, "\/\/.*(?:\n|$)", System.String.Empty)
+        |> parse
+        |> format
+        |> setOutput
     , [|input :> obj|])
     
     React.fragment [    
