@@ -9,7 +9,7 @@ open System.Text.RegularExpressions
 
 importSideEffects "./styles/global.scss"
 
-let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tfrom A & B show B & A by Con_I\n}"
+let lemma = "lemma Con_S: (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tfrom A and B show B & A by Con_I\n}"
 
 let lemma2 = "lemma P -> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show ~P -> F by Neg_E\n\t}\n}"
 
