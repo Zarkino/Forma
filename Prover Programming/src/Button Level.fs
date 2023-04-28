@@ -3,8 +3,14 @@
 open Feliz
 open Feliz.Bulma
 
+let examples = [|
+    "lemma (A & B) -> (B & A)\nproof (rule Imp_I) {\n\tassume A & B\n\tfrom A & B have A by Con_E1\n\tfrom A & B have B by Con_E2\n\tfrom A and B show B & A by Con_I\n}"
+    "lemma P -> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show ~P -> F by Neg_E\n\t}\n}"
+    "lemma (P <-> Q) <-> (Q <-> P)\nproof (rule Iff_I) {\n\tshow (P <-> Q) -> (Q <-> P)\n\tproof (rule Imp_I) {\n\t\tassume P <-> Q\n\t\tfrom P <-> Q have P -> Q by Iff_E1\n\t\tfrom P <-> Q have Q -> P by Iff_E2\n\t\tfrom P -> Q and Q -> P show Q <-> P by Iff_I\n\t}\n\tshow (Q <-> P) -> (P <-> Q)\n\tproof (rule Imp_I) {\n\t\tassume Q <-> P\n\t\tfrom Q <-> P have Q -> P by Iff_E1\n\t\tfrom Q <-> P have P -> Q by Iff_E2\n\t\tfrom Q -> P and P -> Q show P <-> Q by Iff_I\n\t}\n}"
+|]
+
 [<ReactComponent>]
-let Button_Level(theme: string) =
+let Button_Level (theme: string, setInput: string -> unit) =
     let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isLight
     
     Bulma.level [
@@ -67,14 +73,12 @@ let Button_Level(theme: string) =
                             prop.id "dropdown-menu"
                             prop.role "menu"
                             prop.children [
-                                Bulma.dropdownContent [
-                                    Bulma.dropdownItem.a [
-                                        Html.span [ Html.text "Example 1" ]
-                                    ]
-                                    Bulma.dropdownItem.a [
-                                        Html.span [ Html.text "Example 2" ]
-                                    ]
-                                ]
+                                Bulma.dropdownContent
+                                    (examples |> Array.mapi (fun i ex ->
+                                        Bulma.dropdownItem.a [
+                                            prop.onClick (fun _ -> setInput(ex))
+                                            prop.text $"Example %i{i+1}"
+                                        ]))
                             ]
                         ]
                     ]
