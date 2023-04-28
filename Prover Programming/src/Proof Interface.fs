@@ -49,19 +49,21 @@ let rules = Map.ofList [
     ("Iff_E2",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("1"), Variable("0"))))
 ]
 
-let tryApply rule a r rules =
-    match Map.tryFind rule rules with
+let tryApply(from, assumptions, result, rule, ruleset) =
+    match Map.tryFind rule ruleset with
     | None          ->  Some($"Rule \"%s{rule}\" does not exist")
-    | Some(a', r')  ->  match unify r' r Map.empty with
-                        | false, _  ->  Some($"Could not match %s{Formula.ToString r} with %s{Formula.ToString r'}")
-                        | true, map ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) a)) a' with
-                                        | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
-                                                            rule
-                                                            (a' |> List.map Formula.ToString |> String.concat "; ")
-                                                            (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
-                                                            (sprintf "(%s, %s)" (Formula.ToString x) (Map.tryFind (Formula.ToString x) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
-                                                        |> Some
-                                        | None      ->  None
+    | Some(a', r')  ->  match unify r' result Map.empty with
+                        | false, _  ->  Some($"Could not match %s{Formula.ToString result} with %s{Formula.ToString r'}")
+                        | true, map ->  match Seq.tryFind (fun x -> not (Set.contains x assumptions)) from with
+                                        | Some(a)   ->  Some($"The assumption %s{Formula.ToString a} is not in the set of assumptions")
+                                        | None      ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) from)) a' with
+                                                        | None      ->  None
+                                                        | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
+                                                                            rule
+                                                                            (a' |> List.map Formula.ToString |> String.concat "; ")
+                                                                            (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
+                                                                            (sprintf "(%s, %s)" (Formula.ToString x) (Map.tryFind (Formula.ToString x) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
+                                                                        |> Some
 
 type Result =
     | Success of Set<Formula>
@@ -76,7 +78,7 @@ let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<F
             | Success(fs)   ->
                 match statement with
                 | Assumption(f)         ->  Success(Set.add f fs)
-                | Instant(a, f, rule)   ->  match tryApply rule (Set.ofList a) f rules with
+                | Instant(a, f, rule)   ->  match tryApply((Set.ofList a), fs, f, rule, rules) with
                                             | None      ->  Success(Set.add f fs)
                                             | Some(msg) ->  Fail(msg)
                 | Delayed(f, p)         ->  match prove(f, p, fs, rules) with
@@ -84,6 +86,6 @@ let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<F
                                             | Success _ ->  Success(Set.add f fs))
     |> function
         | Fail(msg)     ->  Fail(msg)
-        | Success(fs)   ->  match tryApply proofRule fs goal rules with
+        | Success(fs)   ->  match tryApply(fs, fs, goal, proofRule, rules) with
                             | None      -> Success(Set.add goal fs)
                             | Some(msg) -> Fail(msg)
