@@ -12,6 +12,8 @@ let examples = [|
 
 [<ReactComponent>]
 let Button_Level (theme: string, setInput: string -> unit) =
+    let (help, setHelp) = React.useState(false)
+    
     let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isLight
     
     Bulma.level [
@@ -48,9 +50,28 @@ let Button_Level (theme: string, setInput: string -> unit) =
                 Bulma.button.button [
                     prop.className "mx-1"
                     decide_color theme
+                    prop.target "modal-help"
+                    prop.onClick (fun _ -> setHelp(true))
+                    prop.onKeyDown (key.escape, fun _ -> setHelp(false))
                     prop.children [
                         Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-circle-info" ] ] ]
                         Html.span [ Html.text "Help" ]
+                    ]
+                ]
+                Bulma.modal [
+                    prop.id "modal-help"
+                    if help then modal.isActive
+                    prop.children [
+                        Bulma.modalBackground [ prop.onClick (fun _ -> setHelp(false)) ]
+                        Bulma.modalContent [
+                            Bulma.box [
+                                Html.h1 "Syntax"
+                                Html.span [ Html.text "..." ]
+                                Html.h1 "Rules"
+                                Html.span [ Html.text "..." ]
+                            ]
+                        ]
+                        Bulma.modalClose [ prop.onClick (fun _ -> setHelp(false)) ]
                     ]
                 ]
                 Bulma.dropdown [
