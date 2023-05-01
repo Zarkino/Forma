@@ -65,9 +65,15 @@ let Button_Level (theme: string, setInput: string -> unit) =
                         Bulma.modalBackground [ prop.onClick (fun _ -> setHelp(false)) ]
                         Bulma.modalContent [
                             Bulma.box [
-                                Html.h1 "Syntax"
+                                Html.h1 [
+                                    prop.className [ "title"; "is-4" ]
+                                    prop.text "Language Reference"
+                                ]
                                 Html.span [ Html.text "..." ]
-                                Html.h1 "Rules"
+                                Html.h1 [
+                                    prop.className [ "title"; "is-4" ]
+                                    prop.text "Rules"
+                                ]
                                 Html.span [ Html.text "..." ]
                             ]
                         ]
