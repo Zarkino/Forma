@@ -22,7 +22,7 @@
         "mocha": "^10.2.0",
         "rimraf": "^5.0.0",
         "sass": "^1.62.1",
-        "vite": "^4.3.3",
+        "vite": "^4.3.4",
         "vite-plugin-singlefile": "^0.13.5"
     },
     "engines": {
