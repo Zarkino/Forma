@@ -74,3 +74,17 @@ proof (rule Imp_I) {
         from ~P and P show ~P -> P by Imp_I
     }
 }
+
+//given the following rule holds:
+//("Ccontr",  ([Implication(Negation(Variable("0")), Constant(false))],       Variable("0")))
+
+lemma dneg: (~~p) -> p
+proof (rule Imp_I) {
+    assume ~~p
+    show p
+    proof (rule Ccontr) {
+        assume ~p
+        from ~~p and ~p have F by Neg_E
+        from ~p and F show (~p) -> F by Imp_I
+    }
+}
