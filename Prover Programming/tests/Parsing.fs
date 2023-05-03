@@ -57,9 +57,9 @@ let parsing_Proofs =
             Expect.equal
                 (parse_proof "proof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by Con_E1\n\tfrom P & Q have Q by Con_E2\n\tfrom P and Q show Q & P by Con_I\n}")
                 (Some(Proof("Imp_I", [Assumption(Conjunction(Variable("P"), Variable("Q")))
-                                      Instant([Conjunction(Variable("P"), Variable("Q"))], Variable("P"), "Con_E1")
-                                      Instant([Conjunction(Variable("P"), Variable("Q"))], Variable("Q"), "Con_E2")
-                                      Instant([Variable("P"); Variable("Q")], Conjunction(Variable("Q"), Variable("P")), "Con_I")])), "") error_msg
+                                      Instant(Some [Conjunction(Variable("P"), Variable("Q"))], Variable("P"), "Con_E1")
+                                      Instant(Some [Conjunction(Variable("P"), Variable("Q"))], Variable("Q"), "Con_E2")
+                                      Instant(Some [Variable("P"); Variable("Q")], Conjunction(Variable("Q"), Variable("P")), "Con_I")])), "") error_msg
         }
     ]
 
