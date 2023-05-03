@@ -1,60 +1,76 @@
 ﻿// Some working proof examples
 
-lemma d_neg: a -> ~~a
-proof {
-	assume a
-	proof {
-		assume ~a
-		show ~a -> F by Abs_N
-	}
-	show ~~a by Neg_I
+lemma d_neg: P -> ~~P
+proof (rule Imp_I) {
+    assume P
+    show ~~P
+    proof (rule Neg_I) {
+        assume ~P
+        from ~P and P show ~P -> F by Neg_E
+    }
 }
 
-
-lemma imp_inv: (p -> q) & ~q -> ~p
-proof {
-	assume (p -> q) & ~q
-	proof {
-		assume p
-		have p -> q by Con_E1
-		have q by Imp_E1
-		have ~q by Con_E2
-		have q -> F by Abs_P
-		have F by Imp_E1
-		show p -> F by Imp_I
+lemma imp_inv: ((P -> Q) & ~Q) -> ~P
+proof (rule Imp_I) {
+	assume (P -> Q) & ~Q
+	show ~P
+    proof (rule Neg_I) {
+        assume P
+		have P -> Q by Con_E1
+		from P -> Q have Q by Imp_E
+        have ~Q by Con_E2
+        from ~Q and Q have F by Neg_E
+        have P -> F by Imp_I
 	}
-	show ~p by Neg_I
 }
 
+lemma b-iimp_eqv: (P <-> Q) <-> Q <-> P
+proof (rule Iff_I) {
+    show (P <-> Q) -> (Q <-> P)
+    proof (rule Imp_I) {
+        assume P <-> Q
+        from P <-> Q have P -> Q by Iff_E1
+        from P <-> Q have Q -> P by Iff_E2
+        from P -> Q and Q -> P show Q <-> P by Iff_I
+    }
+    show (Q <-> P) -> (P <-> Q)
+    proof (rule Imp_I) {
+        assume Q <-> P
+        from Q <-> P have Q -> P by Iff_E1
+        from Q <-> P have P -> Q by Iff_E2
+        from Q -> P and P -> Q show P <-> Q by Iff_I
+    }
+}
 
+lemma classical: (~P -> P) -> P
+proof (rule Imp_I) {
+    assume ~P -> P
+    have P | ~P by LEM
+    show P -> P
+    proof (rule Imp_I) {
+        assume P
+    }
+    show P by Dis_E
+}
 
-lemma b-iimp_eqv: (p <-> q) <-> q <-> p
-proof {
-	proof {
-		assume p <-> q
-		proof {
-			assume q
-			show q -> p by Iff_E2
-		}
-		proof {
-			assume p
-			show p -> q by Iff_E1
-		}
-		show q <-> p by Iff_I
-	}
-	proof {
-		assume q <-> p
-		proof {
-			assume p
-			show p -> q by Iff_E2
-		}
-		proof {
-			assume q
-			show q -> p by Iff_E1
-		}
-		show p <-> q by Iff_I
-	}
-	have (p <-> q) -> (q <-> p) by Imp_I
-	have (q <-> p) -> (p <-> q) by Imp_I
-	show (p <-> q) <-> (q <-> p) by Iff_I
+lemma Clavius: (~P -> P) -> P
+proof (rule Imp_I) {
+    assume ~P -> P
+    show P by classical
+}
+
+lemma Peirce: ((P -> Q) -> P) -> P
+proof (rule Imp_I) {
+    assume (P -> Q) -> P
+    show P
+    proof (rule classical) {
+        assume ~P
+        have P -> Q
+        proof (rule Imp_I) {
+            assume P
+            from P and ~P show Q by Neg_E
+        }
+        from (P -> Q) -> P and P -> Q have P by Imp_E
+        from ~P and P show ~P -> P by Imp_I
+    }
 }
