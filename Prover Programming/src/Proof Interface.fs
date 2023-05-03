@@ -47,6 +47,7 @@ let rules = Map.ofList [
                   Implication(Variable("1"), Variable("0"))],                   Equivalence(Variable("0"), Variable("1"))))
     ("Iff_E1",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("0"), Variable("1"))))
     ("Iff_E2",  ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("1"), Variable("0"))))
+    ("LEM",     ([],                                                            Disjunction(Variable("0"), Negation(Variable("0")))))
 ]
 
 let tryApply (assumptions, result, rule, ruleset) =
