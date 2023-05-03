@@ -52,7 +52,7 @@ let Main () =
         
         setRules(Proof_Interface.rules)
         
-        Regex.Replace(input, "\/\/.*(?:\n|$)", System.String.Empty)
+        Regex.Replace(input, "\/\/.*", System.String.Empty)
         |> parse
         |> format
         |> setOutput
