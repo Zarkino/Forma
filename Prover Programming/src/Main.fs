@@ -48,10 +48,10 @@ let Main () =
                 $"Successful lemma %s{lemma.ToString()}"
         
         let format (msg, list) =
-            (match msg with
-            | None  -> System.String.Empty
-            | Some(msg) -> "\n" + msg)
-            |> sprintf "%s%s" (list |> List.map evaluate |> String.concat "\n")
+            match msg, list with
+            | None, xs      -> xs |> List.map evaluate |> String.concat "\n"
+            | Some(msg), [] -> msg
+            | Some(msg), xs -> sprintf "%s\n%s" msg (xs |> List.map evaluate |> String.concat "\n")
         
         setRules(Proof_Interface.rules)
         
