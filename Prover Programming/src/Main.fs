@@ -4,15 +4,18 @@ open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
 open System.Text.RegularExpressions
+open Parsec
 
 importSideEffects "./styles/global.scss"
 
-let rec evaluate_meta value =
-    match Language.Parser.parse_meta(value) with
-    | None, error           ->  error
-    | Some(meta), remaining ->  let result = Logic.ML.Meta.ToString meta
-                                if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_meta remaining}"
-                                else result
+let rec evaluate_meta input =
+    match runString Language.ML.meta () input with
+    | Error(msg)    ->  $"Error: %A{msg}"
+    | Ok(v, r, _)   ->  (StringSegment.toString r)
+                        |> (fun remaining ->
+                            let result = Logic.ML.Meta.ToString v
+                            if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_meta remaining}"
+                            else result)
 
 [<ReactComponent>]
 let Main () =
@@ -24,11 +27,13 @@ let Main () =
     React.useEffect(fun () ->
         let parse (string: string) =
             let rec inner string cont =
-                match Language.Parser.parse_lemma string with
-                | None, error               ->  Some(error), cont []
-                | Some(lemma), remaining    ->  match remaining.Trim().Length with
-                                                | 0 -> None, cont [lemma]
-                                                | _ -> inner remaining (fun tail -> cont (lemma::tail))
+                match runString Language.Proof.lemma () string with
+                | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
+                | Ok(lemma, r, _)   ->  (StringSegment.toString r)
+                                        |> (fun remaining ->
+                                            match remaining.Trim().Length with
+                                            | 0 -> None, cont [lemma]
+                                            | _ -> inner remaining (fun tail -> cont (lemma::tail)))
             if string.Trim().Length > 0 then inner string id else None, []
         
         let evaluate (lemma: Proof_Interface.Lemma) =

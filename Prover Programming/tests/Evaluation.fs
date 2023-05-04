@@ -2,13 +2,19 @@
 
 open Fable.Mocha
 
-open Language.Parser
+open Parsec
 open Proof_Interface
 open Logic.PL
 
 let evaluating_Proofs =
+    let evaluate goal proof =
+        match runString Language.Proof.proof () proof with
+            | Error _       ->  Test.failtest "Could not be parsed"
+            | Ok(v, _, _)   ->  match prove(goal, v, Set.empty, rules) with
+                                | Success _  -> Expect.pass()
+                                | _          -> Test.failtest "Evaluation failed"
+
     testList "Basic Proof Evaluation Tests" [
-        let error_msg = "Evaluation failed"
         test "Prove Proof: Conjunction Swap" {
             let goal = Implication(Conjunction(Variable("P"), Variable("Q")), Conjunction(Variable("Q"), Variable("P")))
             let proof =
@@ -18,11 +24,7 @@ let evaluating_Proofs =
 					from P & Q have Q by Con_E2
 					from P and Q show Q & P by Con_I
 				}"
-            match parse_proof proof with
-            | None, _           -> Test.failtest "Could not be parsed"
-            | Some(proof), _    -> match prove(goal, proof, Set.empty, rules) with
-                                   | Success _  -> Expect.pass()
-                                   | _          -> Test.failtest error_msg
+            evaluate goal proof
         }
         test "Prove Proof: Double Negation" {
             let goal = Implication(Variable("P"), Negation(Negation(Variable("P"))))
@@ -35,11 +37,7 @@ let evaluating_Proofs =
 						from ~P and P show ~P -> F by Neg_E
 					}
 				}"
-            match parse_proof proof with
-            | None, _           -> Test.failtest "Could not be parsed"
-            | Some(proof), _    -> match prove(goal, proof, Set.empty, rules) with
-                                   | Success _  -> Expect.pass()
-                                   | _          -> Test.failtest error_msg
+            evaluate goal proof
         }
         test "Prove Proof: Bi-implication Swap" {
             let goal = Equivalence(Equivalence(Variable("P"), Variable("Q")), Equivalence(Variable("Q"), Variable("P")))
@@ -60,11 +58,6 @@ let evaluating_Proofs =
 						from Q -> P and P -> Q show P <-> Q by Iff_I
 					}
 				}"
-            
-            match parse_proof proof with
-            | None, _           -> Test.failtest "Could not be parsed"
-            | Some(proof), _    -> match prove(goal, proof, Set.empty, rules) with
-                                   | Success _  -> Expect.pass()
-                                   | _          -> Test.failtest error_msg
+            evaluate goal proof
         }
     ]
