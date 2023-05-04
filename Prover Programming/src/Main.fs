@@ -3,8 +3,6 @@ module Main
 open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
-open App
-open Propositional_Logic
 open System.Text.RegularExpressions
 
 importSideEffects "./styles/global.scss"
@@ -12,7 +10,7 @@ importSideEffects "./styles/global.scss"
 let rec evaluate_meta value =
     match Language.Parser.parse_meta(value) with
     | None, error           ->  error
-    | Some(meta), remaining ->  let result = Meta_Logic.Meta.ToString meta
+    | Some(meta), remaining ->  let result = Logic.ML.Meta.ToString meta
                                 if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_meta remaining}"
                                 else result
 
@@ -39,7 +37,7 @@ let Main () =
             | Proof_Interface.Success _ ->
                 match lemma.Name with
                 | None          ->  ()
-                | Some(name)    ->  match lemma.Goal |> standardize |> separate with
+                | Some(name)    ->  match lemma.Goal |> Logic.PL.standardize |> Logic.PL.separate with
                                     | None          -> ()
                                     | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
                 $"Successful lemma %s{lemma.ToString()}"
@@ -77,7 +75,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, input, (fun value -> setInput(value.ToString())))
+                                    App.Components.Editor(theme, input, (fun value -> setInput(value.ToString())))
                                 ]
                             ]
                         ]
@@ -91,7 +89,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, output, readonly = true)
+                                    App.Components.Editor(theme, output, readonly = true)
                                 ]
                             ]
                         ]

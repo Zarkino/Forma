@@ -14,7 +14,9 @@
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Parsec.fs" />
+        <Compile Include="Logic.fs" />
         <Compile Include="Propositional Logic.fs" />
+        <Compile Include="First-order Logic.fs" />
         <Compile Include="Meta Logic.fs" />
         <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />

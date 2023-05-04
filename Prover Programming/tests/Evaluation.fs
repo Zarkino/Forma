@@ -4,7 +4,7 @@ open Fable.Mocha
 
 open Language.Parser
 open Proof_Interface
-open Propositional_Logic
+open Logic.PL
 
 let evaluating_Proofs =
     testList "Basic Proof Evaluation Tests" [

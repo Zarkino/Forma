@@ -1,6 +1,6 @@
 ﻿module Proof_Interface
 
-open Propositional_Logic
+open Logic.PL
 
 type Proof = string * Statement list
 and Statement =

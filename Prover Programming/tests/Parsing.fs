@@ -3,7 +3,7 @@
 open Fable.Mocha
 open Language.Parser
 
-open Propositional_Logic
+open Logic.PL
 
 let parsing_PL =
     testList "Basic Propositional Logic Parsing Tests" [
@@ -63,7 +63,7 @@ let parsing_Proofs =
         }
     ]
 
-open Meta_Logic
+open Logic.ML
 
 let parsing_ML =
     testList "Basic Meta-logic Parsing Tests" [

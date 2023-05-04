@@ -4,7 +4,7 @@ open Parsec
 
 module Grammar =
     module PL =
-        open Propositional_Logic
+        open Logic.PL
         
         let formula, formulaRef = createParserForwardedToRef()
         
@@ -27,7 +27,7 @@ module Grammar =
 
     module ML =
         open PL
-        open Meta_Logic
+        open Logic.ML
         
         let meta, metaRef = createParserForwardedToRef()
         
