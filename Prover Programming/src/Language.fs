@@ -2,76 +2,77 @@
 
 open Parsec
 
-module Grammar_PL =
-    open Propositional_Logic
-    
-    let formula, formulaRef = createParserForwardedToRef()
-    
-    let constant = pchar 'T' <|> pchar 'F' |>> function | 'T' -> Constant(true) | _ -> Constant(false)
-    let var = many1Chars asciiLetter |>> string
-    let variable = var |>> Variable
-    let negation = pchar '~' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
-    let binaryFormula operator = pstring operator >>. spaces >>. formula
-    
-    do formulaRef.Value <- parse {
-        let! left = spaces >>. (constant <|> variable <|> negation <|> (between (pchar '(') (pchar ')') formula))
-        return! spaces >>. choice [
-            binaryFormula "&" |>> (fun right -> Conjunction(left, right))
-            binaryFormula "|" |>> (fun right -> Disjunction(left, right))
-            binaryFormula "->" |>> (fun right -> Implication(left, right))
-            binaryFormula "<->" |>> (fun right -> Equivalence(left, right))
-            preturn left
-        ]
-    }
+module Grammar =
+    module PL =
+        open Propositional_Logic
+        
+        let formula, formulaRef = createParserForwardedToRef()
+        
+        let constant = pchar 'T' <|> pchar 'F' |>> function | 'T' -> Constant(true) | _ -> Constant(false)
+        let var = many1Chars asciiLetter |>> string
+        let variable = var |>> Variable
+        let negation = pchar '~' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
+        let binaryFormula operators = (operators |> List.map pstring |> choice) >>. spaces >>. formula
+        
+        do formulaRef.Value <- parse {
+            let! left = spaces >>. (constant <|> variable <|> negation <|> (between (pchar '(') (pchar ')') formula))
+            return! spaces >>. choice [
+                binaryFormula ["&"; "∧"] |>> (fun right -> Conjunction(left, right))
+                binaryFormula ["|"; "∨"] |>> (fun right -> Disjunction(left, right))
+                binaryFormula ["->"; "→"] |>> (fun right -> Implication(left, right))
+                binaryFormula ["<->"; "↔"] |>> (fun right -> Equivalence(left, right))
+                preturn left
+            ]
+        }
 
-module Grammar_ML =
-    open Grammar_PL
-    open Meta_Logic
-    
-    let meta, metaRef = createParserForwardedToRef()
-    
-    let formula_ml = formula |>> Meta.Formula
-    
-    do metaRef.Value <- parse {
-        let! left = spaces >>. (
-            (pipe2 (pstring "!!" >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
-            formula_ml <|>
-            between (pchar '(') (pchar ')') meta)
-        return! spaces >>. choice [
-            pstring "==>" >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
-            pstring "==" >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
-            preturn left
-        ]
-    }
+    module ML =
+        open PL
+        open Meta_Logic
+        
+        let meta, metaRef = createParserForwardedToRef()
+        
+        let formula_ml = formula |>> Meta.Formula
+        
+        do metaRef.Value <- parse {
+            let! left = spaces >>. (
+                (pipe2 (pstring "!!" >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
+                formula_ml <|>
+                between (pchar '(') (pchar ')') meta)
+            return! spaces >>. choice [
+                pstring "==>" >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
+                pstring "==" >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
+                preturn left
+            ]
+        }
 
-module Grammar_Proof =
-    open Grammar_PL
-    open Proof_Interface
-    
-    let proof, proofRef = createParserForwardedToRef()
-    
-    let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
-    
-    let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
-    
-    let keyword = choice [pstring "have"; pstring "show"]
-    
-    let statements = many (spaces >>. choice [
-            pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            pipe3 (opt (pstring "from" >>. (sepBy1 formula (pstring "and")))) (keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r))
-            pipe2 (keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
-        ] .>> spaces)
-    
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
-    
-    let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
-    
-    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name formula proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
+    module Proof =
+        open PL
+        open Proof_Interface
+        
+        let proof, proofRef = createParserForwardedToRef()
+        
+        let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
+        
+        let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
+        
+        let keyword = ["have"; "show"] |> List.map pstring |> choice
+        
+        let statements = many (spaces >>. choice [
+                pstring "assume" >>. spaces1 >>. formula |>> Assumption
+                pipe3 (opt (pstring "from" >>. (sepBy1 formula (pstring "and")))) (keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r))
+                pipe2 (keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
+            ] .>> spaces)
+        
+        proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
+        
+        let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
+        
+        let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name formula proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
 
 module Parser =
-    open Grammar_PL
-    open Grammar_ML
-    open Grammar_Proof
+    open Grammar.PL
+    open Grammar.ML
+    open Grammar.Proof
     
     let parse_formula input =
         match runString formula () input with
