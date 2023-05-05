@@ -10,7 +10,7 @@
         "test": "mocha tests"
     },
     "dependencies": {
-        "@monaco-editor/react": "^4.5.0",
+        "@monaco-editor/react": "^4.5.1",
         "bulma": "^0.9.4",
         "bulma-switch": "^2.0.4",
         "monaco-editor": "^0.38.0",
