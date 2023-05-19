@@ -32,9 +32,9 @@ let evaluating_Proofs =
                 "proof (rule Imp_I) {
 					assume P
 					show ~~P
-					proof (rule Neg_I) {
+					proof (rule Falsity_E) {
 						assume ~P
-						from ~P and P show ~P -> F by Neg_E
+						from ~P and P show F by Neg_E
 					}
 				}"
             evaluate goal proof
