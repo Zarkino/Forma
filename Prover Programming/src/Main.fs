@@ -51,7 +51,7 @@ let Main () =
             match msg, list with
             | None, xs      -> xs |> List.map evaluate |> String.concat "\n"
             | Some(msg), [] -> msg
-            | Some(msg), xs -> sprintf "%s\n%s" msg (xs |> List.map evaluate |> String.concat "\n")
+            | Some(msg), xs -> sprintf "%s\n%s" (xs |> List.map evaluate |> String.concat "\n") msg
         
         setRules(Proof_Interface.rules)
         
