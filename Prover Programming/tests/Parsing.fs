@@ -84,12 +84,12 @@ let parsing_ML =
     testList "Basic Meta-logic Parsing Tests" [
         let error_msg = "Incorrect parsing"
         test "Parse Implication" {
-            Expect.equal (parse "p ==> p") (Some(Implication(Formula(Variable("p")), Formula(Variable("p")))), "") error_msg
+            Expect.equal (parse "p ==> p") (Some(Implication(Entity(Variable("p")), Entity(Variable("p")))), "") error_msg
         }
         test "Parse Equality" {
-            Expect.equal (parse "p == p") (Some(Equality(Formula(Variable("p")), Formula(Variable("p")))), "") error_msg
+            Expect.equal (parse "p == p") (Some(Equality(Entity(Variable("p")), Entity(Variable("p")))), "") error_msg
         }
         test "Parse Universal Quantifier" {
-            Expect.equal (parse "!!x. p") (Some(Universal("x", Formula(Variable("p")))), "") error_msg
+            Expect.equal (parse "!!x. p") (Some(Universal("x", Entity(Variable("p")))), "") error_msg
         }
     ]

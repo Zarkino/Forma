@@ -30,12 +30,12 @@ module ML =
     
     let meta, metaRef = createParserForwardedToRef()
     
-    let formula_ml = formula |>> Meta.Formula
+    let entity = formula |>> Meta.Entity
     
     do metaRef.Value <- parse {
         let! left = spaces >>. (
             (pipe2 (pstring "!!" >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
-            formula_ml <|>
+            entity <|>
             between (pchar '(') (pchar ')') meta)
         return! spaces >>. choice [
             pstring "==>" >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
