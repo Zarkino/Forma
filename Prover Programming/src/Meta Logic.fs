@@ -15,3 +15,16 @@ module ML =
                 | Universal(x, m)   -> $"⋀%s{x}. %s{f m}"
             f meta
         override this.ToString() = Meta.ToString this
+    
+    let rec unify x y map =
+        match x, y with
+        | Entity(e), Entity(e')                     ->  PL.unify e e' map
+        | Implication(p, q), Implication(p', q')    ->  match unify p p' map with
+                                                        | false, _  -> false, map
+                                                        | true, map -> unify q q' map
+        | Equality(x, y), Equality(x', y')          ->  match unify x x' map with
+                                                        | false, _  -> false, map
+                                                        | true, map -> unify y y' map
+        | Universal(x, m), Universal(x', m')        ->  if x = x' then unify m m' map
+                                                        else false, map
+        | _, _                                      ->  false, map

@@ -1,6 +1,7 @@
 ﻿module Proof_Interface
 
 open Logic.PL
+open Logic.ML
 
 type Proof = string * Statement list
 and Statement =
@@ -30,43 +31,54 @@ let isValid lemma =
                                     | Some(Instant(_, c', _))   when c = c' ->  true, System.String.Empty
                                     | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
 
+let bind statements =
+    let P = statements |> List.tryPick (function Assumption(p) -> Some(p) | _ -> None)
+    let Q = statements |> List.rev |> List.tryPick (function Instant(_, q, _) | Delayed(q, _) -> Some(q) | _ -> None)
+    match P, Q with
+    | Some(p), Some(q)  -> Ok(Implication(Entity(p), Entity(q)))
+    | None, _           -> Error("Could not find assumption")
+    | _, None           -> Error("Could not find conclusion")
+
 let rules = Map.ofList [
-    ("Falsity_E",   ([Constant(false)],                                             Variable("0")))
-    ("Truth_I",     ([Implication(Constant(false), Constant(false))],               Constant(true)))
-    ("Neg_I",       ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
-    ("Neg_E",       ([Negation(Variable("0")); Variable("0")],                      Variable("1")))
-    ("Con_I",       ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
-    ("Con_E1",      ([Conjunction(Variable("0"), Variable("1"))],                   Variable("0")))
-    ("Con_E2",      ([Conjunction(Variable("0"), Variable("1"))],                   Variable("1")))
-    ("Dis_I1",      ([Variable("0")],                                               Disjunction(Variable("0"), Variable("1"))))
-    ("Dis_I2",      ([Variable("1")],                                               Disjunction(Variable("0"), Variable("1"))))
-    ("Dis_E",       ([Disjunction(Variable("0"), Variable("1"))
-                      Implication(Variable("0"), Variable("2"))
-                      Implication(Variable("1"), Variable("2"))],                   Variable("2")))
-    ("Imp_I",       ([Variable("0"); Variable("1")],                                Implication(Variable("0"), Variable("1"))))
-    ("Imp_E",       ([Implication(Variable("0"), Variable("1")); Variable("0")],    Variable("1")))
-    ("Iff_I",       ([Implication(Variable("0"), Variable("1"))
-                      Implication(Variable("1"), Variable("0"))],                   Equivalence(Variable("0"), Variable("1"))))
-    ("Iff_E1",      ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("0"), Variable("1"))))
-    ("Iff_E2",      ([Equivalence(Variable("0"), Variable("1"))],                   Implication(Variable("1"), Variable("0"))))
-    ("LEM",         ([],                                                            Disjunction(Variable("0"), Negation(Variable("0")))))
+    ("Falsity_E",   ([Entity(Constant(false))],                                         Entity(Variable("0"))))
+    ("Truth_I",     ([Entity(Logic.PL.Implication(Constant(false), Constant(false)))],  Entity(Constant(true))))
+    ("Neg_I",       ([Implication(Entity(Variable("0")), Entity(Constant(false)))],     Entity(Negation(Variable("0")))))
+    ("Neg_E",       ([Entity(Negation(Variable("0"))); Entity(Variable("0"))],          Entity(Variable("1"))))
+    ("Con_I",       ([Entity(Variable("0")); Entity(Variable("1"))],                    Entity(Conjunction(Variable("0"), Variable("1")))))
+    ("Con_E1",      ([Entity(Conjunction(Variable("0"), Variable("1")))],               Entity(Variable("0"))))
+    ("Con_E2",      ([Entity(Conjunction(Variable("0"), Variable("1")))],               Entity(Variable("1"))))
+    ("Dis_I1",      ([Entity(Variable("0"))],                                           Entity(Disjunction(Variable("0"), Variable("1")))))
+    ("Dis_I2",      ([Entity(Variable("1"))],                                           Entity(Disjunction(Variable("0"), Variable("1")))))
+    ("Dis_E",       ([Entity(Disjunction(Variable("0"), Variable("1")))
+                      Implication(Entity(Variable("0")), Entity(Variable("2")))
+                      Implication(Entity(Variable("1")), Entity(Variable("2")))],       Entity(Variable("2"))))
+    ("Imp_I",       ([Implication(Entity(Variable("0")), Entity(Variable("1")))],       Entity(Logic.PL.Implication(Variable("0"), Variable("1")))))
+    ("Imp_E",       ([Entity(Logic.PL.Implication(Variable("0"), Variable("1")))
+                      Entity(Variable("0"))],                                           Entity(Variable("1"))))
+    ("Iff_I",       ([Entity(Logic.PL.Implication(Variable("0"), Variable("1")))
+                      Entity(Logic.PL.Implication(Variable("1"), Variable("0")))],      Entity(Equivalence(Variable("0"), Variable("1")))))
+    ("Iff_E1",      ([Entity(Equivalence(Variable("0"), Variable("1")))
+                      Entity(Variable("0"))],                                           Entity(Variable("1"))))
+    ("Iff_E2",      ([Entity(Equivalence(Variable("0"), Variable("1")))
+                      Entity(Variable("1"))],                                           Entity(Variable("0"))))
+    ("LEM",         ([],                                                                Entity(Disjunction(Variable("0"), Negation(Variable("0"))))))
 ]
 
 let tryApply (assumptions, result, rule, ruleset) =
     match Map.tryFind rule ruleset with
     | None          ->  Some($"Rule \"%s{rule}\" does not exist")
     | Some(a', r')  ->  match unify r' result Map.empty with
-                        | false, _  ->  Some($"Could not match %s{Formula.ToString result} with %s{Formula.ToString r'}")
+                        | false, _  ->  Some($"Could not match %s{result.ToString()} with %s{r'.ToString()}")
                         | true, map ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) a' with
                                         | None      ->  None
                                         | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
                                                             rule
-                                                            (a' |> List.map Formula.ToString |> String.concat "; ")
+                                                            (a' |> List.map (fun x -> x.ToString()) |> String.concat "; ")
                                                             (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
-                                                            (sprintf "(%s, %s)" (Formula.ToString x) (Map.tryFind (Formula.ToString x) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
+                                                            (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
                                                         |> Some
 
-let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
+let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta list * Meta>) =
     (Ok(assumptions), statements)
     ||> List.fold
         (fun state statement ->
@@ -74,17 +86,19 @@ let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<F
             | Error _   -> state
             | Ok(fs)    ->
                 match statement with
-                | Assumption(f)         ->  Ok(Set.add f fs)
-                | Instant(a, f, rule)   ->  match List.tryFind (fun x -> not (Set.contains x fs)) (defaultArg a List.empty) with
-                                            | Some(a)   ->  Error($"The assumption %s{Formula.ToString a} is not in the set of assumptions")
-                                            | None      ->  match tryApply(fs, f, rule, rules) with
-                                                            | None      -> Ok(Set.add f fs)
+                | Assumption(f)         ->  Ok(Set.add (Entity(f)) fs)
+                | Instant(a, f, rule)   ->  match List.tryFind (fun x -> not (Set.contains x fs)) (a |> function Some(v) -> List.map Entity v | None -> List.empty) with
+                                            | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
+                                            | None      ->  match tryApply(fs, Entity(f), rule, rules) with
+                                                            | None      -> Ok(Set.add (Entity(f)) fs)
                                                             | Some(msg) -> Error(msg)
-                | Delayed(f, p)         ->  match prove(f, p, fs, rules) with
+                | Delayed(f, p)         ->  match prove(Entity(f), p, fs, rules) with
                                             | Error(msg)    -> Error(msg)
-                                            | Ok _          -> Ok(Set.add f fs))
+                                            | Ok _          -> Ok(Set.add (Entity(f)) fs))
     |> function
         | Error(msg)    ->  Error(msg)
-        | Ok(fs)        ->  match tryApply(fs, goal, proofRule, rules) with
-                            | None      -> Ok(Set.add goal fs)
-                            | Some(msg) -> Error(msg)
+        | Ok(fs)        ->  match bind statements with
+                            | Error(msg)    ->  Error(msg)
+                            | Ok(value)     ->  match tryApply(Set.add value fs, goal, proofRule, rules) with
+                                                | None      -> Ok(Set.add goal fs)
+                                                | Some(msg) -> Error(msg)

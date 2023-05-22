@@ -90,7 +90,7 @@ let Button_Level (theme: string, setInput: string -> unit) =
                                                 (fun (k, (a, r)) ->
                                                     Html.tr [
                                                         Html.td $"%s{k}"
-                                                        Html.td (sprintf "[%s] ⟹ %s" (a |> List.map Logic.PL.Formula.ToString |> String.concat "; ") (Logic.PL.Formula.ToString r))
+                                                        Html.td (sprintf "[%s] ⟹ %s" (a |> List.map Logic.ML.Meta.ToString |> String.concat "; ") (Logic.ML.Meta.ToString r))
                                                     ]
                                                 )
                                         )
