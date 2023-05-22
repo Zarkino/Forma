@@ -851,6 +851,19 @@ module CharParsers =
   let inline many1CharsTillApply p till f = manyCharsTillApplyImpl true p p till f
   let inline many1CharsTillApply1 p1 p till f = manyCharsTillApplyImpl true p1 p till f
 
+  let inline many1CharsTillMax (p: Parser<char, _>) (c: char) (maxCount: int) : Parser<string, 's> =
+    fun (initial, input) ->
+      match run p initial input with
+      | Error _           -> Error([], initial)
+      | Ok(c1, s, state)  ->
+        let rec f state s (n: int) (acc: string) =
+          match n, run p state s with
+          | _, Error _
+          | 0, _                -> Error([], initial)
+          | n, Ok(v, s, state)  -> if v = c then Ok(acc, s, state)
+                                   else f state s (n-1) (acc + string v)
+        f state s maxCount (string c1)
+
   let inline internal manyStringsImpl failOnZero (p1: Parser<string, _>) (p: Parser<string, _>) : Parser<string, 's> =
     fun (state, s) ->
       match run p1 state s with

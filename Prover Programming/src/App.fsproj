@@ -3,8 +3,6 @@
         <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <Content Include="img\favicon-32x32.png" />
-        <Content Include="img\favicon-16x16.png" />
         <None Include="index.html" />
         <TypeScriptCompile Include="language\asp.ts" />
         <Compile Include="Navigation Bar.fs" />
@@ -14,16 +12,20 @@
         <Compile Include="Extensions.fs" />
         <Compile Include="Components.fs" />
         <Compile Include="Parsec.fs" />
+        <Compile Include="Logic.fs" />
         <Compile Include="Propositional Logic.fs" />
+        <Compile Include="First-order Logic.fs" />
+        <Compile Include="Meta Logic.fs" />
+        <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Feliz" Version="2.4.1" />
+        <PackageReference Include="Feliz" Version="2.6.0" />
         <PackageReference Include="Feliz.Bulma" Version="3.0.0" />
         <PackageReference Include="Feliz.Bulma.Switch" Version="3.0.0" />
         <PackageReference Include="Feliz.Router" Version="4.0.0" />
         <PackageReference Include="Fable.DateFunctions" Version="3.9.0" />
-        <PackageReference Update="FSharp.Core" Version="7.0.200" />
+        <PackageReference Update="FSharp.Core" Version="7.0.300" />
     </ItemGroup>
 </Project>

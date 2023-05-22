@@ -3,54 +3,67 @@ module Main
 open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
-open App
+open System.Text.RegularExpressions
+open Parsec
 
 importSideEffects "./styles/global.scss"
 
-(*
-let monaco: obj = importAll "monaco-editor/esm/vs/editor/editor.api"
-
-Browser.Dom.console.log(monaco?languages?getLanguages())
-*)
-
-let initialContent = "/*
-Just some example arguments from wikipedia,
-mainly a language feature demonstrator.
-*/
-
-((p -> q) & p) ||= q                //Modus Ponens
-((p -> q) & ~q) ||= ~p              //Modus Tollens
-((p | q) & ~p) ||= q                //Disjunctive Syllogism
-(p <-> q) ||= ((p -> q) & (q -> p))  //Material Equivalence (1)
-
-//Pre-determined truth values
-(T -> T) & (F -> T)
-
-//Wikipedia FOL example
-!x!y(P(f(x)) -> ~(P(x) -> Q(f(y), x, z)))
-
-//Constants can be used like so
-!x(_c)
-
-//using a macro
-.myMacro
-
-//defining a macro
-def myMacro {
-    //Macro containing Modus Ponens
-    ((p -> q) & p) ||= q
-}"
-
-let marko_polo (x: string) = x.Replace("marko", "polo")
+let rec evaluate_meta input =
+    match runString Language.ML.meta () input with
+    | Error(msg)    ->  $"Error: %A{msg}"
+    | Ok(v, r, _)   ->  (StringSegment.toString r)
+                        |> (fun remaining ->
+                            let result = Logic.ML.Meta.ToString v
+                            if remaining.Trim().Length > 0 then $"%s{result}\n%s{evaluate_meta remaining}"
+                            else result)
 
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (value, setValue) = React.useState(initialContent)
+    let (input, setInput) = React.useState(System.String.Empty)
+    let (output, setOutput) = React.useState(System.String.Empty)
+    let (rules, setRules) = React.useState(Proof_Interface.rules)
+    
+    React.useEffect(fun () ->
+        let parse (string: string) =
+            let rec inner string cont =
+                match runString Language.Proof.lemma () string with
+                | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
+                | Ok(lemma, r, _)   ->  (StringSegment.toString r)
+                                        |> (fun remaining ->
+                                            match remaining.Trim().Length with
+                                            | 0 -> None, cont [lemma]
+                                            | _ -> inner remaining (fun tail -> cont (lemma::tail)))
+            if string.Trim().Length > 0 then inner string id else None, []
+        
+        let evaluate (lemma: Proof_Interface.Lemma) =
+            match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
+            | Proof_Interface.Fail(msg) -> msg
+            | Proof_Interface.Success _ ->
+                match lemma.Name with
+                | None          ->  ()
+                | Some(name)    ->  match lemma.Goal |> Logic.PL.standardize |> Logic.PL.separate with
+                                    | None          -> ()
+                                    | Some(a, r)    -> setRules (Map.add name ([a], r) rules)
+                $"Successful lemma %s{lemma.ToString()}"
+        
+        let format (msg, list) =
+            match msg, list with
+            | None, xs      -> xs |> List.map evaluate |> String.concat "\n"
+            | Some(msg), [] -> msg
+            | Some(msg), xs -> sprintf "%s\n%s" (xs |> List.map evaluate |> String.concat "\n") msg
+        
+        setRules(Proof_Interface.rules)
+        
+        Regex.Replace(input, "\/\/.*", System.String.Empty)
+        |> parse
+        |> format
+        |> setOutput
+    , [|input :> obj|])
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
-        Button_Level.Button_Level(theme)
+        Button_Level.Button_Level(theme, setInput)
         Bulma.columns [
             columns.isGapless
             prop.className theme
@@ -67,7 +80,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, value, (fun value -> setValue(value.ToString())))
+                                    App.Components.Editor(theme, input, (fun value -> setInput(value.ToString())))
                                 ]
                             ]
                         ]
@@ -81,7 +94,7 @@ let Main () =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Components.Editor(theme, marko_polo value, readonly = true)
+                                    App.Components.Editor(theme, output, readonly = true)
                                 ]
                             ]
                         ]
