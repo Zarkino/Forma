@@ -10,8 +10,8 @@ module ML =
             let rec f x =
                 match x with
                 | Entity(p)         -> PL.Formula.ToString p
-                | Implication(p, q) -> $"(%s{f p}) ⟹ (%s{f q})"
-                | Equality(x, y)    -> $"(%s{f x}) ≡ (%s{f y})"
+                | Implication(p, q) -> $"%s{f p} ⟹ %s{f q}"
+                | Equality(x, y)    -> $"%s{f x} ≡ %s{f y}"
                 | Universal(x, m)   -> $"⋀%s{x}. %s{f m}"
             f meta
         override this.ToString() = Meta.ToString this
