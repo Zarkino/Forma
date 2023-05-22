@@ -32,6 +32,7 @@ let isValid lemma =
 
 let rules = Map.ofList [
     ("Falsity_E",   ([Constant(false)],                                             Variable("0")))
+    ("Truth_I",     ([Implication(Constant(false), Constant(false))],               Constant(true)))
     ("Neg_I",       ([Implication(Variable("0"), Constant(false))],                 Negation(Variable("0"))))
     ("Neg_E",       ([Negation(Variable("0")); Variable("0")],                      Variable("1")))
     ("Con_I",       ([Variable("0"); Variable("1")],                                Conjunction(Variable("0"), Variable("1"))))
