@@ -5,12 +5,7 @@
     <ItemGroup>
         <None Include="index.html" />
         <TypeScriptCompile Include="language\asp.ts" />
-        <Compile Include="Navigation Bar.fs" />
-        <Compile Include="Button Level.fs" />
-        <Compile Include="Libs\Monaco.fs" />
-        <Compile Include="Monaco Editor.fs" />
-        <Compile Include="Extensions.fs" />
-        <Compile Include="Components.fs" />
+
         <Compile Include="Parsec.fs" />
         <Compile Include="Logic.fs" />
         <Compile Include="Propositional Logic.fs" />
@@ -18,6 +13,14 @@
         <Compile Include="Meta Logic.fs" />
         <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />
+
+        <Compile Include="Navigation Bar.fs" />
+        <Compile Include="Button Level.fs" />
+        <Compile Include="Libs\Monaco.fs" />
+        <Compile Include="Monaco Editor.fs" />
+        <Compile Include="Extensions.fs" />
+        <Compile Include="Components.fs" />
+
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

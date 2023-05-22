@@ -74,7 +74,28 @@ let Button_Level (theme: string, setInput: string -> unit) =
                                     prop.className [ "title"; "is-4" ]
                                     prop.text "Rules"
                                 ]
-                                Html.span [ Html.text "..." ]
+                                Bulma.table [
+                                    table.isFullWidth
+                                    prop.children [
+                                        Html.thead [
+                                            Html.tr [
+                                                Html.th [ Html.abbr "Rule" ]
+                                                Html.th [ Html.abbr "Definition" ]
+                                            ]
+                                        ]
+                                        Html.tbody (
+                                            Proof_Interface.rules
+                                            |> Map.toList
+                                            |> List.map
+                                                (fun (k, (a, r)) ->
+                                                    Html.tr [
+                                                        Html.td $"%s{k}"
+                                                        Html.td (sprintf "[%s] ⟹ %s" (a |> List.map Logic.PL.Formula.ToString |> String.concat "; ") (Logic.PL.Formula.ToString r))
+                                                    ]
+                                                )
+                                        )
+                                    ]
+                                ]
                             ]
                         ]
                         Bulma.modalClose [ prop.onClick (fun _ -> setHelp(false)) ]
