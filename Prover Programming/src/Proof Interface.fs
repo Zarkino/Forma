@@ -32,12 +32,13 @@ let isValid lemma =
                                     | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
 
 let bind statements =
-    let P = statements |> List.tryPick (function Assumption(p) -> Some(p) | _ -> None)
-    let Q = statements |> List.rev |> List.tryPick (function Instant(_, q, _) | Delayed(q, _) -> Some(q) | _ -> None)
-    match P, Q with
-    | Some(p), Some(q)  -> Ok(Implication(Entity(p), Entity(q)))
-    | None, _           -> Error("Could not find assumption")
-    | _, None           -> Error("Could not find conclusion")
+    match List.tryHead statements with
+    | Some(Assumption(p))   ->
+        match List.tryLast statements with
+        | Some(Instant(_, q, _))
+        | Some(Delayed(q, _))       -> Ok(Implication(Entity(p), Entity(q)))
+        | _                         -> Error("Last statement must be a conclusion")
+    | _ -> Error("First statement must be an assumption")
 
 let rules = Map.ofList [
     ("Falsity_E",   ([Entity(Constant(false))],                                         Entity(Variable("0"))))
