@@ -11,8 +11,8 @@ let evaluating_Proofs =
         match runString Language.Proof.proof () proof with
             | Error _       ->  Test.failtest "Could not be parsed"
             | Ok(v, _, _)   ->  match prove(goal, v, Set.empty, rules) with
-                                | Success _  -> Expect.pass()
-                                | _          -> Test.failtest "Evaluation failed"
+                                | Ok _  -> Expect.pass()
+                                | _     -> Test.failtest "Evaluation failed"
 
     testList "Basic Proof Evaluation Tests" [
         test "Prove Proof: Conjunction Swap" {

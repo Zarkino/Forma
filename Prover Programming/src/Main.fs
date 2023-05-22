@@ -38,8 +38,8 @@ let Main () =
         
         let evaluate (lemma: Proof_Interface.Lemma) =
             match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
-            | Proof_Interface.Fail(msg) -> msg
-            | Proof_Interface.Success _ ->
+            | Error(msg)    -> msg
+            | Ok _          ->
                 match lemma.Name with
                 | None          ->  ()
                 | Some(name)    ->  match lemma.Goal |> Logic.PL.standardize |> Logic.PL.separate with

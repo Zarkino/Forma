@@ -66,29 +66,25 @@ let tryApply (assumptions, result, rule, ruleset) =
                                                             (sprintf "(%s, %s)" (Formula.ToString x) (Map.tryFind (Formula.ToString x) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
                                                         |> Some
 
-type Result =
-    | Success of Set<Formula>
-    | Fail of string
-
 let rec prove (goal: Formula, (proofRule, statements): Proof, assumptions: Set<Formula>, rules: Map<string, Formula list * Formula>) =
-    (Success(assumptions), statements)
+    (Ok(assumptions), statements)
     ||> List.fold
         (fun state statement ->
             match state with
-            | Fail _        ->  state
-            | Success(fs)   ->
+            | Error _   -> state
+            | Ok(fs)    ->
                 match statement with
-                | Assumption(f)         ->  Success(Set.add f fs)
+                | Assumption(f)         ->  Ok(Set.add f fs)
                 | Instant(a, f, rule)   ->  match List.tryFind (fun x -> not (Set.contains x fs)) (defaultArg a List.empty) with
-                                            | Some(a)   ->  Fail($"The assumption %s{Formula.ToString a} is not in the set of assumptions")
+                                            | Some(a)   ->  Error($"The assumption %s{Formula.ToString a} is not in the set of assumptions")
                                             | None      ->  match tryApply(fs, f, rule, rules) with
-                                                            | None      ->  Success(Set.add f fs)
-                                                            | Some(msg) ->  Fail(msg)
+                                                            | None      -> Ok(Set.add f fs)
+                                                            | Some(msg) -> Error(msg)
                 | Delayed(f, p)         ->  match prove(f, p, fs, rules) with
-                                            | Fail(msg) ->  Fail(msg)
-                                            | Success _ ->  Success(Set.add f fs))
+                                            | Error(msg)    -> Error(msg)
+                                            | Ok _          -> Ok(Set.add f fs))
     |> function
-        | Fail(msg)     ->  Fail(msg)
-        | Success(fs)   ->  match tryApply(fs, goal, proofRule, rules) with
-                            | None      -> Success(Set.add goal fs)
-                            | Some(msg) -> Fail(msg)
+        | Error(msg)    ->  Error(msg)
+        | Ok(fs)        ->  match tryApply(fs, goal, proofRule, rules) with
+                            | None      -> Ok(Set.add goal fs)
+                            | Some(msg) -> Error(msg)
