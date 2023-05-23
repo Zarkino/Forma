@@ -54,12 +54,14 @@ module Proof =
     
     let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
     
-    let keyword = ["have"; "show"] |> List.map pstring |> choice
+    let command keyword =
+        pipe3 (opt (pstring "from" >>. (sepBy1 formula (pstring "and")))) (pstring keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r)) <|>
+        pipe2 (pstring keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
     
     let statements = many (spaces >>. choice [
             pstring "assume" >>. spaces1 >>. formula |>> Assumption
-            pipe3 (opt (pstring "from" >>. (sepBy1 formula (pstring "and")))) (keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r))
-            pipe2 (keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
+            command "have" |>> Intermediate
+            command "show" |>> Conclusion
         ] .>> spaces)
     
     proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof

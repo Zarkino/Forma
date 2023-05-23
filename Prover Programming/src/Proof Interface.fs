@@ -6,8 +6,15 @@ open Logic.ML
 type Proof = string * Statement list
 and Statement =
     | Assumption of Formula
+    | Intermediate of Command
+    | Conclusion of Command
+and Command =
     | Instant of Formula list option * Formula * string
     | Delayed of Formula * Proof
+    member this.Goal =
+        match this with
+        | Instant(_, g, _)
+        | Delayed(g, _)     -> g
 
 type Lemma = {
     Name: string option
@@ -18,27 +25,15 @@ with
     static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Goal.ToString()}")
     override this.ToString() = Lemma.ToString this
 
-let isValid lemma =
-    match separate lemma.Goal with
-        | None          ->  false, $"Incomplete lemma %s{lemma.ToString()}"
-        | Some(a, c)    ->
-            (match List.tryHead (snd lemma.Proof) with
-            | Some(Assumption(a'))  when a = a' ->  true, System.String.Empty
-            | _                                 ->  false, "Initial assumption in proof must match the assumption from lemma")
-            |> (function
-                | false, msg    ->  false, msg
-                | true, _       ->  match List.tryLast (snd lemma.Proof) with
-                                    | Some(Instant(_, c', _))   when c = c' ->  true, System.String.Empty
-                                    | _                                     ->  false, "The proofs conclusion must match the conclusion in lemma")
-
 let bind statements =
-    match List.tryHead statements with
-    | Some(Assumption(p))   ->
-        match List.tryLast statements with
-        | Some(Instant(_, q, _))
-        | Some(Delayed(q, _))       -> Ok(Implication(Entity(p), Entity(q)))
-        | _                         -> Error("Last statement must be a conclusion")
-    | _ -> Error("First statement must be an assumption")
+    ((Set.empty, Set.empty), statements)
+    ||> List.fold
+        (fun (bindings, assumptions) statement ->
+            match statement with
+            | Assumption(formula)   -> bindings, Set.add formula assumptions
+            | Intermediate _        -> bindings, assumptions
+            | Conclusion(command)   -> Set.union (Set.map (fun a -> Implication(Entity(a), Entity(command.Goal))) assumptions) bindings, assumptions)
+    |> fst
 
 let rules = Map.ofList [
     ("Falsity_E",   ([Entity(Constant(false))],                                         Entity(Variable("0"))))
@@ -87,19 +82,22 @@ let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta
             | Error _   -> state
             | Ok(fs)    ->
                 match statement with
-                | Assumption(f)         ->  Ok(Set.add (Entity(f)) fs)
-                | Instant(a, f, rule)   ->  match List.tryFind (fun x -> not (Set.contains x fs)) (a |> function Some(v) -> List.map Entity v | None -> List.empty) with
-                                            | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
-                                            | None      ->  match tryApply(fs, Entity(f), rule, rules) with
-                                                            | None      -> Ok(Set.add (Entity(f)) fs)
-                                                            | Some(msg) -> Error(msg)
-                | Delayed(f, p)         ->  match prove(Entity(f), p, fs, rules) with
-                                            | Error(msg)    -> Error(msg)
-                                            | Ok _          -> Ok(Set.add (Entity(f)) fs))
+                | Assumption(f)         -> Ok(Set.add (Entity(f)) fs)
+                | Intermediate(command)
+                | Conclusion(command)   ->
+                    match command with
+                    | Instant(a, f, rule)   ->
+                        match List.tryFind (fun x -> not (Set.contains x fs)) (a |> function Some(v) -> List.map Entity v | None -> List.empty) with
+                        | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
+                        | None      ->  match tryApply(fs, Entity(f), rule, rules) with
+                                        | None      -> Ok(Set.add (Entity(f)) fs)
+                                        | Some(msg) -> Error(msg)
+                    | Delayed(f, p)         ->
+                        match prove(Entity(f), p, fs, rules) with
+                        | Error(msg)    -> Error(msg)
+                        | Ok _          -> Ok(Set.add (Entity(f)) fs))
     |> function
         | Error(msg)    ->  Error(msg)
-        | Ok(fs)        ->  match bind statements with
-                            | Error(msg)    ->  Error(msg)
-                            | Ok(value)     ->  match tryApply(Set.add value fs, goal, proofRule, rules) with
-                                                | None      -> Ok(Set.add goal fs)
-                                                | Some(msg) -> Error(msg)
+        | Ok(fs)        ->  match tryApply(Set.union (bind statements) fs, goal, proofRule, rules) with
+                            | None      -> Ok(Set.add goal fs)
+                            | Some(msg) -> Error(msg)
