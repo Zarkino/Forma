@@ -26,14 +26,17 @@ with
     override this.ToString() = Lemma.ToString this
 
 let bind statements =
-    ((Set.empty, Set.empty), statements)
+    ((Set.empty, Map.empty), statements)
     ||> List.fold
         (fun (bindings, assumptions) statement ->
             match statement with
-            | Assumption(formula)   -> bindings, Set.add formula assumptions
-            | Intermediate _        -> bindings, assumptions
-            | Conclusion(command)   -> Set.union (Set.map (fun a -> Implication(Entity(a), Entity(command.Goal))) assumptions) bindings, assumptions)
-    |> fst
+            | Assumption(formula)   ->  bindings, Map.add formula false assumptions
+            | Intermediate _        ->  bindings, assumptions
+            | Conclusion(command)   ->  Set.union (assumptions |> Map.keys |> Set.ofSeq |> Set.map (fun k -> Implication(Entity(k), Entity(command.Goal)))) bindings, Map.map (fun _ _ -> true) assumptions)
+    |> (fun (bindings, assumptions) ->
+        match Map.tryFindKey (fun _ -> not) assumptions with
+        | Some(k)   -> Error($"Assumption %s{k.ToString()} was not discharged")
+        | None      -> Ok(bindings))
 
 let rules = Map.ofList [
     ("Falsity_E",   ([Entity(Constant(false))],                                         Entity(Variable("0"))))
@@ -98,6 +101,8 @@ let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta
                         | Ok _          -> Ok(Set.add (Entity(f)) fs))
     |> function
         | Error(msg)    ->  Error(msg)
-        | Ok(fs)        ->  match tryApply(Set.union (bind statements) fs, goal, proofRule, rules) with
-                            | None      -> Ok(Set.add goal fs)
-                            | Some(msg) -> Error(msg)
+        | Ok(fs)        ->  match bind statements with
+                            | Error(msg)    ->  Error(msg)
+                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, proofRule, rules) with
+                                                | None      -> Ok(Set.add goal fs)
+                                                | Some(msg) -> Error(msg)
