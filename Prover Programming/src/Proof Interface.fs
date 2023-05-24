@@ -5,12 +5,12 @@ open Logic.ML
 
 type Proof = string * Statement list
 and Statement =
-    | Assumption of Formula
+    | Assumption of Meta
     | Intermediate of Command
     | Conclusion of Command
 and Command =
-    | Instant of Formula list option * Formula * string
-    | Delayed of Formula * Proof
+    | Instant of Meta list option * Meta * string
+    | Delayed of Meta * Proof
     member this.Goal =
         match this with
         | Instant(_, g, _)
@@ -18,7 +18,7 @@ and Command =
 
 type Lemma = {
     Name: string option
-    Goal: Formula
+    Goal: Meta
     Proof: Proof
 }
 with
@@ -32,7 +32,7 @@ let bind statements =
             match statement with
             | Assumption(formula)   ->  bindings, Map.add formula false assumptions
             | Intermediate _        ->  bindings, assumptions
-            | Conclusion(command)   ->  Set.union (assumptions |> Map.keys |> Set.ofSeq |> Set.map (fun k -> Implication(Entity(k), Entity(command.Goal)))) bindings, Map.map (fun _ _ -> true) assumptions)
+            | Conclusion(command)   ->  Set.union (assumptions |> Map.keys |> Set.ofSeq |> Set.map (fun k -> Implication(k, command.Goal))) bindings, Map.map (fun _ _ -> true) assumptions)
     |> (fun (bindings, assumptions) ->
         match Map.tryFindKey (fun _ -> not) assumptions with
         | Some(k)   -> Error($"Assumption %s{k.ToString()} was not discharged")
@@ -85,20 +85,20 @@ let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta
             | Error _   -> state
             | Ok(fs)    ->
                 match statement with
-                | Assumption(f)         -> Ok(Set.add (Entity(f)) fs)
+                | Assumption(f)         -> Ok(Set.add f fs)
                 | Intermediate(command)
                 | Conclusion(command)   ->
                     match command with
                     | Instant(a, f, rule)   ->
-                        match List.tryFind (fun x -> not (Set.contains x fs)) (a |> function Some(v) -> List.map Entity v | None -> List.empty) with
+                        match List.tryFind (fun x -> not (Set.contains x fs)) (defaultArg a List.empty) with
                         | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
-                        | None      ->  match tryApply(fs, Entity(f), rule, rules) with
-                                        | None      -> Ok(Set.add (Entity(f)) fs)
+                        | None      ->  match tryApply(fs, f, rule, rules) with
+                                        | None      -> Ok(Set.add f fs)
                                         | Some(msg) -> Error(msg)
                     | Delayed(f, p)         ->
-                        match prove(Entity(f), p, fs, rules) with
+                        match prove(f, p, fs, rules) with
                         | Error(msg)    -> Error(msg)
-                        | Ok _          -> Ok(Set.add (Entity(f)) fs))
+                        | Ok _          -> Ok(Set.add f fs))
     |> function
         | Error(msg)    ->  Error(msg)
         | Ok(fs)        ->  match bind statements with

@@ -45,7 +45,7 @@ module ML =
     }
 
 module Proof =
-    open PL
+    open ML
     open Proof_Interface
     
     let proof, proofRef = createParserForwardedToRef()
@@ -55,11 +55,11 @@ module Proof =
     let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
     
     let command keyword =
-        pipe3 (opt (pstring "from" >>. (sepBy1 formula (pstring "and")))) (pstring keyword >>. spaces1 >>. formula) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r)) <|>
-        pipe2 (pstring keyword >>. spaces1 >>. formula) proof (fun f p -> Delayed(f, p))
+        pipe3 (opt (pstring "from" >>. (sepBy1 meta (pstring "and")))) (pstring keyword >>. spaces1 >>. meta) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r)) <|>
+        pipe2 (pstring keyword >>. spaces1 >>. meta) proof (fun f p -> Delayed(f, p))
     
     let statements = many (spaces >>. choice [
-            pstring "assume" >>. spaces1 >>. formula |>> Assumption
+            pstring "assume" >>. spaces1 >>. meta |>> Assumption
             command "have" |>> Intermediate
             command "show" |>> Conclusion
         ] .>> spaces)
@@ -68,4 +68,4 @@ module Proof =
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     
-    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name formula proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
+    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name meta proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })

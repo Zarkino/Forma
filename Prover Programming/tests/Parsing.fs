@@ -46,6 +46,7 @@ let parsing_PL =
     ]
 
 open Proof_Interface
+open Logic.ML
 
 let parsing_Proofs =
     let parse input =
@@ -66,14 +67,12 @@ let parsing_Proofs =
         test "Parse Simple Proof" {
             Expect.equal
                 (parse "proof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by Con_E1\n\tfrom P & Q have Q by Con_E2\n\tfrom P and Q show Q & P by Con_I\n}")
-                (Some(Proof("Imp_I", [Assumption(Conjunction(Variable("P"), Variable("Q")))
-                                      Intermediate(Instant(Some [Conjunction(Variable("P"), Variable("Q"))], Variable("P"), "Con_E1"))
-                                      Intermediate(Instant(Some [Conjunction(Variable("P"), Variable("Q"))], Variable("Q"), "Con_E2"))
-                                      Conclusion(Instant(Some [Variable("P"); Variable("Q")], Conjunction(Variable("Q"), Variable("P")), "Con_I"))])), "") error_msg
+                (Some(Proof("Imp_I", [Assumption(Entity(Conjunction(Variable("P"), Variable("Q"))))
+                                      Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("P")), "Con_E1"))
+                                      Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("Q")), "Con_E2"))
+                                      Conclusion(Instant(Some [Entity(Variable("P")); Entity(Variable("Q"))], Entity(Conjunction(Variable("Q"), Variable("P"))), "Con_I"))])), "") error_msg
         }
     ]
-
-open Logic.ML
 
 let parsing_ML =
     let parse input =

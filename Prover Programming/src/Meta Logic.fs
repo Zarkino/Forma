@@ -28,3 +28,16 @@ module ML =
         | Universal(x, m), Universal(x', m')        ->  if x = x' then unify m m' map
                                                         else false, map
         | _, _                                      ->  false, map
+    
+    /// <summary>Splits metalogic into assumptions and conclusion.</summary>
+    let split meta =
+        let rec f x =
+            match x with
+            | Implication(p, q) -> p::f q
+            | _                 -> [x]
+        match meta with
+        | Implication(p, q) -> f p, q
+        | Entity(p)         ->  match PL.separate p with
+                                | None          -> [], meta
+                                | Some(p, q)    -> [Entity(p)], Entity(q)
+        | _                 -> [], meta
