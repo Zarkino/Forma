@@ -3,13 +3,17 @@
 open Logic.PL
 open Logic.ML
 
-type Proof = string * Statement list
+type Tactic =
+    | Rule of string
+    | Assumption
+
+type Proof = Tactic * Statement list
 and Statement =
     | Assumption of Meta
     | Intermediate of Command
     | Conclusion of Command
 and Command =
-    | Instant of Meta list option * Meta * string
+    | Instant of Meta list option * Meta * Tactic
     | Delayed of Meta * Proof
     member this.Goal =
         match this with
@@ -63,21 +67,29 @@ let rules = Map.ofList [
     ("LEM",         ([],                                                                Entity(Disjunction(Variable("0"), Negation(Variable("0"))))))
 ]
 
-let tryApply (assumptions, result, rule, ruleset) =
-    match Map.tryFind rule ruleset with
-    | None          ->  Some($"Rule \"%s{rule}\" does not exist")
-    | Some(a', r')  ->  match unify r' result Map.empty with
-                        | false, _  ->  Some($"Could not match %s{result.ToString()} with %s{r'.ToString()}")
-                        | true, map ->  match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) a' with
-                                        | None      ->  None
-                                        | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
-                                                            rule
-                                                            (a' |> List.map (fun x -> x.ToString()) |> String.concat "; ")
-                                                            (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
-                                                            (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
-                                                        |> Some
+let tryApply (assumptions, result, tactic, ruleset) =
+    match tactic with
+    | Tactic.Assumption    ->
+        match Set.exists ((=) result) assumptions with
+        | false -> Some($"Could not find %s{result.ToString()} in the set of assumptions")
+        | true  -> None
+    | Tactic.Rule(rule)    ->
+        match Map.tryFind rule ruleset with
+        | None          -> Some($"Rule \"%s{rule}\" does not exist")
+        | Some(a', r')  ->
+            match unify r' result Map.empty with
+            | false, _  -> Some($"Could not match %s{result.ToString()} with %s{r'.ToString()}")
+            | true, map ->
+                match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) a' with
+                | None      ->  None
+                | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
+                                    rule
+                                    (a' |> List.map (fun x -> x.ToString()) |> String.concat "; ")
+                                    (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
+                                    (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
+                                |> Some
 
-let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta list * Meta>) =
+let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta list * Meta>) =
     (Ok(assumptions), statements)
     ||> List.fold
         (fun state statement ->
@@ -103,6 +115,6 @@ let rec prove (goal: Meta, (proofRule, statements): Proof, assumptions: Set<Meta
         | Error(msg)    ->  Error(msg)
         | Ok(fs)        ->  match bind statements with
                             | Error(msg)    ->  Error(msg)
-                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, proofRule, rules) with
+                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, tactic, rules) with
                                                 | None      -> Ok(Set.add goal fs)
                                                 | Some(msg) -> Error(msg)

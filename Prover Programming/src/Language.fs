@@ -52,19 +52,26 @@ module Proof =
     
     let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
     
-    let proofRule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')'
+    let tactic_rule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')' |>> Tactic.Rule
+    let tactic_assumption = pstring "assumption" |>> (fun _ -> Tactic.Assumption)
     
-    let command keyword =
-        pipe3 (opt (pstring "from" >>. (sepBy1 meta (pstring "and")))) (pstring keyword >>. spaces1 >>. meta) (pstring "by" >>. spaces1 >>. rule) (fun a f r -> Instant(a, f, r)) <|>
+    let tactic = choice [
+        tactic_rule
+        tactic_assumption
+    ]
+    
+    let command keyword = choice [
+        pipe3 (opt (pstring "from" >>. (sepBy1 meta (pstring "and")))) (pstring keyword >>. spaces1 >>. meta) (pstring "by" >>. spaces1 >>. tactic) (fun a f r -> Instant(a, f, r))
         pipe2 (pstring keyword >>. spaces1 >>. meta) proof (fun f p -> Delayed(f, p))
+    ]
     
     let statements = many (spaces >>. choice [
-            pstring "assume" >>. spaces1 >>. meta |>> Assumption
-            command "have" |>> Intermediate
-            command "show" |>> Conclusion
-        ] .>> spaces)
+        pstring "assume" >>. spaces1 >>. meta |>> Assumption
+        command "have" |>> Intermediate
+        command "show" |>> Conclusion
+    ] .>> spaces)
     
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proofRule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
+    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. tactic_rule .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     

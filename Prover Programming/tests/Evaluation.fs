@@ -20,9 +20,9 @@ let evaluating_Proofs =
             let proof =
                 "proof (rule Imp_I) {
 					assume P & Q
-					from P & Q have P by Con_E1
-					from P & Q have Q by Con_E2
-					from P and Q show Q & P by Con_I
+					from P & Q have P by (rule Con_E1)
+					from P & Q have Q by (rule Con_E2)
+					from P and Q show Q & P by (rule Con_I)
 				}"
             evaluate goal proof
         }
@@ -34,7 +34,7 @@ let evaluating_Proofs =
 					show ~~P
 					proof (rule Falsity_E) {
 						assume ~P
-						from ~P and P show F by Neg_E
+						from ~P and P show F by (rule Neg_E)
 					}
 				}"
             evaluate goal proof
@@ -50,14 +50,14 @@ let evaluating_Proofs =
 				        show P -> Q
 				        proof (rule Imp_I) {
 				            assume P
-				            show Q by Iff_E1
+				            show Q by (rule Iff_E1)
 				        }
 				        show Q -> P
 				        proof (rule Imp_I) {
 				            assume Q
-				            show P by Iff_E2
+				            show P by (rule Iff_E2)
 				        }
-						show Q <-> P by Iff_I
+						show Q <-> P by (rule Iff_I)
 					}
 				    assume Q <-> P
 					show (Q <-> P) -> (P <-> Q)
@@ -66,14 +66,14 @@ let evaluating_Proofs =
 				        show Q -> P
 				        proof (rule Imp_I) {
 				            assume Q
-				            show P by Iff_E1
+				            show P by (rule Iff_E1)
 				        }
 						show P -> Q
 				        proof (rule Imp_I) {
 				            assume P
-				            show Q by Iff_E2
+				            show Q by (rule Iff_E2)
 				        }
-						show P <-> Q by Iff_I
+						show P <-> Q by (rule Iff_I)
 					}
 				}"
             evaluate goal proof

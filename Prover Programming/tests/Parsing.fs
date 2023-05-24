@@ -57,20 +57,21 @@ let parsing_Proofs =
     testList "Basic Proof Parsing Tests" [
         let error_msg = "Incorrect parsing"
         test "Parse Empty Proof" {
-            Expect.equal (parse "proof (rule Empty) {}") (Some(Proof("Empty", [])), "") error_msg
+            Expect.equal (parse "proof (rule Empty) {}") (Some(Proof(Rule("Empty"), [])), "") error_msg
         }
         test "Parse Rules" {
             rules.Keys |> Seq.iter (fun rule -> Expect.equal
                                                     (parse (sprintf "proof (rule %s) {}" rule))
-                                                    (Some(Proof(rule, [])), "") error_msg)
+                                                    (Some(Proof(Rule(rule), [])), "") error_msg)
         }
         test "Parse Simple Proof" {
             Expect.equal
-                (parse "proof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by Con_E1\n\tfrom P & Q have Q by Con_E2\n\tfrom P and Q show Q & P by Con_I\n}")
-                (Some(Proof("Imp_I", [Assumption(Entity(Conjunction(Variable("P"), Variable("Q"))))
-                                      Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("P")), "Con_E1"))
-                                      Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("Q")), "Con_E2"))
-                                      Conclusion(Instant(Some [Entity(Variable("P")); Entity(Variable("Q"))], Entity(Conjunction(Variable("Q"), Variable("P"))), "Con_I"))])), "") error_msg
+                (parse "proof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by (rule Con_E1)\n\tfrom P & Q have Q by (rule Con_E2)\n\tfrom P and Q show Q & P by (rule Con_I)\n}")
+                (Some(Proof(Rule("Imp_I"),
+                    [Assumption(Entity(Conjunction(Variable("P"), Variable("Q"))))
+                     Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("P")), Rule("Con_E1")))
+                     Intermediate(Instant(Some [Entity(Conjunction(Variable("P"), Variable("Q")))], Entity(Variable("Q")), Rule("Con_E2")))
+                     Conclusion(Instant(Some [Entity(Variable("P")); Entity(Variable("Q"))], Entity(Conjunction(Variable("Q"), Variable("P"))), Rule("Con_I")))])), "") error_msg
         }
     ]
 
