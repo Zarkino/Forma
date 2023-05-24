@@ -53,7 +53,7 @@ module Proof =
     let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
     
     let tactic_rule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')' |>> Tactic.Rule
-    let tactic_assumption = pstring "assumption" |>> (fun _ -> Tactic.Assumption)
+    let tactic_assumption = pstring "assumption" >>% Tactic.Assumption
     
     let tactic = choice [
         tactic_rule
