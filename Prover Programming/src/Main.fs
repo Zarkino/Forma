@@ -20,7 +20,7 @@ let rec evaluate_meta input =
 [<ReactComponent>]
 let Main () =
     let (theme, setTheme) = React.useState("light")
-    let (input, setInput) = React.useState(System.String.Empty)
+    let (input, setInput) = React.useState(Browser.WebStorage.localStorage.getItem("input"))
     let (output, setOutput) = React.useState(System.String.Empty)
     let (rules, setRules) = React.useState(Proof_Interface.rules)
     
@@ -52,6 +52,8 @@ let Main () =
             | Some(msg), xs -> sprintf "%s\n%s" (xs |> List.map evaluate |> String.concat "\n") msg
         
         setRules(Proof_Interface.rules)
+        
+        Browser.WebStorage.localStorage.setItem("input", input)
         
         Regex.Replace(input, "\/\/.*", System.String.Empty)
         |> parse
