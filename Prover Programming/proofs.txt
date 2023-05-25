@@ -4,9 +4,9 @@ lemma d_neg: P -> ~~P
 proof (rule Imp_I) {
     assume P
     show ~~P
-    proof (rule Neg_I) {
+    proof (rule Falsity_E) {
         assume ~P
-        from ~P and P show ~P -> F by Neg_E
+        from ~P and P show F by (rule Neg_E)
     }
 }
 
@@ -16,63 +16,60 @@ proof (rule Imp_I) {
 	show ~P
     proof (rule Neg_I) {
         assume P
-		have P -> Q by Con_E1
-		from P -> Q have Q by Imp_E
-        have ~Q by Con_E2
-        from ~Q and Q have F by Neg_E
-        have P -> F by Imp_I
+		have P -> Q by (rule Con_E1)
+		have Q by (rule Imp_E)
+        have ~Q by (rule Con_E2)
+        show F by (rule Neg_E)
 	}
 }
 
-lemma b-iimp_eqv: (P <-> Q) <-> Q <-> P
+lemma b-iimp_eqv: (P <-> Q) <-> (Q <-> P)
 proof (rule Iff_I) {
-    show (P <-> Q) -> (Q <-> P)
-    proof (rule Imp_I) {
-        assume P <-> Q
-        from P <-> Q have P -> Q by Iff_E1
-        from P <-> Q have Q -> P by Iff_E2
-        from P -> Q and Q -> P show Q <-> P by Iff_I
+	assume P <-> Q
+    show Q <-> P
+    proof (rule Iff_I) {
+        have P ==> Q by (rule Iff_E1)
+        have Q ==> P by (rule Iff_E2)
     }
-    show (Q <-> P) -> (P <-> Q)
-    proof (rule Imp_I) {
-        assume Q <-> P
-        from Q <-> P have Q -> P by Iff_E1
-        from Q <-> P have P -> Q by Iff_E2
-        from Q -> P and P -> Q show P <-> Q by Iff_I
+    assume Q <-> P
+	show P <-> Q
+    proof (rule Iff_I) {
+        have Q ==> P by (rule Iff_E1)
+        have P ==> Q by (rule Iff_E2)
     }
 }
 
-lemma classical: (~P -> P) -> P
-proof (rule Imp_I) {
-    assume ~P -> P
-    have P | ~P by LEM
-    show P -> P
-    proof (rule Imp_I) {
-        assume P
-    }
-    show P by Dis_E
+lemma classical: (~P ==> P) ==> P
+proof this {
+	assume ~P ==> P
+	have P ==> P by this
+	have P | ~P by (rule LEM)
+	show P by (rule Dis_E)
 }
 
 lemma Clavius: (~P -> P) -> P
 proof (rule Imp_I) {
-    assume ~P -> P
-    show P by classical
+	assume ~P -> P
+	show P
+	proof (rule classical) {
+		assume ~P
+		show P by (rule Imp_E)
+	}
 }
 
 lemma Peirce: ((P -> Q) -> P) -> P
 proof (rule Imp_I) {
-    assume (P -> Q) -> P
-    show P
-    proof (rule classical) {
-        assume ~P
-        have P -> Q
-        proof (rule Imp_I) {
-            assume P
-            from P and ~P show Q by Neg_E
-        }
-        from (P -> Q) -> P and P -> Q have P by Imp_E
-        from ~P and P show ~P -> P by Imp_I
-    }
+	assume (P -> Q) -> P
+	show P
+	proof (rule classical) {
+		assume ~P
+		have P -> Q
+		proof (rule Imp_I) {
+			assume P
+			show Q by (rule Imp_E)
+		}
+		show P by (rule Imp_E)
+	}
 }
 
 //given the following rule holds:
