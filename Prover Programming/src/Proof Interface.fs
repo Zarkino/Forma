@@ -77,8 +77,11 @@ let tryApply (assumptions, result, tactic, ruleset) =
     match tactic with
     | Tactic.Assumption    ->
         match Set.exists ((=) result) assumptions with
-        | false -> Error($"Could not find %s{result.ToString()} in the set of assumptions")
-        | true  -> Ok()
+        | true -> Ok()
+        | false  ->
+            match result with
+            | Implication(p, p') when p = p'    -> Ok()
+            | _                                 -> Error("Could not achieve goal by assumption")
     | Tactic.Rule(rule)    ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
