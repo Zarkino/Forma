@@ -68,7 +68,7 @@ let split rule goal =
             match unify q goal Map.empty with
             | true, map -> Ok(p::acc, map)
             | false, _  -> f q acc
-        | _                 -> Error($"Can only unify with Meta-implication: %s{x.ToString()}")
+        | _                 -> Error($"Can only split Meta-implication: %s{x.ToString()}")
     match unify rule goal Map.empty with
     | true, map -> Ok(List.empty, map)
     | false, _  -> f rule List.empty
@@ -76,12 +76,11 @@ let split rule goal =
 let tryApply (assumptions, result, method, ruleset) =
     match method with
     | Method.This       ->
-        match Set.exists ((=) result) assumptions with
-        | true  -> Ok()
-        | false ->
+        if Set.exists ((=) result) assumptions then Ok()
+        else
             match result with
             | Implication(p, p') when p = p'    -> Ok()
-            | _                                 -> Error("Could not achieve goal by this")
+            | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
     | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
