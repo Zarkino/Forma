@@ -87,10 +87,10 @@ let Button_Level (theme: string, setInput: string -> unit) =
                                             Proof_Interface.rules
                                             |> Map.toList
                                             |> List.map
-                                                (fun (k, (a, r)) ->
+                                                (fun (k, rule) ->
                                                     Html.tr [
                                                         Html.td $"%s{k}"
-                                                        Html.td (sprintf "[%s] ⟹ %s" (a |> List.map Logic.ML.Meta.ToString |> String.concat "; ") (Logic.ML.Meta.ToString r))
+                                                        Html.td $"%s{Logic.ML.Meta.ToString rule}"
                                                     ]
                                                 )
                                         )

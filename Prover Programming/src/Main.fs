@@ -37,12 +37,12 @@ let Main () =
             if string.Trim().Length > 0 then inner string id else None, []
         
         let evaluate (lemma: Proof_Interface.Lemma) =
-            match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
+            match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, Map.empty) with
             | Error(msg)    -> msg
             | Ok _          ->
                 match lemma.Name with
                 | None          -> ()
-                | Some(name)    -> setRules (Map.add name (Logic.ML.split lemma.Goal) rules)
+                | Some(name)    -> () //setRules (Map.add name (Logic.ML.split lemma.Goal) rules)
                 $"Successful lemma %s{lemma.ToString()}"
         
         let format (msg, list) =
