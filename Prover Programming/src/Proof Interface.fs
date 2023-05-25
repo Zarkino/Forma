@@ -61,29 +61,41 @@ let rules = Map.ofList [
     "LEM",         Entity(Disjunction(Variable("0"), Negation(Variable("0"))))
 ]
 
+let split rule goal =
+    let rec f x acc =
+        match x with
+        | Implication(p, q) ->
+            match unify q goal Map.empty with
+            | true, map -> Ok(p::acc, map)
+            | false, _  -> f q acc
+        | _                 -> Error($"Can only unify with Meta-implication: %s{x.ToString()}")
+    match unify rule goal Map.empty with
+    | true, map -> Ok(List.empty, map)
+    | false, _  -> f rule List.empty
+
 let tryApply (assumptions, result, tactic, ruleset) =
     match tactic with
     | Tactic.Assumption    ->
         match Set.exists ((=) result) assumptions with
-        | false -> Some($"Could not find %s{result.ToString()} in the set of assumptions")
-        | true  -> None
+        | false -> Error($"Could not find %s{result.ToString()} in the set of assumptions")
+        | true  -> Ok()
     | Tactic.Rule(rule)    ->
         match Map.tryFind rule ruleset with
-        | None          -> Some($"Rule \"%s{rule}\" does not exist")
-        | Some(a', r')  ->
-            match unify r' result Map.empty with
-            | false, _  -> Some($"Could not match %s{result.ToString()} with %s{r'.ToString()}")
-            | true, map ->
-                match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) a' with
-                | None      ->  None
+        | None          -> Error($"Rule \"%s{rule}\" does not exist")
+        | Some(meta)  ->
+            match split meta result with
+            | Error(msg)    -> Error(msg)
+            | Ok(list, map) -> 
+                match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) list with
+                | None      ->  Ok()
                 | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
                                     rule
-                                    (a' |> List.map (fun x -> x.ToString()) |> String.concat "; ")
+                                    (list |> List.map (fun x -> x.ToString()) |> String.concat "; ")
                                     (map |> Map.toList |> List.map (fun (k, v) -> $"(%s{k}, %s{Formula.ToString v})") |> String.concat "; ")
                                     (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
-                                |> Some
+                                |> Error
 
-let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta list * Meta>) =
+let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
     (Ok(assumptions), statements)
     ||> List.fold
         (fun state statement ->
@@ -99,8 +111,8 @@ let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, 
                         match List.tryFind (fun x -> not (Set.contains x fs)) (defaultArg a List.empty) with
                         | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
                         | None      ->  match tryApply(fs, f, rule, rules) with
-                                        | None      -> Ok(Set.add f fs)
-                                        | Some(msg) -> Error(msg)
+                                        | Ok()          -> Ok(Set.add f fs)
+                                        | Error(msg)    -> Error(msg)
                     | Delayed(f, p)         ->
                         match prove(f, p, fs, rules) with
                         | Error(msg)    -> Error(msg)
@@ -110,5 +122,5 @@ let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, 
         | Ok(fs)        ->  match bind statements with
                             | Error(msg)    ->  Error(msg)
                             | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, tactic, rules) with
-                                                | None      -> Ok(Set.add goal fs)
-                                                | Some(msg) -> Error(msg)
+                                                | Ok()          -> Ok(Set.add goal fs)
+                                                | Error(msg)    -> Error(msg)
