@@ -3,17 +3,17 @@
 open Logic.PL
 open Logic.ML
 
-type Tactic =
+type Method =
     | Rule of string
-    | Assumption
+    | This
 
-type Proof = Tactic * Statement list
+type Proof = Method * Statement list
 and Statement =
     | Assumption of Meta
     | Intermediate of Command
     | Conclusion of Command
 and Command =
-    | Instant of Meta list option * Meta * Tactic
+    | Instant of Meta list option * Meta * Method
     | Delayed of Meta * Proof
     member this.Goal =
         match this with
@@ -73,16 +73,16 @@ let split rule goal =
     | true, map -> Ok(List.empty, map)
     | false, _  -> f rule List.empty
 
-let tryApply (assumptions, result, tactic, ruleset) =
-    match tactic with
-    | Tactic.Assumption    ->
+let tryApply (assumptions, result, method, ruleset) =
+    match method with
+    | Method.This       ->
         match Set.exists ((=) result) assumptions with
-        | true -> Ok()
-        | false  ->
+        | true  -> Ok()
+        | false ->
             match result with
             | Implication(p, p') when p = p'    -> Ok()
-            | _                                 -> Error("Could not achieve goal by assumption")
-    | Tactic.Rule(rule)    ->
+            | _                                 -> Error("Could not achieve goal by this")
+    | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
         | Some(meta)  ->
@@ -98,7 +98,7 @@ let tryApply (assumptions, result, tactic, ruleset) =
                                     (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
                                 |> Error
 
-let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
+let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
     (Ok(assumptions), statements)
     ||> List.fold
         (fun state statement ->
@@ -124,6 +124,6 @@ let rec prove (goal: Meta, (tactic, statements): Proof, assumptions: Set<Meta>, 
         | Error(msg)    ->  Error(msg)
         | Ok(fs)        ->  match bind statements with
                             | Error(msg)    ->  Error(msg)
-                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, tactic, rules) with
+                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, method, rules) with
                                                 | Ok()          -> Ok(Set.add goal fs)
                                                 | Error(msg)    -> Error(msg)
