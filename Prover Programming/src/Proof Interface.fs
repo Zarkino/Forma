@@ -4,8 +4,9 @@ open Logic.PL
 open Logic.ML
 
 type Method =
-    | Rule of string
+    | Trivial
     | This
+    | Rule of string
 
 type Proof = Method * Statement list
 and Statement =
@@ -75,21 +76,20 @@ let split rule goal =
 
 let tryApply (assumptions, result, method, ruleset) =
     match method with
+    | Method.Trivial    -> if Set.contains result assumptions then Ok() else Error($"Could not reach goal %s{result.ToString()} by none")
     | Method.This       ->
-        if Set.exists ((=) result) assumptions then Ok()
-        else
-            assumptions
-            |> Set.exists
-                (fun x ->
-                    match Logic.ML.split x with
-                    | a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a'   -> true
-                    | _                                                                                 -> false)
-            |> function
-                | true  -> Ok()
-                | false ->
-                    match result with
-                    | Implication(p, p') when p = p'    -> Ok()
-                    | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
+        assumptions
+        |> Set.exists
+               (fun x ->
+                   match Logic.ML.split x with
+                   | a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a'   -> true
+                   | _                                                                                 -> false)
+        |> function
+        | true  -> Ok()
+        | false ->
+            match result with
+            | Implication(p, p') when p = p'    -> Ok()
+            | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
     | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")

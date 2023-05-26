@@ -54,14 +54,21 @@ module Proof =
     
     let method_rule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')' |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
+    let method_trivial = (pstring "-" <|> pstring "none") >>% Method.Trivial
     
-    let method = choice [
+    let proof_method = choice [
+        method_rule
+        method_this
+        method_trivial
+    ]
+    
+    let command_method = choice [
         method_rule
         method_this
     ]
     
     let command keyword = choice [
-        pipe3 (opt (pstring "from" >>. (sepBy1 meta (pstring "and")))) (pstring keyword >>. spaces1 >>. meta) (pstring "by" >>. spaces1 >>. method) (fun a f r -> Instant(a, f, r))
+        pipe3 (opt (pstring "from" >>. (sepBy1 meta (pstring "and")))) (pstring keyword >>. spaces1 >>. meta) (pstring "by" >>. spaces1 >>. command_method) (fun a f r -> Instant(a, f, r))
         pipe2 (pstring keyword >>. spaces1 >>. meta) proof (fun f p -> Delayed(f, p))
     ]
     
@@ -71,7 +78,7 @@ module Proof =
         command "show" |>> Conclusion
     ] .>> spaces)
     
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. method .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
+    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proof_method .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     

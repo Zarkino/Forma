@@ -40,7 +40,7 @@ proof (rule Iff_I) {
 }
 
 lemma classical: (~P ==> P) ==> P
-proof this {
+proof - {
 	assume ~P ==> P
 	have P ==> P by this
 	have P | ~P by (rule LEM)
@@ -73,10 +73,10 @@ proof (rule Imp_I) {
 }
 
 lemma ccontr: (~P ==> F) ==> P
-proof this {
+proof - {
     assume ~P ==> F
     have ~P ==> P
-    proof this {
+    proof - {
         assume ~P
         have ~P -> F by (rule Imp_I)
         have F by (rule Imp_E)
