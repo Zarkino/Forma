@@ -31,13 +31,10 @@ module ML =
     
     /// <summary>Splits metalogic into assumptions and conclusion.</summary>
     let split meta =
-        let rec f x =
+        let rec f x cont =
             match x with
-            | Implication(p, q) -> p::f q
-            | _                 -> [x]
+            | Implication(p, q) -> f q (fun tail -> p::tail)
+            | q                 -> cont [], q
         match meta with
-        | Implication(p, q) -> f p, q
-        | Entity(p)         ->  match PL.separate p with
-                                | None          -> [], meta
-                                | Some(p, q)    -> [Entity(p)], Entity(q)
-        | _                 -> [], meta
+        | Implication(p, q) -> f q (fun tail -> p::tail)
+        | p                 -> [], p
