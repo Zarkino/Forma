@@ -30,19 +30,6 @@ with
     static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Goal.ToString()}")
     override this.ToString() = Lemma.ToString this
 
-let bind statements =
-    ((Set.empty, Map.empty), statements)
-    ||> List.fold
-        (fun (bindings, assumptions) statement ->
-            match statement with
-            | Assumption(formula)   ->  bindings, Map.add formula false assumptions
-            | Intermediate _        ->  bindings, assumptions
-            | Conclusion(command)   ->  Set.union (assumptions |> Map.keys |> Set.ofSeq |> Set.map (fun k -> Implication(k, command.Goal))) bindings, Map.map (fun _ _ -> true) assumptions)
-    |> (fun (bindings, assumptions) ->
-        match Map.tryFindKey (fun _ -> not) assumptions with
-        | Some(k)   -> Error($"Assumption %s{k.ToString()} was not discharged")
-        | None      -> Ok(bindings))
-
 let rules = Map.ofList [
     "Falsity_E",    Implication(Entity(Constant(false)), Entity(Variable("0")))
     "Truth_I",      Implication(Entity(Logic.PL.Implication(Constant(false), Constant(false))), Entity(Constant(true)))
@@ -73,6 +60,8 @@ let split rule goal =
     match unify rule goal Map.empty with
     | true, map -> Ok(List.empty, map)
     | false, _  -> f rule List.empty
+
+let rec insert goal = function Implication(p, q) -> Implication(p, insert goal q) | q -> Implication(goal, q)
 
 let tryApply (assumptions, result, method, ruleset) =
     match method with
@@ -107,38 +96,46 @@ let tryApply (assumptions, result, method, ruleset) =
                                 |> Error
 
 let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
-    (Ok(assumptions), statements)
+    (Ok(assumptions, None), statements)
     ||> List.fold
         (fun state statement ->
             match state with
-            | Error _   -> state
-            | Ok(fs)    ->
+            | Error _           -> state
+            | Ok(fs, subgoal)   ->
                 match statement with
-                | Assumption(f)         -> Ok(Set.add f fs)
+                | Assumption(f)         -> Ok(Set.add f fs, Some(subgoal |> function None -> f | Some(f') -> insert f' f))
                 | Intermediate(command)
                 | Conclusion(command)   ->
                     match command with
                     | Instant(a, f, rule)   ->
-                        (match a with
+                        match a with
                         | None      -> Ok(fs)
                         | Some(a')  ->
                             match List.tryFind (fun x -> not (Set.contains x fs)) a' with
                             | Some(v)   -> Error($"The assumption %s{v.ToString()} is not in the set of assumptions")
-                            | None      -> Ok(Set a'))
+                            | None      -> Ok(Set a')
                         |> function
                             | Error(msg)    -> Error(msg)
-                            | Ok(a')        ->
-                                match tryApply(a', f, rule, rules) with
-                                | Ok()          -> Ok(Set.add f fs)
+                            | Ok(fs')        ->
+                                match tryApply(fs', f, rule, rules) with
                                 | Error(msg)    -> Error(msg)
+                                | Ok()          -> Ok(f)
                     | Delayed(f, p)         ->
                         match prove(f, p, fs, rules) with
                         | Error(msg)    -> Error(msg)
-                        | Ok _          -> Ok(Set.add f fs))
+                        | Ok _          -> Ok(f)
+                    |> function
+                        | Error(msg)    -> Error(msg)
+                        | Ok(f)         ->
+                            match statement with
+                            | Assumption _      -> Error("Something went wrong")
+                            | Intermediate _    -> Ok(Set.add f fs, subgoal)
+                            | Conclusion _      ->
+                                match subgoal with
+                                | None      -> Ok(Set.add f fs, subgoal)
+                                | Some(f')  -> Ok(Set.union (Set [f; Implication(f', f)]) fs, subgoal))
     |> function
         | Error(msg)    ->  Error(msg)
-        | Ok(fs)        ->  match bind statements with
-                            | Error(msg)    ->  Error(msg)
-                            | Ok(bindings)  ->  match tryApply(Set.union bindings fs, goal, method, rules) with
-                                                | Ok()          -> Ok(Set.add goal fs)
-                                                | Error(msg)    -> Error(msg)
+        | Ok(fs, _)     ->  match tryApply(fs, goal, method, rules) with
+                            | Ok()          -> Ok(Set.add goal fs)
+                            | Error(msg)    -> Error(msg)
