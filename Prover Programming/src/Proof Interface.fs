@@ -119,11 +119,18 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, 
                 | Conclusion(command)   ->
                     match command with
                     | Instant(a, f, rule)   ->
-                        match List.tryFind (fun x -> not (Set.contains x fs)) (defaultArg a List.empty) with
-                        | Some(a)   ->  Error($"The assumption %s{a.ToString()} is not in the set of assumptions")
-                        | None      ->  match tryApply(fs, f, rule, rules) with
-                                        | Ok()          -> Ok(Set.add f fs)
-                                        | Error(msg)    -> Error(msg)
+                        (match a with
+                        | None      -> Ok(fs)
+                        | Some(a')  ->
+                            match List.tryFind (fun x -> not (Set.contains x fs)) a' with
+                            | Some(v)   -> Error($"The assumption %s{v.ToString()} is not in the set of assumptions")
+                            | None      -> Ok(Set a'))
+                        |> function
+                            | Error(msg)    -> Error(msg)
+                            | Ok(a')        ->
+                                match tryApply(a', f, rule, rules) with
+                                | Ok()          -> Ok(Set.add f fs)
+                                | Error(msg)    -> Error(msg)
                     | Delayed(f, p)         ->
                         match prove(f, p, fs, rules) with
                         | Error(msg)    -> Error(msg)
