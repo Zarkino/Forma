@@ -66,10 +66,24 @@ proof (rule Imp_I) {
 		have P -> Q
 		proof (rule Imp_I) {
 			assume P
-			show Q by (rule Imp_E)
+			show Q by (rule Neg_E)
 		}
 		show P by (rule Imp_E)
 	}
+}
+
+lemma ccontr: (~P ==> F) ==> P
+proof this {
+    assume ~P ==> F
+    have ~P ==> P
+    proof this {
+        assume ~P
+        have ~P -> F by (rule Imp_I)
+        have F by (rule Imp_E)
+        show P by (rule Falsity_E)
+    }
+    have (~P ==> P) ==> P by (rule classical)
+    show P by this
 }
 
 //given the following rule holds:
