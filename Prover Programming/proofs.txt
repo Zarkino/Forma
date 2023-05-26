@@ -82,8 +82,7 @@ proof this {
         have F by (rule Imp_E)
         show P by (rule Falsity_E)
     }
-    have (~P ==> P) ==> P by (rule classical)
-    show P by this
+    show P by (rule classical)
 }
 
 //given the following rule holds:
