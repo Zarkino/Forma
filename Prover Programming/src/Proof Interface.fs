@@ -43,22 +43,22 @@ let bind statements =
         | None      -> Ok(bindings))
 
 let rules = Map.ofList [
-    "Falsity_E",   Implication(Entity(Constant(false)), Entity(Variable("0")))
-    "Truth_I",     Implication(Entity(Logic.PL.Implication(Constant(false), Constant(false))), Entity(Constant(true)))
-    "Neg_I",       Implication(Implication(Entity(Variable("0")), Entity(Constant(false))), Entity(Negation(Variable("0"))))
-    "Neg_E",       Implication(Entity(Negation(Variable("0"))),Implication(Entity(Variable("0")), Entity(Variable("1"))))
-    "Con_I",       Implication(Entity(Variable("0")), Implication(Entity(Variable("1")), Entity(Conjunction(Variable("0"), Variable("1")))))
-    "Con_E1",      Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("0")))
-    "Con_E2",      Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("1")))
-    "Dis_I1",      Implication(Entity(Variable("0")), Entity(Disjunction(Variable("0"), Variable("1"))))
-    "Dis_I2",      Implication(Entity(Variable("1")), Entity(Disjunction(Variable("0"), Variable("1"))))
-    "Dis_E",       Implication(Entity(Disjunction(Variable("0"), Variable("1"))), Implication(Implication(Entity(Variable("0")), Entity(Variable("2"))), Implication(Implication(Entity(Variable("1")), Entity(Variable("2"))), Entity(Variable("2")))))
-    "Imp_I",       Implication(Implication(Entity(Variable("0")), Entity(Variable("1"))), Entity(Logic.PL.Implication(Variable("0"), Variable("1"))))
-    "Imp_E",       Implication(Entity(Logic.PL.Implication(Variable("0"), Variable("1"))), Implication(Entity(Variable("0")), Entity(Variable("1"))))
-    "Iff_I",       Implication(Implication(Entity(Variable("0")), Entity(Variable("1"))), Implication(Implication(Entity(Variable("1")), Entity(Variable("0"))), Entity(Equivalence(Variable("0"), Variable("1")))))
-    "Iff_E1",      Implication(Entity(Equivalence(Variable("0"), Variable("1"))), Implication(Entity(Variable("0")), Entity(Variable("1"))))
-    "Iff_E2",      Implication(Entity(Equivalence(Variable("0"), Variable("1"))), Implication(Entity(Variable("1")), Entity(Variable("0"))))
-    "LEM",         Entity(Disjunction(Variable("0"), Negation(Variable("0"))))
+    "Falsity_E",    Implication(Entity(Constant(false)), Entity(Variable("0")))
+    "Truth_I",      Implication(Entity(Logic.PL.Implication(Constant(false), Constant(false))), Entity(Constant(true)))
+    "Neg_I",        Implication(Implication(Entity(Variable("0")), Entity(Constant(false))), Entity(Negation(Variable("0"))))
+    "Neg_E",        Implication(Entity(Negation(Variable("0"))),Implication(Entity(Variable("0")), Entity(Variable("1"))))
+    "Con_I",        Implication(Entity(Variable("0")), Implication(Entity(Variable("1")), Entity(Conjunction(Variable("0"), Variable("1")))))
+    "Con_E1",       Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("0")))
+    "Con_E2",       Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("1")))
+    "Dis_I1",       Implication(Entity(Variable("0")), Entity(Disjunction(Variable("0"), Variable("1"))))
+    "Dis_I2",       Implication(Entity(Variable("1")), Entity(Disjunction(Variable("0"), Variable("1"))))
+    "Dis_E",        Implication(Entity(Disjunction(Variable("0"), Variable("1"))), Implication(Implication(Entity(Variable("0")), Entity(Variable("2"))), Implication(Implication(Entity(Variable("1")), Entity(Variable("2"))), Entity(Variable("2")))))
+    "Imp_I",        Implication(Implication(Entity(Variable("0")), Entity(Variable("1"))), Entity(Logic.PL.Implication(Variable("0"), Variable("1"))))
+    "Imp_E",        Implication(Entity(Logic.PL.Implication(Variable("0"), Variable("1"))), Implication(Entity(Variable("0")), Entity(Variable("1"))))
+    "Iff_I",        Implication(Implication(Entity(Variable("0")), Entity(Variable("1"))), Implication(Implication(Entity(Variable("1")), Entity(Variable("0"))), Entity(Equivalence(Variable("0"), Variable("1")))))
+    "Iff_E1",       Implication(Entity(Equivalence(Variable("0"), Variable("1"))), Implication(Entity(Variable("0")), Entity(Variable("1"))))
+    "Iff_E2",       Implication(Entity(Equivalence(Variable("0"), Variable("1"))), Implication(Entity(Variable("1")), Entity(Variable("0"))))
+    "LEM",          Entity(Disjunction(Variable("0"), Negation(Variable("0"))))
 ]
 
 let split rule goal =
@@ -67,7 +67,7 @@ let split rule goal =
         | Implication(p, q) ->
             match unify q goal Map.empty with
             | true, map -> Ok(p::acc, map)
-            | false, _  -> f q acc
+            | false, _  -> f q (p::acc)
         | _                 -> Error($"Can only split Meta-implication: %s{x.ToString()}")
     match unify rule goal Map.empty with
     | true, map -> Ok(List.empty, map)
