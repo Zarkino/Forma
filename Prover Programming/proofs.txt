@@ -1,6 +1,6 @@
 ﻿// Some working proof examples
 
-lemma d_neg: P -> ~~P
+lemma d_neg: P --> ~~P
 proof (rule Imp_I) {
     assume P
     show ~~P
@@ -10,29 +10,29 @@ proof (rule Imp_I) {
     }
 }
 
-lemma imp_inv: ((P -> Q) & ~Q) -> ~P
+lemma imp_inv: ((P --> Q) & ~Q) --> ~P
 proof (rule Imp_I) {
-	assume (P -> Q) & ~Q
+	assume (P --> Q) & ~Q
 	show ~P
     proof (rule Neg_I) {
         assume P
-		have P -> Q by (rule Con_E1)
+		have P --> Q by (rule Con_E1)
 		have Q by (rule Imp_E)
         have ~Q by (rule Con_E2)
         show F by (rule Neg_E)
 	}
 }
 
-lemma b-iimp_eqv: (P <-> Q) <-> (Q <-> P)
+lemma b-iimp_eqv: (P <--> Q) <--> (Q <--> P)
 proof (rule Iff_I) {
-	assume P <-> Q
-    show Q <-> P
+	assume P <--> Q
+    show Q <--> P
     proof (rule Iff_I) {
         have P ==> Q by (rule Iff_E1)
         have Q ==> P by (rule Iff_E2)
     }
-    assume Q <-> P
-	show P <-> Q
+    assume Q <--> P
+	show P <--> Q
     proof (rule Iff_I) {
         have Q ==> P by (rule Iff_E1)
         have P ==> Q by (rule Iff_E2)
@@ -47,9 +47,9 @@ proof - {
 	show P by (rule Dis_E)
 }
 
-lemma Clavius: (~P -> P) -> P
+lemma Clavius: (~P --> P) --> P
 proof (rule Imp_I) {
-	assume ~P -> P
+	assume ~P --> P
 	show P
 	proof (rule classical) {
 		assume ~P
@@ -57,13 +57,13 @@ proof (rule Imp_I) {
 	}
 }
 
-lemma Peirce: ((P -> Q) -> P) -> P
+lemma Peirce: ((P --> Q) --> P) --> P
 proof (rule Imp_I) {
-	assume (P -> Q) -> P
+	assume (P --> Q) --> P
 	show P
 	proof (rule classical) {
 		assume ~P
-		have P -> Q
+		have P --> Q
 		proof (rule Imp_I) {
 			assume P
 			show Q by (rule Neg_E)
@@ -78,23 +78,38 @@ proof - {
     have ~P ==> P
     proof - {
         assume ~P
-        have ~P -> F by (rule Imp_I)
+        have ~P --> F by (rule Imp_I)
         have F by (rule Imp_E)
         show P by (rule Falsity_E)
     }
     show P by (rule classical)
 }
 
+lemma Boole: ((P --> F) --> F) ==> P
+proof - {
+    assume (P --> F) --> F
+    show P
+    proof (rule ccontr) {
+        assume ~P
+        have P --> F
+        proof (rule Imp_I) {
+            assume P
+            show F by (rule Neg_E)
+        }
+        show F by (rule Imp_E)
+    }
+}
+
 //given the following rule holds:
 //("Ccontr",  ([Implication(Negation(Variable("0")), Constant(false))],       Variable("0")))
 
-lemma dneg: (~~p) -> p
+lemma dneg: (~~p) --> p
 proof (rule Imp_I) {
     assume ~~p
     show p
     proof (rule Ccontr) {
         assume ~p
         from ~~p and ~p have F by Neg_E
-        from ~p and F show (~p) -> F by Imp_I
+        from ~p and F show (~p) --> F by Imp_I
     }
 }

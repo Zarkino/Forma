@@ -57,8 +57,8 @@ module PL =
             | Negation _    -> "¬"
             | Conjunction _ -> "∧"
             | Disjunction _ -> "∨"
-            | Implication _ -> "→"
-            | Equivalence _ -> "↔"
+            | Implication _ -> "⟶"
+            | Equivalence _ -> "⟷"
         member this.GetOperator() = Formula.GetOperator this
         static member ToString formula =
             let rec f x =

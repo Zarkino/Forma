@@ -18,8 +18,8 @@ module PL =
         return! spaces >>. choice [
             binaryFormula ["&"; "∧"] |>> (fun right -> Conjunction(left, right))
             binaryFormula ["|"; "∨"] |>> (fun right -> Disjunction(left, right))
-            binaryFormula ["->"; "→"] |>> (fun right -> Implication(left, right))
-            binaryFormula ["<->"; "↔"] |>> (fun right -> Equivalence(left, right))
+            binaryFormula ["-->"; "⟶"] |>> (fun right -> Implication(left, right))
+            binaryFormula ["<-->"; "⟷"] |>> (fun right -> Equivalence(left, right))
             preturn left
         ]
     }

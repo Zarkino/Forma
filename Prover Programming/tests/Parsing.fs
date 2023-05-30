@@ -38,10 +38,10 @@ let parsing_PL =
             Expect.equal (parse "P | Q") (Some(Disjunction(Variable("P"), Variable("Q"))), "") error_msg
         }
         test "Parse Implication" {
-            Expect.equal (parse "P -> Q") (Some(Implication(Variable("P"), Variable("Q"))), "") error_msg
+            Expect.equal (parse "P --> Q") (Some(Implication(Variable("P"), Variable("Q"))), "") error_msg
         }
         test "Parse Bi-implication" {
-            Expect.equal (parse "P <-> Q") (Some(Equivalence(Variable("P"), Variable("Q"))), "") error_msg
+            Expect.equal (parse "P <--> Q") (Some(Equivalence(Variable("P"), Variable("Q"))), "") error_msg
         }
     ]
 

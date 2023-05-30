@@ -43,37 +43,37 @@ let evaluating_Proofs =
             let goal = Equivalence(Equivalence(Variable("P"), Variable("Q")), Equivalence(Variable("Q"), Variable("P")))
             let proof =
                 "proof (rule Iff_I) {
-				    assume P <-> Q
-					show (P <-> Q) -> (Q <-> P)
+				    assume P <--> Q
+					show (P <--> Q) --> (Q <--> P)
 					proof (rule Imp_I) {
-						assume P <-> Q
-				        show P -> Q
+						assume P <--> Q
+				        show P --> Q
 				        proof (rule Imp_I) {
 				            assume P
 				            show Q by (rule Iff_E1)
 				        }
-				        show Q -> P
+				        show Q --> P
 				        proof (rule Imp_I) {
 				            assume Q
 				            show P by (rule Iff_E2)
 				        }
-						show Q <-> P by (rule Iff_I)
+						show Q <--> P by (rule Iff_I)
 					}
-				    assume Q <-> P
-					show (Q <-> P) -> (P <-> Q)
+				    assume Q <--> P
+					show (Q <--> P) --> (P <--> Q)
 					proof (rule Imp_I) {
-						assume Q <-> P
-				        show Q -> P
+						assume Q <--> P
+				        show Q --> P
 				        proof (rule Imp_I) {
 				            assume Q
 				            show P by (rule Iff_E1)
 				        }
-						show P -> Q
+						show P --> Q
 				        proof (rule Imp_I) {
 				            assume P
 				            show Q by (rule Iff_E2)
 				        }
-						show P <-> Q by (rule Iff_I)
+						show P <--> Q by (rule Iff_I)
 					}
 				}"
             evaluate goal proof
