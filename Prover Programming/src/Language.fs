@@ -73,7 +73,7 @@ module Proof =
     ]
     
     let statements = many (spaces >>. choice [
-        pstring "assume" >>. spaces1 >>. meta |>> Assumption
+        pstring "assume" >>. spaces1 >>. (sepBy1 meta (pstring "and")) |>> Assumption
         command "have" |>> Intermediate
         command "show" |>> Conclusion
     ] .>> spaces)

@@ -10,7 +10,7 @@ type Method =
 
 type Proof = Method * Statement list
 and Statement =
-    | Assumption of Meta
+    | Assumption of Meta List
     | Intermediate of Command
     | Conclusion of Command
 and Command =
@@ -61,7 +61,11 @@ let split rule goal =
     | true, map -> Ok(List.empty, map)
     | false, _  -> f rule List.empty
 
-let rec insert goal = function Implication(p, q) -> Implication(p, insert goal q) | q -> Implication(goal, q)
+let rec build list =
+    match list with
+    | [x]       -> x
+    | x::x'::xs -> Implication(x, build (x'::xs))
+    | _         -> failwith "Could not build formula"
 
 let tryApply (assumptions, result, method, ruleset) =
     match method with
@@ -96,14 +100,14 @@ let tryApply (assumptions, result, method, ruleset) =
                                 |> Error
 
 let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
-    (Ok(assumptions, None), statements)
+    (Ok(assumptions, List.empty), statements)
     ||> List.fold
         (fun state statement ->
             match state with
             | Error _           -> state
             | Ok(fs, subgoal)   ->
                 match statement with
-                | Assumption(f)         -> Ok(Set.add f fs, Some(subgoal |> function None -> f | Some(f') -> insert f' f))
+                | Assumption(fs')       -> Ok(Set.union (Set fs') fs, subgoal@fs')
                 | Intermediate(command)
                 | Conclusion(command)   ->
                     match command with
@@ -132,8 +136,8 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, 
                             | Intermediate _    -> Ok(Set.add f fs, subgoal)
                             | Conclusion _      ->
                                 match subgoal with
-                                | None      -> Ok(Set.add f fs, subgoal)
-                                | Some(f')  -> Ok(Set.union (Set [f; Implication(f', f)]) fs, subgoal))
+                                | []    -> Ok(Set.add f fs, subgoal)
+                                | fs'   -> Ok(Set.union (Set [f; build (fs'@[f])]) fs, subgoal))
     |> function
         | Error(msg)    ->  Error(msg)
         | Ok(fs, _)     ->  match tryApply(fs, goal, method, rules) with
