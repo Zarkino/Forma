@@ -22,7 +22,6 @@ let Main () =
     let (theme, setTheme) = React.useState("light")
     let (input, setInput) = React.useState(Browser.WebStorage.localStorage.getItem("input"))
     let (output, setOutput) = React.useState(System.String.Empty)
-    let (rules, setRules) = React.useState(Proof_Interface.rules)
     
     React.useEffect(fun () ->
         let parse (string: string) =
@@ -36,28 +35,23 @@ let Main () =
                                             | _ -> inner remaining (fun tail -> cont (lemma::tail)))
             if string.Trim().Length > 0 then inner string id else None, []
         
-        let evaluate (lemma: Proof_Interface.Lemma) =
+        let evaluate (lemma: Proof_Interface.Lemma, rules) =
             match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
-            | Error(msg)    -> msg
-            | Ok _          ->
-                match lemma.Name with
-                | None          -> ()
-                | Some(name)    -> setRules (Map.add name lemma.Goal rules)
-                $"Successful lemma %s{lemma.ToString()}"
-        
-        let format (msg, list) =
-            match msg, list with
-            | None, xs      -> xs |> List.map evaluate |> String.concat "\n"
-            | Some(msg), [] -> msg
-            | Some(msg), xs -> sprintf "%s\n%s" (xs |> List.map evaluate |> String.concat "\n") msg
-        
-        setRules(Proof_Interface.rules)
+            | Error(msg)    -> Error(msg)
+            | Ok _          -> lemma.Name |> function Some(name) -> Ok(Map.add name lemma.Goal rules) | None -> Ok(rules)
         
         Browser.WebStorage.localStorage.setItem("input", input)
         
         Regex.Replace(input, "\/\/.*", System.String.Empty)
         |> parse
-        |> format
+        |> fun (msg, list) ->
+            ((Proof_Interface.rules, List.empty), list)
+            ||> List.fold
+                (fun (map, strings) lemma ->
+                    match evaluate(lemma, map) with
+                    | Error(msg)    -> (map, msg::strings)
+                    | Ok(map')      -> (map', $"Successful Lemma %s{lemma.ToString()}"::strings))
+            |> fun (_, strings) -> sprintf "%s%s" (String.concat "\n" (List.rev strings)) (msg |> function None -> "" | Some(msg) -> $"\n%s{msg}")
         |> setOutput
     , [|input :> obj|])
     
