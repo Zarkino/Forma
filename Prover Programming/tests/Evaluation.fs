@@ -10,7 +10,7 @@ let evaluating_Proofs =
     let evaluate goal proof =
         match runString Language.Proof.proof () proof with
             | Error _       ->  Test.failtest "Could not be parsed"
-            | Ok(v, _, _)   ->  match prove(Logic.ML.Entity(goal), v, Set.empty, rules) with
+            | Ok(v, _, _)   ->  match prove(Logic.ML.Entity(goal), v, List.empty, rules) with
                                 | Ok _  -> Expect.pass()
                                 | _     -> Test.failtest "Evaluation failed"
 
@@ -32,7 +32,7 @@ let evaluating_Proofs =
                 "proof (rule Imp_I) {
 					assume P
 					show ~~P
-					proof (rule Falsity_E) {
+					proof (rule Neg_I) {
 						assume ~P
 						from ~P and P show F by (rule Neg_E)
 					}
@@ -43,39 +43,26 @@ let evaluating_Proofs =
             let goal = Equivalence(Equivalence(Variable("P"), Variable("Q")), Equivalence(Variable("Q"), Variable("P")))
             let proof =
                 "proof (rule Iff_I) {
-				    assume P <--> Q
-					show (P <--> Q) --> (Q <--> P)
-					proof (rule Imp_I) {
-						assume P <--> Q
-				        show P --> Q
-				        proof (rule Imp_I) {
-				            assume P
-				            show Q by (rule Iff_E1)
-				        }
-				        show Q --> P
-				        proof (rule Imp_I) {
-				            assume Q
-				            show P by (rule Iff_E2)
-				        }
-						show Q <--> P by (rule Iff_I)
-					}
-				    assume Q <--> P
-					show (Q <--> P) --> (P <--> Q)
-					proof (rule Imp_I) {
-						assume Q <--> P
-				        show Q --> P
-				        proof (rule Imp_I) {
-				            assume Q
-				            show P by (rule Iff_E1)
-				        }
-						show P --> Q
-				        proof (rule Imp_I) {
-				            assume P
-				            show Q by (rule Iff_E2)
-				        }
-						show P <--> Q by (rule Iff_I)
-					}
-				}"
+                    assume P <--> Q
+                    show Q <--> P
+                    proof (rule Iff_I) {
+                        assume Q
+                        show P by (rule Iff_E2)
+                    next
+                        assume P
+                        show Q by (rule Iff_E1)
+                    }
+                next
+                    assume Q <--> P
+                    show P <--> Q
+                    proof (rule Iff_I) {
+                        assume P
+                        show Q by (rule Iff_E2)
+                    next
+                        assume Q
+                        show P by (rule Iff_E1)
+                    }
+                }"
             evaluate goal proof
         }
     ]
