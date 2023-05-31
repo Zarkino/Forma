@@ -35,7 +35,7 @@ let rules = Map.ofList [
     "Falsity_E",    Implication(Entity(Constant(false)), Entity(Variable("0")))
     "Truth_I",      Implication(Entity(Logic.PL.Implication(Constant(false), Constant(false))), Entity(Constant(true)))
     "Neg_I",        Implication(Implication(Entity(Variable("0")), Entity(Constant(false))), Entity(Negation(Variable("0"))))
-    "Neg_E",        Implication(Entity(Negation(Variable("0"))),Implication(Entity(Variable("0")), Entity(Variable("1"))))
+    "Neg_E",        Implication(Entity(Negation(Variable("0"))), Implication(Entity(Variable("0")), Entity(Variable("1"))))
     "Con_I",        Implication(Entity(Variable("0")), Implication(Entity(Variable("1")), Entity(Conjunction(Variable("0"), Variable("1")))))
     "Con_E1",       Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("0")))
     "Con_E2",       Implication(Entity(Conjunction(Variable("0"), Variable("1"))), Entity(Variable("1")))

@@ -35,23 +35,30 @@ let Main () =
                                             | _ -> inner remaining (fun tail -> cont (lemma::tail)))
             if string.Trim().Length > 0 then inner string id else None, []
         
-        let evaluate (lemma: Proof_Interface.Lemma, rules) =
-            match Proof_Interface.prove(lemma.Goal, lemma.Proof, List.empty, rules) with
-            | Error(msg)    -> Error(msg)
-            | Ok _          -> lemma.Name |> function Some(name) -> Ok(Map.add name lemma.Goal rules) | None -> Ok(rules)
+        let evaluate (lemmas: Proof_Interface.Lemma list) =
+            ((Proof_Interface.rules, id), lemmas)
+            ||> List.fold
+                (fun (rules, cont) lemma ->
+                    match Proof_Interface.prove(lemma.Goal, lemma.Proof, List.empty, rules) with
+                    | Error(msg)    -> (rules, fun tail -> cont (msg::tail))
+                    | Ok _          ->
+                        match lemma.Name with
+                        | None          -> rules
+                        | Some(name)    -> Map.add name lemma.Goal rules
+                        |> (fun rules' ->  (rules', fun tail -> cont ($"Successful Lemma %s{lemma.ToString()}"::tail))))
+            |> (fun (_, cont) -> String.concat "\n" (cont []))
         
         Browser.WebStorage.localStorage.setItem("input", input)
         
         Regex.Replace(input, "\/\/.*", System.String.Empty)
         |> parse
         |> fun (msg, list) ->
-            ((Proof_Interface.rules, List.empty), list)
-            ||> List.fold
-                (fun (map, strings) lemma ->
-                    match evaluate(lemma, map) with
-                    | Error(msg)    -> (map, msg::strings)
-                    | Ok(map')      -> (map', $"Successful Lemma %s{lemma.ToString()}"::strings))
-            |> fun (_, strings) -> sprintf "%s%s" (String.concat "\n" (List.rev strings)) (msg |> function None -> "" | Some(msg) -> $"\n%s{msg}")
+            let output = evaluate list
+            match msg, list with
+            | None, []      -> System.String.Empty
+            | None, _       -> output
+            | Some(msg), [] -> msg
+            | Some(msg), _  -> $"%s{output}\n%s{msg}"
         |> setOutput
     , [|input :> obj|])
     
