@@ -100,16 +100,16 @@ let tryApply (assumptions, result, method, ruleset) =
                                     (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
                                 |> Error
 
-let rec prove (goal: Meta, (method, statements): Proof, assumptions: Meta list, rules: Map<string, Meta>) =
-    (Ok(assumptions, List.empty), statements)
+let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules: Map<string, Meta>) =
+    (Ok(facts, List.empty, Set.empty), statements)
     ||> List.fold
         (fun state statement ->
             match state with
-            | Error _           -> state
-            | Ok(fs, subgoal)   ->
+            | Error _                           -> state
+            | Ok(fs, assumptions, conclusions)  ->
                 match statement with
-                | Next                  -> Ok((List.head fs)::assumptions, List.empty)
-                | Assumption(fs')       -> Ok(List.append fs' fs, subgoal@fs')
+                | Next                  -> Ok(facts, List.empty, Set.add (List.head fs) conclusions)
+                | Assumption(fs')       -> Ok(List.append fs' fs, assumptions@fs', conclusions)
                 | Intermediate(command)
                 | Conclusion(command)   ->
                     match command with
@@ -136,13 +136,11 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Meta list, 
                             match statement with
                             | Next
                             | Assumption _      -> Error("Something went wrong")
-                            | Intermediate _    -> Ok(f::fs, subgoal)
+                            | Intermediate _    -> Ok(f::fs, assumptions, conclusions)
                             | Conclusion _      ->
-                                match subgoal with
-                                | []    -> Ok(f::fs, subgoal)
-                                | fs'   -> Ok((build (fs'@[f]))::fs, subgoal))
+                                match assumptions with
+                                | []    -> Ok(fs, assumptions, Set.add f conclusions)
+                                | fs'   -> Ok(fs, assumptions, Set.add (build (fs'@[f])) conclusions))
     |> function
-        | Error(msg)    ->  Error(msg)
-        | Ok(fs, _)     ->  match tryApply(Set fs, goal, method, rules) with
-                            | Ok()          -> Ok(goal::fs)
-                            | Error(msg)    -> Error(msg)
+        | Error(msg)            ->  Error(msg)
+        | Ok(_, _, conclusions) ->  tryApply(conclusions, goal, method, rules)
