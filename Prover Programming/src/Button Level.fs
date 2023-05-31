@@ -5,9 +5,9 @@ open Feliz.Bulma
 
 let examples = [|
     "lemma (P & Q) --> (Q & P)\nproof (rule Imp_I) {\n\tassume P & Q\n\tfrom P & Q have P by (rule Con_E1)\n\tfrom P & Q have Q by (rule Con_E2)\n\tfrom P and Q show Q & P by (rule Con_I)\n}"
-    "lemma P --> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Falsity_E) {\n\t\tassume ~P\n\t\tfrom ~P and P show F by (rule Neg_E)\n\t}\n}"
-    "lemma ((P --> Q) & ~Q) --> ~P\nproof (rule Imp_I) {\n\tassume (P --> Q) & ~Q\n\tshow ~P\n\tproof (rule Falsity_E) {\n\t\tassume P\n\t\tfrom (P --> Q) & ~Q have P --> Q by (rule Con_E1)\n\t\tfrom (P --> Q) & ~Q have ~Q by (rule Con_E2)\n\t\tfrom P --> Q and P have Q by (rule Imp_E)\n\t\tfrom ~Q and Q show F by (rule Neg_E)\n\t}\n}"
-    "lemma (P <--> Q) <--> (Q <--> P)\nproof (rule Iff_I) {\n\tshow (P <--> Q) --> (Q <--> P)\n\tproof (rule Imp_I) {\n\t\tassume P <--> Q\n\t\tfrom P <--> Q have P --> Q by (rule Iff_E1)\n\t\tfrom P <--> Q have Q --> P by (rule Iff_E2)\n\t\tfrom P --> Q and Q --> P show Q <--> P by (rule Iff_I)\n\t}\n\tshow (Q <--> P) --> (P <--> Q)\n\tproof (rule Imp_I) {\n\t\tassume Q <--> P\n\t\tfrom Q <--> P have Q --> P by (rule Iff_E1)\n\t\tfrom Q <--> P have P --> Q by (rule Iff_E2)\n\t\tfrom Q --> P and P --> Q show P <--> Q by (rule Iff_I)\n\t}\n}"
+    "lemma P --> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show F by (rule Neg_E)\n\t}\n}"
+    "lemma ((P --> Q) & ~Q) --> ~P\nproof (rule Imp_I) {\n\tassume (P --> Q) & ~Q\n\tshow ~P\n\tproof (rule Neg_I) {\n\t\tassume P\n\t\tfrom (P --> Q) & ~Q have P --> Q by (rule Con_E1)\n\t\tfrom (P --> Q) & ~Q have ~Q by (rule Con_E2)\n\t\tfrom P --> Q and P have Q by (rule Imp_E)\n\t\tfrom ~Q and Q show F by (rule Neg_E)\n\t}\n}"
+    "lemma (P <--> Q) <--> (Q <--> P)\nproof (rule Iff_I) {\n\tassume P <--> Q\n\tshow Q <--> P\n\tproof (rule Iff_I) {\n\t\tassume Q\n\t\tshow P by (rule Iff_E2)\n\tnext\n\t\tassume P\n\t\tshow Q by (rule Iff_E1)\n\t}\nnext\n\tassume Q <--> P\n\tshow P <--> Q\n\tproof (rule Iff_I) {\n\t\tassume P\n\t\tshow Q by (rule Iff_E2)\n\tnext\n\t\tassume Q\n\t\tshow P by (rule Iff_E1)\n\t}\n}"
 |]
 
 [<ReactComponent>]

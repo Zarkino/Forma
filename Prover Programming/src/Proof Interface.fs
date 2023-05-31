@@ -17,10 +17,6 @@ and Statement =
 and Command =
     | Instant of Meta list option * Meta * Method
     | Delayed of Meta * Proof
-    member this.Goal =
-        match this with
-        | Instant(_, g, _)
-        | Delayed(g, _)     -> g
 
 type Lemma = {
     Name: string option
@@ -73,24 +69,20 @@ let tryApply (assumptions, result, method, ruleset) =
     | Method.Trivial    -> if Set.contains result assumptions then Ok() else Error($"Could not reach goal %s{result.ToString()} by none")
     | Method.This       ->
         assumptions
-        |> Set.exists
-               (fun x ->
-                   match Logic.ML.split x with
-                   | a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a'   -> true
-                   | _                                                                                 -> false)
+        |> Set.exists (fun x -> Logic.ML.split x |> function a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a' -> true | _ -> false)
         |> function
-        | true  -> Ok()
-        | false ->
-            match result with
-            | Implication(p, p') when p = p'    -> Ok()
-            | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
+            | true  -> Ok()
+            | false ->
+                match result with
+                | Implication(p, p') when p = p'    -> Ok()
+                | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
     | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
-        | Some(meta)  ->
+        | Some(meta)    ->
             match split meta result with
             | Error(msg)    -> Error(msg)
-            | Ok(list, map) -> 
+            | Ok(list, map) ->
                 match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) list with
                 | None      ->  Ok()
                 | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
@@ -122,7 +114,7 @@ let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules:
                             | None      -> Ok(a')
                         |> function
                             | Error(msg)    -> Error(msg)
-                            | Ok(fs')        ->
+                            | Ok(fs')       ->
                                 match tryApply(Set fs', f, rule, rules) with
                                 | Error(msg)    -> Error(msg)
                                 | Ok()          -> Ok(f)
@@ -134,13 +126,9 @@ let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules:
                         | Error(msg)    -> Error(msg)
                         | Ok(f)         ->
                             match statement with
-                            | Next
-                            | Assumption _      -> Error("Something went wrong")
                             | Intermediate _    -> Ok(f::fs, assumptions, conclusions)
-                            | Conclusion _      ->
-                                match assumptions with
-                                | []    -> Ok(fs, assumptions, Set.add f conclusions)
-                                | fs'   -> Ok(fs, assumptions, Set.add (build (fs'@[f])) conclusions))
+                            | Conclusion _      -> Ok(fs, assumptions, Set.add (build (assumptions@[f])) conclusions)
+                            | _                 -> Error("Something went wrong"))
     |> function
         | Error(msg)            ->  Error(msg)
         | Ok(_, _, conclusions) ->  tryApply(conclusions, goal, method, rules)
