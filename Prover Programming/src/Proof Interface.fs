@@ -10,6 +10,7 @@ type Method =
 
 type Proof = Method * Statement list
 and Statement =
+    | Next
     | Assumption of Meta List
     | Intermediate of Command
     | Conclusion of Command
@@ -99,7 +100,7 @@ let tryApply (assumptions, result, method, ruleset) =
                                     (sprintf "(%s, %s)" (x.ToString()) (Map.tryFind (x.ToString()) map |> function Some(f) -> Formula.ToString f | _ -> "?"))
                                 |> Error
 
-let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, rules: Map<string, Meta>) =
+let rec prove (goal: Meta, (method, statements): Proof, assumptions: Meta list, rules: Map<string, Meta>) =
     (Ok(assumptions, List.empty), statements)
     ||> List.fold
         (fun state statement ->
@@ -107,7 +108,8 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, 
             | Error _           -> state
             | Ok(fs, subgoal)   ->
                 match statement with
-                | Assumption(fs')       -> Ok(Set.union (Set fs') fs, subgoal@fs')
+                | Next                  -> Ok((List.head fs)::assumptions, List.empty)
+                | Assumption(fs')       -> Ok(List.append fs' fs, subgoal@fs')
                 | Intermediate(command)
                 | Conclusion(command)   ->
                     match command with
@@ -115,13 +117,13 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, 
                         match a with
                         | None      -> Ok(fs)
                         | Some(a')  ->
-                            match List.tryFind (fun x -> not (Set.contains x fs)) a' with
+                            match List.tryFind (fun x -> not (List.contains x fs)) a' with
                             | Some(v)   -> Error($"The assumption %s{v.ToString()} is not in the set of assumptions")
-                            | None      -> Ok(Set a')
+                            | None      -> Ok(a')
                         |> function
                             | Error(msg)    -> Error(msg)
                             | Ok(fs')        ->
-                                match tryApply(fs', f, rule, rules) with
+                                match tryApply(Set fs', f, rule, rules) with
                                 | Error(msg)    -> Error(msg)
                                 | Ok()          -> Ok(f)
                     | Delayed(f, p)         ->
@@ -132,14 +134,15 @@ let rec prove (goal: Meta, (method, statements): Proof, assumptions: Set<Meta>, 
                         | Error(msg)    -> Error(msg)
                         | Ok(f)         ->
                             match statement with
+                            | Next
                             | Assumption _      -> Error("Something went wrong")
-                            | Intermediate _    -> Ok(Set.add f fs, subgoal)
+                            | Intermediate _    -> Ok(f::fs, subgoal)
                             | Conclusion _      ->
                                 match subgoal with
-                                | []    -> Ok(Set.add f fs, subgoal)
-                                | fs'   -> Ok(Set.union (Set [f; build (fs'@[f])]) fs, subgoal))
+                                | []    -> Ok(f::fs, subgoal)
+                                | fs'   -> Ok((build (fs'@[f]))::fs, subgoal))
     |> function
         | Error(msg)    ->  Error(msg)
-        | Ok(fs, _)     ->  match tryApply(fs, goal, method, rules) with
-                            | Ok()          -> Ok(Set.add goal fs)
+        | Ok(fs, _)     ->  match tryApply(Set fs, goal, method, rules) with
+                            | Ok()          -> Ok(goal::fs)
                             | Error(msg)    -> Error(msg)

@@ -75,10 +75,25 @@ module Proof =
     let statements = many (spaces >>. choice [
         pstring "assume" >>. spaces1 >>. (sepBy1 meta (pstring "and")) |>> Assumption
         command "have" |>> Intermediate
-        command "show" |>> Conclusion
     ] .>> spaces)
     
-    proofRef.Value <- spaces >>. pstring "proof" >>. spaces1 >>. proof_method .>>. (spaces >>. between (pchar '{') (pchar '}') statements) |>> Proof
+    let conclusion = spaces >>. command "show" .>> spaces |>> Conclusion
+    
+    let next = spaces >>. pstring "next" .>> spaces >>% Next
+    
+    let block, blockRef = createParserForwardedToRef()
+    blockRef.Value <- parse {
+        let! left = pipe2 statements conclusion (fun statements conclusion -> statements@[conclusion])
+        return! choice [
+            next .>>. block >>= (fun (next, block) -> preturn (left@next::block))
+            preturn left
+        ]
+    }
+    
+    proofRef.Value <-
+        spaces >>. pstring "proof" >>. spaces1 >>. proof_method .>>.
+        (spaces >>. between (pchar '{') (pchar '}') block)
+        >>= (fun (method, statements) -> preturn (Proof(method, statements)))
     
     let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
     

@@ -36,7 +36,7 @@ let Main () =
             if string.Trim().Length > 0 then inner string id else None, []
         
         let evaluate (lemma: Proof_Interface.Lemma, rules) =
-            match Proof_Interface.prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
+            match Proof_Interface.prove(lemma.Goal, lemma.Proof, List.empty, rules) with
             | Error(msg)    -> Error(msg)
             | Ok _          -> lemma.Name |> function Some(name) -> Ok(Map.add name lemma.Goal rules) | None -> Ok(rules)
         
