@@ -108,7 +108,7 @@ let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules:
             | Error _                           -> state
             | Ok(fs, assumptions, conclusions)  ->
                 match statement with
-                | Next                  -> Ok(facts, List.empty, Set.add (List.head fs) conclusions)
+                | Next                  -> Ok(facts, List.empty, List.tryHead fs |> function Some(f) -> Set.add f conclusions | None -> conclusions)
                 | Assumption(fs')       -> Ok(List.append fs' fs, assumptions@fs', conclusions)
                 | Intermediate(command)
                 | Conclusion(command)   ->
