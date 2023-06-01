@@ -34,7 +34,7 @@ module ML =
     
     do metaRef.Value <- parse {
         let! left = spaces >>. (
-            (pipe2 ((anyOfStr ["!!"; "⋀"]) >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
+            (pipe2 ((anyOfStr ["!!"; "⋀"]) >>. many1 var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
             entity <|>
             between (pchar '(') (pchar ')') meta)
         return! spaces >>. choice [

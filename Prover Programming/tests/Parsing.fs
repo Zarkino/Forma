@@ -89,6 +89,6 @@ let parsing_ML =
             Expect.equal (parse "p == p") (Some(Equality(Entity(Variable("p")), Entity(Variable("p")))), "") error_msg
         }
         test "Parse Universal Quantifier" {
-            Expect.equal (parse "!!x. p") (Some(Universal("x", Entity(Variable("p")))), "") error_msg
+            Expect.equal (parse "!!x. p") (Some(Universal(["x"], Entity(Variable("p")))), "") error_msg
         }
     ]
