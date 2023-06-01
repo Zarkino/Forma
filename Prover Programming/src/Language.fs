@@ -7,19 +7,19 @@ module PL =
     
     let (formula: Parser<Formula, obj>), formulaRef = createParserForwardedToRef()
     
-    let constant = pchar 'T' <|> pchar 'F' |>> function | 'T' -> Constant(true) | _ -> Constant(false)
+    let constant = (anyOf ['T'; '⊤'] >>% Constant(true)) <|> (anyOf ['F'; '⊥'] >>% Constant(false))
     let var = many1Chars asciiLetter |>> string
     let variable = var |>> Variable
-    let negation = pchar '~' >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
-    let binaryFormula operators = (operators |> List.map pstring |> choice) >>. spaces >>. formula
+    let negation = (anyOf ['~'; '¬']) >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
+    let binaryFormula operator = operator >>. spaces >>. formula
     
     do formulaRef.Value <- parse {
         let! left = spaces >>. (constant <|> variable <|> negation <|> (between (pchar '(') (pchar ')') formula))
         return! spaces >>. choice [
-            binaryFormula ["&"; "∧"] |>> (fun right -> Conjunction(left, right))
-            binaryFormula ["|"; "∨"] |>> (fun right -> Disjunction(left, right))
-            binaryFormula ["-->"; "⟶"] |>> (fun right -> Implication(left, right))
-            binaryFormula ["<-->"; "⟷"] |>> (fun right -> Equivalence(left, right))
+            binaryFormula (anyOfStr ["&"; "∧"]) |>> (fun right -> Conjunction(left, right))
+            binaryFormula (anyOfStr ["|"; "∨"]) |>> (fun right -> Disjunction(left, right))
+            binaryFormula (anyOfStr ["-->"; "⟶"]) |>> (fun right -> Implication(left, right))
+            binaryFormula (anyOfStr ["<-->"; "⟷"]) |>> (fun right -> Equivalence(left, right))
             preturn left
         ]
     }
@@ -34,12 +34,12 @@ module ML =
     
     do metaRef.Value <- parse {
         let! left = spaces >>. (
-            (pipe2 (pstring "!!" >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
+            (pipe2 ((anyOfStr ["!!"; "⋀"]) >>. var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
             entity <|>
             between (pchar '(') (pchar ')') meta)
         return! spaces >>. choice [
-            pstring "==>" >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
-            pstring "==" >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
+            (anyOfStr ["==>"; "⟹"]) >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
+            (anyOfStr ["=="; "≡"]) >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
             preturn left
         ]
     }
@@ -54,7 +54,7 @@ module Proof =
     
     let method_rule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')' |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
-    let method_trivial = (pstring "-" <|> pstring "none") >>% Method.Trivial
+    let method_trivial = (anyOfStr ["-"; "none"]) >>% Method.Trivial
     
     let proof_method = choice [
         method_rule

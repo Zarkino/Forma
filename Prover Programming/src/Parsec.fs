@@ -648,6 +648,9 @@ module CharParsers =
   let inline pstring str : Parser<string, 's> = stringReturn str str
   let inline skipString str : Parser<unit, 's> = stringReturn str ()
 
+  let inline anyOfStr strings : Parser<string, 's> =
+    strings |> List.map pstring |> choice
+
   let inline anyString (len: int) : Parser<string, 's> =
     fun (state, s) ->
       if s.length >= len then
