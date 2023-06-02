@@ -9,10 +9,14 @@ module ML =
         static member ToString meta =
             let rec f x =
                 match x with
-                | Entity(p)         -> PL.Formula.ToString p
-                | Implication(p, q) -> $"%s{f p} ⟹ %s{f q}"
-                | Equality(x, y)    -> $"%s{f x} ≡ %s{f y}"
-                | Universal(xs, m)  -> "⋀" + (String.concat " " xs) + $". %s{f m}"
+                | Entity(p)         -> p.ToString()
+                | Implication(p, q) -> $"%s{par p} ⟹ %s{par q}"
+                | Equality(x, y)    -> $"%s{par x} ≡ %s{par y}"
+                | Universal(xs, m)  -> "⋀" + (String.concat " " xs) + $". %s{par m}"
+            and par x =
+                match x with
+                | Entity _ -> $"%s{f x}"
+                | _         -> $"(%s{f x})"
             f meta
         override this.ToString() = Meta.ToString this
     

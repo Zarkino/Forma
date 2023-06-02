@@ -73,9 +73,7 @@ module PL =
                 | Conjunction(p, q)
                 | Disjunction(p, q)
                 | Implication(p, q)
-                | Equivalence(p, q) ->  let p' = par p
-                                        let q' = par q
-                                        $"%s{p'} %s{Formula.GetOperator x} %s{q'}"
+                | Equivalence(p, q) ->  $"%s{par p} %s{Formula.GetOperator x} %s{par q}"
             and par x =
                 match x with
                 | Constant _
