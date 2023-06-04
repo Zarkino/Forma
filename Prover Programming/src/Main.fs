@@ -64,7 +64,7 @@ let Main () =
     
     React.fragment [    
         Navigation_Bar.Navigation(theme, setTheme)
-        Button_Level.Button_Level(theme, setInput)
+        Button_Level.Button_Level(theme, input, setInput)
         Bulma.columns [
             columns.isGapless
             prop.className theme
