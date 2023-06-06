@@ -23,6 +23,7 @@ let Navigation(theme: string, setTheme: string -> unit) =
                     Bulma.navbarItem.div [
                         Bulma.field.div [
                             Switch.checkbox [
+                                prop.defaultChecked (Browser.WebStorage.localStorage.getItem("theme").Equals("dark"))
                                 prop.id "theme_switch"
                                 color.isDark
                                 switch.isRounded
