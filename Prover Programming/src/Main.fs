@@ -19,7 +19,7 @@ let rec evaluate_meta input =
 
 [<ReactComponent>]
 let Main () =
-    let (theme, setTheme) = React.useState("light")
+    let (theme, setTheme) = React.useState("light") //TODO: Store in webstorage plz, notice that this will be initialized as null
     let (input, setInput) = React.useState(Browser.WebStorage.localStorage.getItem("input"))
     let (output, setOutput) = React.useState(System.String.Empty)
     
