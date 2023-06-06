@@ -1,4 +1,4 @@
-﻿// Type definitions for monaco-editor v0.38.0
+﻿// Type definitions for monaco-editor v0.39.0
 // generated with ts2fable from /node_modules/monaco-editor/monaco.d.ts
 
 // ts2fable 0.9.0
@@ -60,10 +60,36 @@ type Thenable<'T> =
     PromiseLike<'T>
 
 type [<AllowNullLiteral>] Environment =
+    /// <summary>
+    /// Define a global <c>monaco</c> symbol.
+    /// This is true by default in AMD and false by default in ESM.
+    /// </summary>
     abstract globalAPI: bool option with get, set
+    /// The base url where the editor sources are found (which contains the vs folder)
     abstract baseUrl: string option with get, set
+    /// <summary>
+    /// A web worker factory.
+    /// NOTE: If <c>getWorker</c> is defined, <c>getWorkerUrl</c> is not invoked.
+    /// </summary>
     abstract getWorker: workerId: string * label: string -> U2<Promise<Worker>, Worker>
+    /// <summary>
+    /// Return the location for web worker scripts.
+    /// NOTE: If <c>getWorker</c> is defined, <c>getWorkerUrl</c> is not invoked.
+    /// </summary>
     abstract getWorkerUrl: workerId: string * label: string -> string
+    /// Create a trusted types policy (same API as window.trustedTypes.createPolicy)
+    abstract createTrustedTypesPolicy: policyName: string * ?policyOptions: ITrustedTypePolicyOptions -> ITrustedTypePolicy option
+
+type [<AllowNullLiteral>] ITrustedTypePolicyOptions =
+    abstract createHTML: (string -> ResizeArray<obj option> -> string) option with get, set
+    abstract createScript: (string -> ResizeArray<obj option> -> string) option with get, set
+    abstract createScriptURL: (string -> ResizeArray<obj option> -> string) option with get, set
+
+type [<AllowNullLiteral>] ITrustedTypePolicy =
+    abstract name: string
+    abstract createHTML: input: string -> obj option
+    abstract createScript: input: string -> obj option
+    abstract createScriptURL: input: string -> obj option
 
 type [<AllowNullLiteral>] IDisposable =
     abstract dispose: unit -> unit
@@ -236,28 +262,37 @@ type [<AllowNullLiteral>] UriStatic =
     /// </summary>
     /// <param name="path">A file system path (see <c>Uri#fsPath</c>)</param>
     abstract file: path: string -> Uri
-    abstract from: components: UriStaticFromComponents -> Uri
+    /// <summary>
+    /// Creates new Uri from uri components.
+    /// 
+    /// Unless <c>strict</c> is <c>true</c> the scheme is defaults to be <c>file</c>. This function performs
+    /// validation and should be used for untrusted uri components retrieved from storage,
+    /// user input, command arguments etc
+    /// </summary>
+    abstract from: components: UriComponents * ?strict: bool -> Uri
     /// <summary>Join a Uri path with path fragments and normalizes the resulting path.</summary>
     /// <param name="uri">The input Uri.</param>
     /// <param name="pathFragment">The path fragment to add to the Uri path.</param>
     /// <returns>The resulting Uri.</returns>
     abstract joinPath: uri: Uri * [<ParamArray>] pathFragment: string[] -> Uri
+    /// <summary>
+    /// A helper function to revive URIs.
+    /// 
+    /// **Note** that this function should only be used when receiving Uri#toJSON generated data
+    /// and that it doesn't do any validation. Use <see cref="Uri.from" /> when received "untrusted"
+    /// uri components such as command arguments or data from storage.
+    /// </summary>
+    /// <param name="data">The Uri components or Uri to revive.</param>
+    /// <returns>The revived Uri or undefined or null.</returns>
     abstract revive: data: U2<UriComponents, Uri> -> Uri
     abstract revive: data: U2<UriComponents, Uri> option -> Uri option
 
-type [<AllowNullLiteral>] UriStaticFromComponents =
+type [<AllowNullLiteral>] UriComponents =
     abstract scheme: string with get, set
     abstract authority: string option with get, set
     abstract path: string option with get, set
     abstract query: string option with get, set
     abstract fragment: string option with get, set
-
-type [<AllowNullLiteral>] UriComponents =
-    abstract scheme: string with get, set
-    abstract authority: string with get, set
-    abstract path: string with get, set
-    abstract query: string with get, set
-    abstract fragment: string with get, set
 
 /// <summary>
 /// Virtual Key Codes, the value does not hold any inherent meaning.
@@ -1703,7 +1738,7 @@ module Editor =
 
     /// Options for the diff computation.
     type [<AllowNullLiteral>] IDocumentDiffProviderOptions =
-        /// When set to true, the diff should ignore whitespace changes.i
+        /// When set to true, the diff should ignore whitespace changes.
         abstract ignoreTrimWhitespace: bool with get, set
         /// A diff computation should throw if it takes longer than this value.
         abstract maxComputationTimeMs: float with get, set
@@ -1737,16 +1772,21 @@ module Editor =
         /// The resulting range is empty if the ranges do not intersect, but touch.
         /// If the ranges don't even touch, the result is undefined.
         abstract intersect: other: LineRange -> LineRange option
+        abstract intersectsStrict: other: LineRange -> bool
         abstract overlapOrTouch: other: LineRange -> bool
         abstract equals: b: LineRange -> bool
+        abstract toInclusiveRange: unit -> Range option
+        abstract toExclusiveRange: unit -> Range
 
     /// A range of lines (1-based).
     type [<AllowNullLiteral>] LineRangeStatic =
+        abstract fromRange: range: Range -> LineRange
         /// <param name="lineRanges">An array of sorted line ranges.</param>
         abstract joinMany: lineRanges: ResizeArray<ResizeArray<LineRange>> -> ResizeArray<LineRange>
         /// <param name="lineRanges1">Must be sorted.</param>
         /// <param name="lineRanges2">Must be sorted.</param>
         abstract join: lineRanges1: ResizeArray<LineRange> * lineRanges2: ResizeArray<LineRange> -> ResizeArray<LineRange>
+        abstract ofLength: startLineNumber: float * length: float -> LineRange
         [<EmitConstructor>] abstract Create: startLineNumber: float * endLineNumberExclusive: float -> LineRange
 
     /// Maps a line range in the original text model to a line range in the modified text model.
@@ -1765,6 +1805,7 @@ module Editor =
 
     /// Maps a line range in the original text model to a line range in the modified text model.
     type [<AllowNullLiteral>] LineRangeMappingStatic =
+        abstract inverse: mapping: ResizeArray<LineRangeMapping> * originalLineCount: float * modifiedLineCount: float -> ResizeArray<LineRangeMapping>
         [<EmitConstructor>] abstract Create: originalRange: LineRange * modifiedRange: LineRange * innerChanges: ResizeArray<RangeMapping> option -> LineRangeMapping
 
     /// Maps a range in the original text model to a range in the modified text model.
@@ -2587,6 +2628,8 @@ module Editor =
         /// When enabled, this shows a preview of the drop location and triggers an <c>onDropIntoEditor</c> event.
         /// </summary>
         abstract dropIntoEditor: IDropIntoEditorOptions option with get, set
+        /// Controls support for changing how content is pasted into the editor.
+        abstract pasteAs: IPasteAsOptions option with get, set
         /// Controls whether the editor receives tabs or defers them to the workbench for navigation.
         abstract tabFocusMode: bool option with get, set
 
@@ -2631,11 +2674,15 @@ module Editor =
         abstract diffAlgorithm: U2<IDocumentDiffProvider, string> option with get, set
         /// Whether the diff editor aria label should be verbose.
         abstract accessibilityVerbose: bool option with get, set
+        abstract experimental: {| collapseUnchangedRegions: bool option |} option with get, set
 
     /// Configuration options for the diff editor.
     type [<AllowNullLiteral>] IDiffEditorOptions =
         inherit IEditorOptions
         inherit IDiffEditorBaseOptions
+        /// Is the diff editor inside another editor
+        /// Defaults to false
+        abstract isInEmbeddedEditor: bool option with get, set
 
     /// An event describing that the configuration of the editor has changed.
     type [<AllowNullLiteral>] ConfigurationChangedEvent =
@@ -3169,6 +3216,15 @@ module Editor =
         /// Defaults to 'afterDrop'.
         abstract showDropSelector: IDropIntoEditorOptionsShowDropSelector option with get, set
 
+    /// Configuration options for editor pasting as into behavior
+    type [<AllowNullLiteral>] IPasteAsOptions =
+        /// Enable paste as functionality in editors.
+        /// Defaults to true.
+        abstract enabled: bool option with get, set
+        /// Controls if a widget is shown after a drop.
+        /// Defaults to 'afterPaste'.
+        abstract showPasteSelector: IPasteAsOptionsShowPasteSelector option with get, set
+
     type EditorOption =
         | AcceptSuggestionOnCommitCharacter = 0
         | AcceptSuggestionOnEnter = 1
@@ -3252,66 +3308,67 @@ module Editor =
         | OverviewRulerBorder = 79
         | OverviewRulerLanes = 80
         | Padding = 81
-        | ParameterHints = 82
-        | PeekWidgetDefaultFocus = 83
-        | DefinitionLinkOpensInPeek = 84
-        | QuickSuggestions = 85
-        | QuickSuggestionsDelay = 86
-        | ReadOnly = 87
-        | RenameOnType = 88
-        | RenderControlCharacters = 89
-        | RenderFinalNewline = 90
-        | RenderLineHighlight = 91
-        | RenderLineHighlightOnlyWhenFocus = 92
-        | RenderValidationDecorations = 93
-        | RenderWhitespace = 94
-        | RevealHorizontalRightPadding = 95
-        | RoundedSelection = 96
-        | Rulers = 97
-        | Scrollbar = 98
-        | ScrollBeyondLastColumn = 99
-        | ScrollBeyondLastLine = 100
-        | ScrollPredominantAxis = 101
-        | SelectionClipboard = 102
-        | SelectionHighlight = 103
-        | SelectOnLineNumbers = 104
-        | ShowFoldingControls = 105
-        | ShowUnused = 106
-        | SnippetSuggestions = 107
-        | SmartSelect = 108
-        | SmoothScrolling = 109
-        | StickyScroll = 110
-        | StickyTabStops = 111
-        | StopRenderingLineAfter = 112
-        | Suggest = 113
-        | SuggestFontSize = 114
-        | SuggestLineHeight = 115
-        | SuggestOnTriggerCharacters = 116
-        | SuggestSelection = 117
-        | TabCompletion = 118
-        | TabIndex = 119
-        | UnicodeHighlighting = 120
-        | UnusualLineTerminators = 121
-        | UseShadowDOM = 122
-        | UseTabStops = 123
-        | WordBreak = 124
-        | WordSeparators = 125
-        | WordWrap = 126
-        | WordWrapBreakAfterCharacters = 127
-        | WordWrapBreakBeforeCharacters = 128
-        | WordWrapColumn = 129
-        | WordWrapOverride1 = 130
-        | WordWrapOverride2 = 131
-        | WrappingIndent = 132
-        | WrappingStrategy = 133
-        | ShowDeprecated = 134
-        | InlayHints = 135
-        | EditorClassName = 136
-        | PixelRatio = 137
-        | TabFocusMode = 138
-        | LayoutInfo = 139
-        | WrappingInfo = 140
-        | DefaultColorDecorators = 141
+        | PasteAs = 82
+        | ParameterHints = 83
+        | PeekWidgetDefaultFocus = 84
+        | DefinitionLinkOpensInPeek = 85
+        | QuickSuggestions = 86
+        | QuickSuggestionsDelay = 87
+        | ReadOnly = 88
+        | RenameOnType = 89
+        | RenderControlCharacters = 90
+        | RenderFinalNewline = 91
+        | RenderLineHighlight = 92
+        | RenderLineHighlightOnlyWhenFocus = 93
+        | RenderValidationDecorations = 94
+        | RenderWhitespace = 95
+        | RevealHorizontalRightPadding = 96
+        | RoundedSelection = 97
+        | Rulers = 98
+        | Scrollbar = 99
+        | ScrollBeyondLastColumn = 100
+        | ScrollBeyondLastLine = 101
+        | ScrollPredominantAxis = 102
+        | SelectionClipboard = 103
+        | SelectionHighlight = 104
+        | SelectOnLineNumbers = 105
+        | ShowFoldingControls = 106
+        | ShowUnused = 107
+        | SnippetSuggestions = 108
+        | SmartSelect = 109
+        | SmoothScrolling = 110
+        | StickyScroll = 111
+        | StickyTabStops = 112
+        | StopRenderingLineAfter = 113
+        | Suggest = 114
+        | SuggestFontSize = 115
+        | SuggestLineHeight = 116
+        | SuggestOnTriggerCharacters = 117
+        | SuggestSelection = 118
+        | TabCompletion = 119
+        | TabIndex = 120
+        | UnicodeHighlighting = 121
+        | UnusualLineTerminators = 122
+        | UseShadowDOM = 123
+        | UseTabStops = 124
+        | WordBreak = 125
+        | WordSeparators = 126
+        | WordWrap = 127
+        | WordWrapBreakAfterCharacters = 128
+        | WordWrapBreakBeforeCharacters = 129
+        | WordWrapColumn = 130
+        | WordWrapOverride1 = 131
+        | WordWrapOverride2 = 132
+        | WrappingIndent = 133
+        | WrappingStrategy = 134
+        | ShowDeprecated = 135
+        | InlayHints = 136
+        | EditorClassName = 137
+        | PixelRatio = 138
+        | TabFocusMode = 139
+        | LayoutInfo = 140
+        | WrappingInfo = 141
+        | DefaultColorDecorators = 142
 
     type EditorOptionsType =
         obj
@@ -3644,9 +3701,6 @@ module Editor =
         abstract originalAriaLabel: string option with get, set
         /// Aria label for modified editor.
         abstract modifiedAriaLabel: string option with get, set
-        /// Is the diff editor inside another editor
-        /// Defaults to false
-        abstract isInEmbeddedEditor: bool option with get, set
 
     /// A rich code editor.
     type [<AllowNullLiteral>] ICodeEditor =
@@ -4159,6 +4213,7 @@ module Editor =
         abstract overviewRulerBorder: IEditorOption<EditorOption, bool> with get, set
         abstract overviewRulerLanes: IEditorOption<EditorOption, float> with get, set
         abstract padding: IEditorOption<EditorOption, obj> with get, set
+        abstract pasteAs: IEditorOption<EditorOption, obj> with get, set
         abstract parameterHints: IEditorOption<EditorOption, obj> with get, set
         abstract peekWidgetDefaultFocus: IEditorOption<EditorOption, IExportsEditorOptionsPeekWidgetDefaultFocusIEditorOption> with get, set
         abstract definitionLinkOpensInPeek: IEditorOption<EditorOption, bool> with get, set
@@ -4382,6 +4437,10 @@ module Editor =
 
     type [<StringEnum>] [<RequireQualifiedAccess>] IDropIntoEditorOptionsShowDropSelector =
         | AfterDrop
+        | Never
+
+    type [<StringEnum>] [<RequireQualifiedAccess>] IPasteAsOptionsShowPasteSelector =
+        | AfterPaste
         | Never
 
     type [<StringEnum>] [<RequireQualifiedAccess>] IMouseTargetOutsideEditorOutsidePosition =
