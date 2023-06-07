@@ -107,23 +107,7 @@ let Main () =
                 ]
             ]
         ]
-        Bulma.footer [
-            Bulma.color.hasBackgroundPrimary
-            prop.style [
-                style.textAlign.center
-                style.paddingTop 0
-                style.paddingBottom 0
-            ]
-            prop.children [
-                Html.p [
-                    Html.text "Developed by "
-                    Html.strong "s204433"
-                    Html.text " and "
-                    Html.strong "s204442"
-                    Html.text " at the Technical University of Denmark"
-                ]
-            ]
-        ]
+        Footer.Footer(theme)
     ]
 
 let root = ReactDOM.createRoot(Browser.Dom.document.getElementById "root")

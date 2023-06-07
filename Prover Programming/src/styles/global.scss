@@ -1,11 +1,25 @@
 // Overwrite navigation bar breakpoint
 $navbar-breakpoint: "0";
 
+@import "../../node_modules/bulma/sass/utilities/initial-variables";
+@import "../../node_modules/bulma/sass/utilities/functions";
+
+$blue: lightblue;
+
+$primary: #89cff0;
+$primary-invert: #FFF;
+
+$dark: #2f1855;
+
+$switch-background: white;
+$switch-background-active: black;
+$switch-paddle-background: lightgray;
+
 @import "../../node_modules/bulma/bulma.sass";
 @import "../../node_modules/bulma-switch/src/sass/index.sass";
 
 :root {
-  --main-color-dark: #121212;
+  --main-color-dark: #1e1e1e;
 }
 
 html {

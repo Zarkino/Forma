@@ -5,8 +5,10 @@ open Feliz.Bulma
 
 [<ReactComponent>]
 let Navigation(theme: string, setTheme: string -> unit) =
+    let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
+    
     Bulma.navbar [
-        Bulma.color.isPrimary
+        decide_color theme
         prop.children [
             Bulma.navbarBrand.div [
                 Bulma.navbarItem.a [
@@ -25,7 +27,7 @@ let Navigation(theme: string, setTheme: string -> unit) =
                             Switch.checkbox [
                                 prop.defaultChecked (Browser.WebStorage.localStorage.getItem("theme").Equals("dark"))
                                 prop.id "theme_switch"
-                                color.isDark
+                                color.isBlack
                                 switch.isRounded
                                 switch.isMedium
                                 prop.onClick (fun _ -> setTheme(if theme.Equals("light") then "dark" else "light"))

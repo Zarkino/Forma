@@ -129,7 +129,7 @@ let Button_Level (theme: string, input: string, setInput: string -> unit) =
     let (download, setDownload) = React.useState(false)
     let (help, setHelp) = React.useState(false)
     
-    let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isLight
+    let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
     
     Bulma.level [
         prop.className [

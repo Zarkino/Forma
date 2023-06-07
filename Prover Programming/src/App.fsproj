@@ -13,6 +13,7 @@
         <Compile Include="Meta Logic.fs" />
         <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />
+        <Compile Include="Footer.fs" />
 
         <Compile Include="Navigation Bar.fs" />
         <Compile Include="Button Level.fs" />
