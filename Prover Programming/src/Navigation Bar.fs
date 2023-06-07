@@ -12,7 +12,7 @@ let Navigation(theme: string, setTheme: string -> unit) =
         prop.children [
             Bulma.navbarBrand.div [
                 Bulma.navbarItem.a [
-                    Html.img [ prop.src "https://bulma.io/images/bulma-logo-white.png"; prop.height 28; prop.width 112; ]
+                    Html.img [ prop.src "https://i.postimg.cc/j2NrVSFS/logo.png"; prop.height 28; prop.width 148; ]
                 ]
             ]
             Bulma.navbarMenu [
