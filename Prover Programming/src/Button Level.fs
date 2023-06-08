@@ -129,6 +129,8 @@ let Button_Level (theme: string, input: string, setInput: string -> unit) =
     let (download, setDownload) = React.useState(false)
     let (help, setHelp) = React.useState(false)
     
+    let reader = Browser.Dom.FileReader.Create()
+    
     let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
     
     Bulma.level [
@@ -158,12 +160,30 @@ let Button_Level (theme: string, input: string, setInput: string -> unit) =
                     ]
                 ]
                 Modal.Download("modal-download", download, setDownload, input)
-                Bulma.button.button [
+                Bulma.file [
                     prop.className "mx-1"
                     decide_color theme
                     prop.children [
-                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-upload" ] ] ]
-                        Html.span [ Html.text "Upload" ]
+                        Bulma.fileLabel.label [
+                            prop.children [
+                                Bulma.fileInput [
+                                    prop.accept "text/*"
+                                    prop.onChange
+                                        (fun (e: Browser.Types.Event) ->
+                                            let target = e.target :?> Browser.Types.HTMLInputElement
+                                            let file = target.files.Item(0)
+                                            
+                                            reader.readAsText(file)
+                                            reader.onload <- (fun _ -> reader.result |> function :? string as str -> setInput(str) | _ -> ()))
+                                ]
+                                Bulma.fileCta [
+                                    prop.children [
+                                        Bulma.fileIcon [ Html.i [ prop.className "fa-solid fa-upload" ] ]
+                                        Bulma.fileLabel.span [ Html.text "Upload" ]
+                                    ]
+                                ]
+                            ]
+                        ]
                     ]
                 ]
                 Bulma.button.button [
