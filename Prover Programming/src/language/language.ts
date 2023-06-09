@@ -5,14 +5,12 @@ type Monaco = typeof monaco;
 let keywords = ['lemma', 'proof', 'from', 'by', 'next', 'have']
 let components = ['assume', 'show']
 let connectives = ['and']
-//let logicals = ['~', '¬', '&', '∧', '|', '∨', '-->', '⟶', '<-->', '⟷', '(', ')', 'none', 'this', '.', '-', '!!', '⋀', '==>', '⟹', '≡', '==', '{', '}']
-let values = ['T', 'F', '⊤', '⊥']               
+let values = ['T', 'F', '⊤', '⊥']
 
-const ASP_FORMAT: monaco.languages.IMonarchLanguage = {
+const FORMAT: monaco.languages.IMonarchLanguage = {
     keywords,
     components,
     connectives,
-//    logicals,
     values,
     symbols:  /[=><!~?:&|+\-*\/\^%]+/,
     tokenizer: {
@@ -54,7 +52,7 @@ const ASP_FORMAT: monaco.languages.IMonarchLanguage = {
     }
 };
 
-const ASP_THEME_LIGHT: monaco.editor.IStandaloneThemeData = {
+const THEME_LIGHT: monaco.editor.IStandaloneThemeData = {
     base: 'vs',
     inherit: true,
     rules: [
@@ -69,7 +67,7 @@ const ASP_THEME_LIGHT: monaco.editor.IStandaloneThemeData = {
     colors: {}
 }
 
-const ASP_THEME_DARK: monaco.editor.IStandaloneThemeData = {
+const THEME_DARK: monaco.editor.IStandaloneThemeData = {
     base: 'vs-dark',
     inherit: true,
     rules: [
@@ -84,9 +82,9 @@ const ASP_THEME_DARK: monaco.editor.IStandaloneThemeData = {
     colors: {}
 }
 
-export function run(monaco: Monaco) {
-    monaco.languages.register({ id: "asp-lang" });
-    monaco.languages.setMonarchTokensProvider("asp-lang", ASP_FORMAT);
-    monaco.editor.defineTheme("asp-theme-light", ASP_THEME_LIGHT);
-    monaco.editor.defineTheme("asp-theme-dark", ASP_THEME_DARK);
+export function beforeMount(monaco: Monaco) {
+    monaco.languages.register({ id: "logi-lang" });
+    monaco.languages.setMonarchTokensProvider("logi-lang", FORMAT);
+    monaco.editor.defineTheme("logi-theme-light", THEME_LIGHT);
+    monaco.editor.defineTheme("logi-theme-dark", THEME_DARK);
 }

@@ -125,7 +125,9 @@ type Modal =
         ]
 
 [<ReactComponent>]
-let Button_Level (theme: string, input: string, setInput: string -> unit) =
+let Button_Level(input, setInput) =
+    let theme = React.useContext(Contexts.themeContext)
+    
     let (download, setDownload) = React.useState(false)
     let (help, setHelp) = React.useState(false)
     
@@ -134,10 +136,7 @@ let Button_Level (theme: string, input: string, setInput: string -> unit) =
     let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
     
     Bulma.level [
-        prop.className [
-            theme
-            "py-2"
-        ]
+        prop.className [ theme; "py-2" ]
         prop.style [style.margin 0]
         prop.children [
             Bulma.levelLeft [

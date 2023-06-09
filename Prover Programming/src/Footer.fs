@@ -4,11 +4,11 @@ open Feliz
 open Feliz.Bulma
 
 [<ReactComponent>]
-let Footer(theme: string) =
-    let decide_color theme = if theme.Equals("dark") then Bulma.color.hasBackgroundDark else Bulma.color.hasBackgroundPrimary   
+let Footer() =
+    let theme = React.useContext(Contexts.themeContext)
     
     Bulma.footer [
-            decide_color theme
+            if theme.Equals("dark") then Bulma.color.hasBackgroundDark else Bulma.color.hasBackgroundPrimary
             Bulma.color.hasTextLight
             prop.style [
                 style.textAlign.center

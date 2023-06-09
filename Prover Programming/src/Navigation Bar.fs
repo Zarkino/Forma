@@ -4,21 +4,23 @@ open Feliz
 open Feliz.Bulma
 
 [<ReactComponent>]
-let Navigation(theme: string, setTheme: string -> unit) =
-    let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
+let Navigation(setTheme) =
+    let theme = React.useContext(Contexts.themeContext)
     
     Bulma.navbar [
-        decide_color theme
+        if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
         prop.children [
             Bulma.navbarBrand.div [
                 Bulma.navbarItem.a [
-                    Html.img [ prop.src "https://i.postimg.cc/j2NrVSFS/logo.png"; prop.height 28; prop.width 148; ]
+                    prop.href "/"
+                    prop.children [
+                        Html.img [ prop.src "https://i.postimg.cc/j2NrVSFS/logo.png"; prop.height 28; prop.width 148; ]
+                    ]
                 ]
             ]
             Bulma.navbarMenu [
                 Bulma.navbarStart.div [
-                    Bulma.navbarItem.a [ prop.text "Home" ]
-                    Bulma.navbarItem.a [ prop.text "Documentation" ]
+                    Bulma.navbarItem.a [ prop.href "/"; prop.text "Home" ]
                     Bulma.navbarItem.a [ prop.text "About" ]
                 ]
                 Bulma.navbarEnd.div [

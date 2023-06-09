@@ -130,5 +130,5 @@ let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules:
                             | Conclusion _      -> Ok(fs, assumptions, Set.add (build (assumptions@[f])) conclusions)
                             | _                 -> Error("Something went wrong"))
     |> function
-        | Error(msg)            ->  Error(msg)
-        | Ok(_, _, conclusions) ->  tryApply(conclusions, goal, method, rules)
+        | Error(msg)            -> Error(msg)
+        | Ok(_, _, conclusions) -> tryApply(conclusions, goal, method, rules)
