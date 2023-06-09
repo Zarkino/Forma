@@ -218,12 +218,15 @@ let Button_Level(input, setInput) =
                             prop.id "dropdown-menu"
                             prop.role "menu"
                             prop.children [
-                                Bulma.dropdownContent
-                                    (examples |> Array.mapi (fun i ex ->
+                                Bulma.dropdownContent [
+                                    prop.className theme
+                                    prop.children
+                                        (examples |> Array.mapi (fun i ex ->
                                         Bulma.dropdownItem.a [
                                             prop.onClick (fun _ -> setInput(ex))
                                             prop.text $"Example %i{i+1}"
                                         ]))
+                                ]
                             ]
                         ]
                     ]
