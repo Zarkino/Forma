@@ -11,10 +11,6 @@ let Home() =
     let (output, setOutput) = React.useState(System.String.Empty)
     
     React.useEffect(fun () ->
-        Browser.WebStorage.localStorage.setItem("theme", theme)
-    , [|theme :> obj|])
-    
-    React.useEffect(fun () ->
         let parse (string: string) =
             let rec inner string cont =
                 match Parsec.runString Language.Proof.lemma () string with

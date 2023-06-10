@@ -1,22 +1,7 @@
 // Overwrite navigation bar breakpoint
 $navbar-breakpoint: "0";
 
-@import "../../node_modules/bulma/sass/utilities/initial-variables";
-@import "../../node_modules/bulma/sass/utilities/functions";
-
-$blue: lightblue;
-
-$primary: #6e4fd5;
-$primary-invert: #FFF;
-
-$dark: #4E31AA;
-
-$switch-background: white;
-$switch-background-active: black;
-$switch-paddle-background: lightgray;
-
 @import "../../node_modules/bulma/bulma.sass";
-@import "../../node_modules/bulma-switch/src/sass/index.sass";
 
 :root {
   --dark-main-color: #1E1E1E;
@@ -37,9 +22,17 @@ html {
   content: '.txt';
 }
 
+.navbar {
+  min-height: 72px;
+}
+
 div.editor {
   height: calc(100vh - 72px - 56px - 24px);
-  //72 header, 56 buttongroup, 24 footer
+  //72 navbar, 56 buttongroup, 24 footer
+}
+
+div.settings {
+  height: calc(100vh - 72px - 24px);
 }
 
 div.dark {
@@ -50,9 +43,47 @@ nav.dark {
   background-color: var(--dark-main-color);
 }
 
+a.navbar-item {
+  color: white;
+}
+
+a.navbar-item:hover,
+a.navbar-item:focus {
+  color: white;
+  background-color: transparent;
+  backdrop-filter: brightness(0.8);
+}
+
+.button,
+.button:hover,
+.button:focus {
+  border-color: transparent;
+  color: white;
+}
+
+.button:hover {
+  opacity: 0.8;
+}
+
 button.dark {
   background-color: #2F2F2F;
   border-color: transparent;
+  color: var(--dark-text-primary);
+}
+
+button.dark:hover {
+  border-color: transparent;
+  color: var(--dark-text-primary);
+  opacity: 0.8;
+}
+
+button.light,
+button.light:hover {
+  border-color: hsl(0, 0%, 71%);
+  color: hsl(0, 0%, 21%);
+}
+
+button.dark:focus {
   color: var(--dark-text-primary);
 }
 

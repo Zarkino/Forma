@@ -14,6 +14,7 @@ type Modal =
     [<ReactComponent>]
     static member Download (id: string, active: bool, setActive: bool -> unit, input: string) =
         let theme = React.useContext(Contexts.themeContext)
+        let accent = React.useContext(Contexts.accentContext)
         
         let (filename, setFilename) = React.useState("File1")
         
@@ -49,7 +50,7 @@ type Modal =
                                 prop.children [
                                     Bulma.control.p [
                                         Bulma.button.button [
-                                            prop.className "is-primary"
+                                            prop.style [ style.backgroundColor accent ]
                                             prop.onClick
                                                 (fun _  ->
                                                     if filename.Length > 0 then
@@ -139,13 +140,12 @@ type Modal =
 [<ReactComponent>]
 let Button_Level(input, setInput) =
     let theme = React.useContext(Contexts.themeContext)
+    let accent = React.useContext(Contexts.accentContext)
     
     let (download, setDownload) = React.useState(false)
     let (help, setHelp) = React.useState(false)
     
     let reader = Browser.Dom.FileReader.Create()
-    
-    let decide_color theme = if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
     
     Bulma.level [
         prop.className [ theme; "py-2" ]
@@ -154,14 +154,14 @@ let Button_Level(input, setInput) =
             Bulma.levelLeft [
                 Bulma.button.button [
                     prop.className "mx-1"
-                    decide_color theme
+                    prop.style [ style.backgroundColor accent ]
                     prop.children [
                         Html.span [ Html.text "Format" ]
                     ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
-                    decide_color theme
+                    prop.style [ style.backgroundColor accent ]
                     prop.target "modal-download"
                     prop.onClick (fun _ -> setDownload(true))
                     prop.onKeyDown (key.escape, fun _ -> setDownload(false))
@@ -173,7 +173,6 @@ let Button_Level(input, setInput) =
                 Modal.Download("modal-download", download, setDownload, input)
                 Bulma.file [
                     prop.className "mx-1"
-                    decide_color theme
                     prop.children [
                         Bulma.fileLabel.label [
                             prop.children [
@@ -188,6 +187,11 @@ let Button_Level(input, setInput) =
                                             reader.onload <- (fun _ -> reader.result |> function :? string as str -> setInput(str) | _ -> ()))
                                 ]
                                 Bulma.fileCta [
+                                    prop.className "button"
+                                    prop.style [
+                                        style.backgroundColor accent
+                                        style.color "white"
+                                    ]
                                     prop.children [
                                         Bulma.fileIcon [ Html.i [ prop.className "fa-solid fa-upload" ] ]
                                         Bulma.fileLabel.span [ Html.text "Upload" ]
@@ -199,7 +203,7 @@ let Button_Level(input, setInput) =
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
-                    decide_color theme
+                    prop.style [ style.backgroundColor accent ]
                     prop.target "modal-help"
                     prop.onClick (fun _ -> setHelp(true))
                     prop.onKeyDown (key.escape, fun _ -> setHelp(false))
@@ -216,7 +220,7 @@ let Button_Level(input, setInput) =
                             prop.children [
                                 Bulma.button.button [
                                     prop.className "mx-1"
-                                    decide_color theme
+                                    prop.style [ style.backgroundColor accent ]
                                     prop.ariaHasPopup true
                                     prop.ariaControls "dropdown-menu"
                                     prop.children [

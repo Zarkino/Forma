@@ -5,15 +5,15 @@ open Feliz.Bulma
 
 [<ReactComponent>]
 let Footer() =
-    let theme = React.useContext(Contexts.themeContext)
+    let accent = React.useContext(Contexts.accentContext)
     
     Bulma.footer [
-            if theme.Equals("dark") then Bulma.color.hasBackgroundDark else Bulma.color.hasBackgroundPrimary
             Bulma.color.hasTextLight
             prop.style [
                 style.textAlign.center
                 style.paddingTop 0
                 style.paddingBottom 0
+                style.backgroundColor accent
             ]
             prop.children [
                 Html.p [

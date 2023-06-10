@@ -4,11 +4,12 @@ open Feliz
 open Feliz.Bulma
 
 [<ReactComponent>]
-let Navigation(setTheme) =
-    let theme = React.useContext(Contexts.themeContext)
+let Navigation() =
+    let accent = React.useContext(Contexts.accentContext)
     
     Bulma.navbar [
-        if theme.Equals("dark") then Bulma.color.isDark else Bulma.color.isPrimary
+        Bulma.color.hasTextLight
+        prop.style [ style.backgroundColor accent ]
         prop.children [
             Bulma.navbarBrand.div [
                 Bulma.navbarItem.a [
@@ -21,25 +22,8 @@ let Navigation(setTheme) =
             Bulma.navbarMenu [
                 Bulma.navbarStart.div [
                     Bulma.navbarItem.a [ prop.href "/"; prop.text "Home" ]
+                    Bulma.navbarItem.a [ prop.href "/settings"; prop.text "Settings" ]
                     Bulma.navbarItem.a [ prop.text "About" ]
-                ]
-                Bulma.navbarEnd.div [
-                    Bulma.navbarItem.div [
-                        Bulma.field.div [
-                            Switch.checkbox [
-                                prop.defaultChecked (Browser.WebStorage.localStorage.getItem("theme").Equals("dark"))
-                                prop.id "theme_switch"
-                                color.isBlack
-                                switch.isRounded
-                                switch.isMedium
-                                prop.onClick (fun _ -> setTheme(if theme.Equals("light") then "dark" else "light"))
-                            ]
-                            Html.label [
-                                prop.htmlFor "theme_switch"
-                                prop.text ""
-                            ]
-                        ]
-                    ]
                 ]
             ]
         ]
