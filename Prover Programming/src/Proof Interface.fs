@@ -81,7 +81,7 @@ let tryApply (assumptions, result, method, ruleset) =
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
         | Some(meta)    ->
             match split meta result with
-            | Error(msg)    -> Error(msg)
+            | Error _       -> Error($"Could not achieve %s{result.ToString()} by rule %s{rule}")
             | Ok(list, map) ->
                 match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) list with
                 | None      ->  Ok()
