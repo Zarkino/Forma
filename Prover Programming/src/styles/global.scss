@@ -19,7 +19,11 @@ $switch-paddle-background: lightgray;
 @import "../../node_modules/bulma-switch/src/sass/index.sass";
 
 :root {
-  --main-color-dark: #1e1e1e;
+  --dark-main-color: #1E1E1E;
+  
+  --dark-text-primary: #FFFFFF;
+  --dark-text-secondary: #DCDCDC;
+  --dark-text-tertiary: #9F9F9F;
 }
 
 html {
@@ -39,38 +43,44 @@ div.editor {
 }
 
 div.dark {
-  background-color: var(--main-color-dark);
-}
-
-div.light {
-  background-color: white;
-}
-
-.column.dark {
-  background-color: var(--main-color-dark);
-}
-
-.column.light {
-  background-color: white;
+  background-color: var(--dark-main-color);
 }
 
 nav.dark {
-  background-color: var(--main-color-dark);
-}
-
-nav.light {
-  background-color: white;
+  background-color: var(--dark-main-color);
 }
 
 button.dark {
-  background-color: var(--main-color-dark);
+  background-color: #2F2F2F;
+  border-color: transparent;
+  color: var(--dark-text-primary);
 }
 
-button.light {
-  background-color: #f5f5f5;
+.dropdown-content.dark a {
+  color: var(--dark-text-tertiary);
 }
 
 .dropdown-content.dark a:hover {
-  color: white;
+  color: var(--dark-text-primary);
   background-color: #252525;
+}
+
+table.dark {
+  background-color: var(--dark-main-color);
+}
+
+table.dark > thead > tr > th {
+  color: var(--dark-text-secondary);
+}
+
+table.dark > tbody > tr > td {
+  color: var(--dark-text-tertiary);
+}
+
+.dark h1, a {
+  color: var(--dark-text-primary);
+}
+
+.dark .field label {
+  color: var(--dark-text-primary);
 }

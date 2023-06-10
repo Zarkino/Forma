@@ -13,6 +13,8 @@ let examples = [|
 type Modal =
     [<ReactComponent>]
     static member Download (id: string, active: bool, setActive: bool -> unit, input: string) =
+        let theme = React.useContext(Contexts.themeContext)
+        
         let (filename, setFilename) = React.useState("File1")
         
         Bulma.modal [
@@ -23,45 +25,49 @@ type Modal =
                 Bulma.modalClose [ prop.onClick (fun _ -> setActive(false)) ]
                 Bulma.modalContent [
                     Bulma.box [
-                        Html.h1 [
-                            prop.className [ "title"; "is-4" ]
-                            prop.text "Save this file"
-                        ]
-                        Bulma.field.div [
-                            Bulma.label "File Name"
-                            Html.div [
-                                prop.className [ "control"; "input-container" ]
-                                prop.children [
-                                    Bulma.input.text [
-                                        prop.defaultValue filename
-                                        prop.onChange setFilename
+                        prop.className theme
+                        prop.children [
+                            Html.h1 [
+                                prop.className [ "title"; "is-4" ]
+                                prop.text "Save this file"
+                            ]
+                            Bulma.field.div [
+                                Bulma.label "File Name"
+                                Html.div [
+                                    prop.className [ "control"; "input-container" ]
+                                    prop.children [
+                                        Bulma.input.text [
+                                            prop.defaultValue filename
+                                            prop.onChange setFilename
+                                        ]
                                     ]
                                 ]
                             ]
-                        ]
-                        Bulma.field.div [
-                            field.isGrouped
-                            prop.style [ style.justifyContent.right ]
-                            prop.children [
-                                Bulma.control.p [
-                                    Bulma.button.button [
-                                        prop.className [ "is-primary" ]
-                                        prop.onClick
-                                            (fun _  ->
-                                                if filename.Length > 0 then
-                                                    let anchor = Browser.Dom.document.createElement("a")
-                                                    anchor.setAttribute("href", input |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI)
-                                                    anchor.setAttribute("download", filename + ".txt")
-                                                    anchor.click()
-                                                    setActive(false)
-                                            )
-                                        prop.children [ Html.span [ Html.text "Save" ] ]
+                            Bulma.field.div [
+                                field.isGrouped
+                                prop.style [ style.justifyContent.right ]
+                                prop.children [
+                                    Bulma.control.p [
+                                        Bulma.button.button [
+                                            prop.className "is-primary"
+                                            prop.onClick
+                                                (fun _  ->
+                                                    if filename.Length > 0 then
+                                                        let anchor = Browser.Dom.document.createElement("a")
+                                                        anchor.setAttribute("href", input |> sprintf "data:text/plain;charset=utf-8,%s" |> Fable.Core.JS.encodeURI)
+                                                        anchor.setAttribute("download", filename + ".txt")
+                                                        anchor.click()
+                                                        setActive(false)
+                                                )
+                                            prop.children [ Html.span [ Html.text "Save" ] ]
+                                        ]
                                     ]
-                                ]
-                                Bulma.control.p [
-                                    Bulma.button.button [
-                                        prop.onClick (fun _ -> setActive(false))
-                                        prop.children [ Html.span [ Html.text "Cancel" ] ]
+                                    Bulma.control.p [
+                                        Bulma.button.button [
+                                            prop.className theme
+                                            prop.onClick (fun _ -> setActive(false))
+                                            prop.children [ Html.span [ Html.text "Cancel" ] ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -73,6 +79,8 @@ type Modal =
 
     [<ReactComponent>]
     static member Help (id: string, active: bool, setActive: bool -> unit) =
+        let theme = React.useContext(Contexts.themeContext)
+        
         Bulma.modal [
             prop.id id
             if active then modal.isActive
@@ -81,41 +89,45 @@ type Modal =
                 Bulma.modalClose [ prop.onClick (fun _ -> setActive(false)) ]
                 Bulma.modalContent [
                     Bulma.box [
-                        Html.h1 [
-                            prop.className [ "title"; "is-4" ]
-                            prop.text "Language Reference"
-                        ]
-                        Html.span [ Html.text "..." ]
-                        Html.h1 [
-                            prop.className [ "title"; "is-4" ]
-                            prop.text "Rules"
-                        ]
-                        Bulma.table [
-                            table.isFullWidth
-                            prop.children [
-                                Html.thead [
-                                    Html.tr [
-                                        Html.th [ Html.abbr "Rule" ]
-                                        Html.th [ Html.abbr "Definition" ]
+                        prop.className theme
+                        prop.children [
+                            Html.h1 [
+                                prop.className [ "title"; "is-4" ]
+                                prop.text "Language Reference"
+                            ]
+                            Html.span [ Html.text "..." ]
+                            Html.h1 [
+                                prop.className [ "title"; "is-4" ]
+                                prop.text "Rules"
+                            ]
+                            Bulma.table [
+                                table.isFullWidth
+                                prop.className theme
+                                prop.children [
+                                    Html.thead [
+                                        Html.tr [
+                                            Html.th [ Html.abbr "Rule" ]
+                                            Html.th [ Html.abbr "Definition" ]
+                                        ]
                                     ]
-                                ]
-                                Html.tbody [
-                                    Html.tr [ Html.td "Imp_I";      Html.td "(P ⟹ Q) ⟹ P ⟶ Q" ]
-                                    Html.tr [ Html.td "Imp_E";      Html.td "P ⟶ Q ⟹ P ⟹ Q" ]
-                                    Html.tr [ Html.td "Con_I";      Html.td "P ⟹ Q ⟹ P ∧ Q" ]
-                                    Html.tr [ Html.td "Con_E1";     Html.td "P ∧ Q ⟹ P" ]
-                                    Html.tr [ Html.td "Con_E2";     Html.td "P ∧ Q ⟹ Q" ]
-                                    Html.tr [ Html.td "Dis_I1";     Html.td "P ⟹ P ∨ Q" ]
-                                    Html.tr [ Html.td "Dis_I2";     Html.td "Q ⟹ P ∨ Q" ]
-                                    Html.tr [ Html.td "Dis_E";      Html.td "P ∨ Q ⟹ (P ⟹ R) ⟹ (Q ⟹ R) ⟹ R" ]
-                                    Html.tr [ Html.td "Neg_I";      Html.td "(P ⟹ ⊥) ⟹ ¬P" ]
-                                    Html.tr [ Html.td "Neg_E";      Html.td "¬P ⟹ P ⟹ Q" ]
-                                    Html.tr [ Html.td "Iff_I";      Html.td "(P ⟹ Q) ⟹ (Q ⟹ P) ⟹ P ⟷ Q" ]
-                                    Html.tr [ Html.td "Iff_E1";     Html.td "P ⟷ Q ⟹ P ⟹ Q" ]
-                                    Html.tr [ Html.td "Iff_E2";     Html.td "P ⟷ Q ⟹ Q ⟹ P" ]
-                                    Html.tr [ Html.td "Falsity_E";  Html.td "⊥ ⟹ P" ]
-                                    Html.tr [ Html.td "Truth_I";    Html.td "⊥ ⟶ ⊥ ⟹ ⊤" ]
-                                    Html.tr [ Html.td "LEM";        Html.td "P ∨ ¬P" ]
+                                    Html.tbody [
+                                        Html.tr [ Html.td "Imp_I";      Html.td "(P ⟹ Q) ⟹ P ⟶ Q" ]
+                                        Html.tr [ Html.td "Imp_E";      Html.td "P ⟶ Q ⟹ P ⟹ Q" ]
+                                        Html.tr [ Html.td "Con_I";      Html.td "P ⟹ Q ⟹ P ∧ Q" ]
+                                        Html.tr [ Html.td "Con_E1";     Html.td "P ∧ Q ⟹ P" ]
+                                        Html.tr [ Html.td "Con_E2";     Html.td "P ∧ Q ⟹ Q" ]
+                                        Html.tr [ Html.td "Dis_I1";     Html.td "P ⟹ P ∨ Q" ]
+                                        Html.tr [ Html.td "Dis_I2";     Html.td "Q ⟹ P ∨ Q" ]
+                                        Html.tr [ Html.td "Dis_E";      Html.td "P ∨ Q ⟹ (P ⟹ R) ⟹ (Q ⟹ R) ⟹ R" ]
+                                        Html.tr [ Html.td "Neg_I";      Html.td "(P ⟹ ⊥) ⟹ ¬P" ]
+                                        Html.tr [ Html.td "Neg_E";      Html.td "¬P ⟹ P ⟹ Q" ]
+                                        Html.tr [ Html.td "Iff_I";      Html.td "(P ⟹ Q) ⟹ (Q ⟹ P) ⟹ P ⟷ Q" ]
+                                        Html.tr [ Html.td "Iff_E1";     Html.td "P ⟷ Q ⟹ P ⟹ Q" ]
+                                        Html.tr [ Html.td "Iff_E2";     Html.td "P ⟷ Q ⟹ Q ⟹ P" ]
+                                        Html.tr [ Html.td "Falsity_E";  Html.td "⊥ ⟹ P" ]
+                                        Html.tr [ Html.td "Truth_I";    Html.td "⊥ ⟶ ⊥ ⟹ ⊤" ]
+                                        Html.tr [ Html.td "LEM";        Html.td "P ∨ ¬P" ]
+                                    ]
                                 ]
                             ]
                         ]
