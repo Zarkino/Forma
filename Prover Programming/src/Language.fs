@@ -95,6 +95,6 @@ module Proof =
         (spaces >>. between (pchar '{') (pchar '}') block)
         >>= (fun (method, statements) -> preturn (Proof(method, statements)))
     
-    let name = spaces >>. opt (many1CharsTillMax anyChar ':' 10)
+    let name = spaces >>. opt (many1CharsTillMax (satisfy (function ' ' | '\n' -> false | _ -> true)) ':' 10)
     
     let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name meta proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
