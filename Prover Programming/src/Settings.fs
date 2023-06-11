@@ -196,7 +196,7 @@ let Settings(setAccent, setTheme) =
                                                         prop.style [ style.justifyContent.center ]
                                                         prop.children [
                                                             Bulma.button.button [
-                                                                prop.style [ style.backgroundColor accent ]
+                                                                prop.style [ style.color "white"; style.backgroundColor accent ]
                                                                 prop.onClick
                                                                     (fun _  -> setActive(false))
                                                                 prop.children [ Html.span [ Html.text "Done" ] ]

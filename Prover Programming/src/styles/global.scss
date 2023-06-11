@@ -57,34 +57,29 @@ a.navbar-item:focus {
 .button,
 .button:hover,
 .button:focus {
+  background-color: unset;
   border-color: transparent;
-  color: white;
 }
 
 .button:hover {
   opacity: 0.8;
 }
 
-button.dark {
+button.dark,
+button.dark:hover {
   background-color: #2F2F2F;
   border-color: transparent;
   color: var(--dark-text-primary);
 }
 
-button.dark:hover {
-  border-color: transparent;
+button.dark:focus {
   color: var(--dark-text-primary);
-  opacity: 0.8;
 }
 
 button.light,
 button.light:hover {
   border-color: hsl(0, 0%, 71%);
   color: hsl(0, 0%, 21%);
-}
-
-button.dark:focus {
-  color: var(--dark-text-primary);
 }
 
 .dropdown-content.dark a {

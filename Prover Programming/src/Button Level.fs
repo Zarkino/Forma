@@ -50,7 +50,7 @@ type Modal =
                                 prop.children [
                                     Bulma.control.p [
                                         Bulma.button.button [
-                                            prop.style [ style.backgroundColor accent ]
+                                            prop.style [ style.color "white"; style.backgroundColor accent ]
                                             prop.onClick
                                                 (fun _  ->
                                                     if filename.Length > 0 then
@@ -154,14 +154,14 @@ let Button_Level(input, setInput) =
             Bulma.levelLeft [
                 Bulma.button.button [
                     prop.className "mx-1"
-                    prop.style [ style.backgroundColor accent ]
+                    prop.style [ style.color "white"; style.backgroundColor accent ]
                     prop.children [
                         Html.span [ Html.text "Format" ]
                     ]
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
-                    prop.style [ style.backgroundColor accent ]
+                    prop.style [ style.color "white"; style.backgroundColor accent ]
                     prop.target "modal-download"
                     prop.onClick (fun _ -> setDownload(true))
                     prop.onKeyDown (key.escape, fun _ -> setDownload(false))
@@ -203,7 +203,7 @@ let Button_Level(input, setInput) =
                 ]
                 Bulma.button.button [
                     prop.className "mx-1"
-                    prop.style [ style.backgroundColor accent ]
+                    prop.style [ style.color "white"; style.backgroundColor accent ]
                     prop.target "modal-help"
                     prop.onClick (fun _ -> setHelp(true))
                     prop.onKeyDown (key.escape, fun _ -> setHelp(false))
@@ -220,7 +220,7 @@ let Button_Level(input, setInput) =
                             prop.children [
                                 Bulma.button.button [
                                     prop.className "mx-1"
-                                    prop.style [ style.backgroundColor accent ]
+                                    prop.style [ style.color "white"; style.backgroundColor accent ]
                                     prop.ariaHasPopup true
                                     prop.ariaControls "dropdown-menu"
                                     prop.children [
