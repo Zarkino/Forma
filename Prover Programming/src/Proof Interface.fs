@@ -66,7 +66,7 @@ let rec build list =
 
 let tryApply (assumptions, result, method, ruleset) =
     match method with
-    | Method.Trivial    -> if Set.contains result assumptions then Ok() else Error($"Could not reach goal %s{result.ToString()} by none")
+    | Method.Trivial    -> if Set.contains result assumptions then Ok() else Error($"Could not achieve %s{result.ToString()} by none")
     | Method.This       ->
         assumptions
         |> Set.exists (fun x -> Logic.ML.split x |> function a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a' -> true | _ -> false)
@@ -75,7 +75,7 @@ let tryApply (assumptions, result, method, ruleset) =
             | false ->
                 match result with
                 | Implication(p, p') when p = p'    -> Ok()
-                | _                                 -> Error($"Could not achieve goal %s{result.ToString()} by this")
+                | _                                 -> Error($"Could not achieve %s{result.ToString()} by this")
     | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
