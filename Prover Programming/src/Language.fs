@@ -104,4 +104,4 @@ module Proof =
     
     let name = spaces >>. opt (many1CharsTillMax (satisfy (function ' ' | '\n' -> false | _ -> true)) ':' 10)
     
-    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name meta proof (fun name id proof -> { Name = name; Goal = id; Proof = proof })
+    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name meta proof (fun name goal proof -> { Name = name; Goal = goal; Proof = proof })
