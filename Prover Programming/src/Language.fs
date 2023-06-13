@@ -14,7 +14,12 @@ module PL =
     let binaryFormula operator = operator >>. spaces >>. formula
     
     do formulaRef.Value <- parse {
-        let! left = spaces >>. (constant <|> variable <|> negation <|> (between (pchar '(') (pchar ')') formula))
+        let! left = spaces >>. choice [
+            constant
+            variable
+            negation
+            between (pchar '(') (pchar ')') formula
+        ]
         return! spaces >>. choice [
             binaryFormula (anyOfStr ["&"; "∧"]) |>> (fun right -> Conjunction(left, right))
             binaryFormula (anyOfStr ["|"; "∨"]) |>> (fun right -> Disjunction(left, right))
@@ -33,10 +38,11 @@ module ML =
     let entity = formula |>> Meta.Entity
     
     do metaRef.Value <- parse {
-        let! left = spaces >>. (
-            (pipe2 ((anyOfStr ["!!"; "⋀"]) >>. many1 var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))) <|>
-            entity <|>
-            between (pchar '(') (pchar ')') meta)
+        let! left = spaces >>. choice [
+            pipe2 ((anyOfStr ["!!"; "⋀"]) >>. many1 var .>> pchar '.') (spaces1 >>. meta) (fun left right -> Meta.Universal(left, right))
+            entity
+            between (pchar '(') (pchar ')') meta
+        ]
         return! spaces >>. choice [
             (anyOfStr ["==>"; "⟹"]) >>. spaces >>. meta |>> (fun right -> Meta.Implication(left, right))
             (anyOfStr ["=="; "≡"]) >>. spaces >>. meta |>> (fun right -> Meta.Equality(left, right))
