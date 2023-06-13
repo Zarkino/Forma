@@ -97,9 +97,10 @@ module Proof =
     }
     
     proofRef.Value <-
-        spaces >>. pstring "proof" >>. spaces1 >>. proof_method .>>.
-        (spaces >>. between (pchar '{') (pchar '}') block)
-        >>= (fun (method, statements) -> preturn (Proof(method, statements)))
+        pipe2
+            (spaces >>. pstring "proof" >>. spaces1 >>. proof_method)
+            (spaces >>. between (pchar '{') (pchar '}') block)
+            (fun method statements -> Proof(method, statements))
     
     let name = spaces >>. opt (many1CharsTillMax (satisfy (function ' ' | '\n' -> false | _ -> true)) ':' 10)
     
