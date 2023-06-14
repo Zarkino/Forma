@@ -58,7 +58,7 @@ module Proof =
     
     let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
     
-    let method_rule = pchar '(' >>. pstring "rule" >>. spaces1 >>. rule .>> pchar ')' |>> Method.Rule
+    let method_rule = between (pchar '(') (pchar ')') (spaces >>. pstring "rule" >>. spaces1 >>. rule .>> spaces) |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
     let method_trivial = (anyOfStr ["-"; "none"]) >>% Method.Trivial
     
@@ -97,8 +97,9 @@ module Proof =
     }
     
     proofRef.Value <-
+        spaces >>. pstring "proof" >>. spaces1 >>.
         pipe2
-            (spaces >>. pstring "proof" >>. spaces1 >>. proof_method)
+            proof_method
             (spaces >>. between (pchar '{') (pchar '}') block)
             (fun method statements -> Proof(method, statements))
     
