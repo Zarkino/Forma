@@ -136,7 +136,7 @@ let Language_Reference() =
             prop.children [
                 Html.li [ Html.span [ Html.samp "[...]";  Html.text " means optional." ] ]
                 Html.li [ Html.span [ Html.text "+ means you can have more than 1." ] ]
-                Html.li [ Html.span [ Html.text "A <name> is up to 10 characters long and must not contain any spaces. " ] ]
+                Html.li [ Html.span [ Html.text "A <name> is a string up to 10 characters long. " ] ]
                 Html.li [ Html.span [ Html.text "A <var> is any alphanumeric string. " ] ]
             ]
         ]

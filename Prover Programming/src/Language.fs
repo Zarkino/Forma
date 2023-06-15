@@ -56,9 +56,9 @@ module Proof =
     
     let proof, proofRef = createParserForwardedToRef()
     
-    let rule = manyMinMaxSatisfy 1 10 (fun c -> isLetter c || isDigit c || c = '_')
+    let name = spaces >>. manyMinMaxSatisfy 1 10 (function ' ' | '\n' | ':' | '(' | ')' -> false | _ -> true)
     
-    let method_rule = between (pchar '(') (pchar ')') (spaces >>. pstring "rule" >>. spaces1 >>. rule .>> spaces) |>> Method.Rule
+    let method_rule = between (pchar '(') (pchar ')') (spaces >>. pstring "rule" >>. spaces1 >>. name .>> spaces) |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
     let method_trivial = (anyOfStr ["-"; "none"]) >>% Method.Trivial
     
@@ -103,6 +103,4 @@ module Proof =
             (spaces >>. between (pchar '{') (pchar '}') block)
             (fun method statements -> Proof(method, statements))
     
-    let name = spaces >>. opt (many1CharsTillMax (satisfy (function ' ' | '\n' -> false | _ -> true)) ':' 10)
-    
-    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 name meta proof (fun name goal proof -> { Name = name; Goal = goal; Proof = proof })
+    let lemma = spaces >>. pstring "lemma" >>. spaces1 >>. pipe3 (opt (name .>> spaces .>> pchar ':')) meta proof (fun name goal proof -> { Name = name; Goal = goal; Proof = proof })
