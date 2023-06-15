@@ -99,8 +99,8 @@ let Editor(value, setValue, readonly) =
                 o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
                     oMinimap.enabled <- Some false
                 ))
-                o.unicodeHighlight <- Some (jsOptions<Monaco.Editor.IUnicodeHighlightOptions>(fun oUnicodeHiglight ->
-                    oUnicodeHiglight.ambiguousCharacters <- Some false
+                o.unicodeHighlight <- Some (jsOptions<Monaco.Editor.IUnicodeHighlightOptions>(fun oUnicodeHighlight ->
+                    oUnicodeHighlight.ambiguousCharacters <- Some false
                 ))
                 o.readOnly <- Some readonly
             ))
