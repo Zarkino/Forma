@@ -8,7 +8,7 @@ module PL =
     let (formula: Parser<Formula, obj>), formulaRef = createParserForwardedToRef()
     
     let constant = (anyOf ['T'; '⊤'] >>% Constant(true)) <|> (anyOf ['F'; '⊥'] >>% Constant(false))
-    let var = many1Chars asciiLetter |>> string
+    let var = many1Chars (satisfy (fun c -> isLetter c || isDigit c)) |>> string
     let variable = var |>> Variable
     let negation = (anyOf ['~'; '¬']) >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
     let binaryFormula operator = operator >>. spaces >>. formula
