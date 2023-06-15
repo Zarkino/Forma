@@ -37,7 +37,7 @@ let Home() =
         
         Browser.WebStorage.localStorage.setItem("input", input)
         
-        System.Text.RegularExpressions.Regex.Replace(input, "\/\/.*", System.String.Empty)
+        System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
         |> parse
         |> fun (msg, list) ->
             let output = evaluate list
