@@ -27,7 +27,7 @@ const FORMAT: monaco.languages.IMonarchLanguage = {
                 }
             }],
 
-            [/[~¬&∧|∨\->⟶<⟷().!⋀=⟹≡{}]+/, 'neutral'],
+            [/[~¬&∧|∨\->⟶<⟷().!⋀=⟹≡{}:]+/, 'neutral'],
 
             { include: '@whitespace' },
 
