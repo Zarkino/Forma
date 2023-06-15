@@ -8,6 +8,7 @@ let private styles = Stylesheet.load "./styles/language.module.scss"
 [<ReactComponent>]
 let Language_Reference() =
     let theme = React.useContext(Contexts.themeContext)
+    let accent = React.useContext(Contexts.accentContext)
     
     let formatSubcript(string: string) = Html.sub [ prop.key 0; prop.children [ Html.strong string ] ]
     
@@ -21,7 +22,7 @@ let Language_Reference() =
             | Some(color)   -> Html.strong [ prop.style [ style.color color ]; prop.children [ Html.text string ] ]
             | None          -> Html.text string
     
-    let separator() = Html.strong [ prop.style [ style.color "red" ]; prop.children [ Html.text " | " ] ]
+    let separator() = Html.strong [ prop.style [ style.color accent ]; prop.children [ Html.text " | " ] ]
     
     Bulma.content [
         Html.p [ Html.text "The following list outlines the structure and syntax of the language." ]
