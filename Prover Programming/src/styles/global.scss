@@ -101,6 +101,9 @@ table.dark > thead > tr > th {
 
 table.dark > tbody > tr > td {
   color: var(--dark-text-tertiary);
+  strong {
+    color: var(--dark-text-tertiary);
+  }
 }
 
 .dark h1, a {
@@ -109,4 +112,16 @@ table.dark > tbody > tr > td {
 
 .dark .field label {
   color: var(--dark-text-primary);
+}
+
+.dark > .tabs > ul > li > a:not(li.is-active a, a:hover) {
+  color: var(--dark-text-secondary);
+}
+
+.dark p {
+  color: var(--dark-text-tertiary);
+}
+
+.dark .content > ul > li span {
+  color: var(--dark-text-tertiary);
 }

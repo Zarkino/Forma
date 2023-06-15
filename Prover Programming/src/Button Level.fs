@@ -79,58 +79,50 @@ type Modal =
         ]
 
     [<ReactComponent>]
-    static member Help (id: string, active: bool, setActive: bool -> unit) =
+    static member Help (id: string, help: bool, setHelp: bool -> unit) =
         let theme = React.useContext(Contexts.themeContext)
+        
+        let (active, setActive) = React.useState(0)
         
         Bulma.modal [
             prop.id id
-            if active then modal.isActive
+            if help then modal.isActive
             prop.children [
-                Bulma.modalBackground [ prop.onClick (fun _ -> setActive(false)) ]
-                Bulma.modalClose [ prop.onClick (fun _ -> setActive(false)) ]
+                Bulma.modalBackground [ prop.onClick (fun _ -> setHelp(false)) ]
+                Bulma.modalClose [ prop.onClick (fun _ -> setHelp(false)) ]
                 Bulma.modalContent [
                     Bulma.box [
                         prop.className theme
                         prop.children [
-                            Html.h1 [
-                                prop.className [ "title"; "is-4" ]
-                                prop.text "Language Reference"
-                            ]
-                            Html.span [ Html.text "..." ]
-                            Html.h1 [
-                                prop.className [ "title"; "is-4" ]
-                                prop.text "Rules"
-                            ]
-                            Bulma.table [
-                                table.isFullWidth
-                                prop.className theme
+                            Bulma.tabs [
                                 prop.children [
-                                    Html.thead [
-                                        Html.tr [
-                                            Html.th [ Html.abbr "Rule" ]
-                                            Html.th [ Html.abbr "Definition" ]
+                                    Html.ul [
+                                        Bulma.tab [
+                                            if active = 0 then tab.isActive
+                                            prop.onClick (fun _ -> setActive(0))
+                                            prop.children [
+                                                Html.a [
+                                                    Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-book" ] ] ]
+                                                    Html.span [ Html.text "Rules" ]
+                                                ]
+                                            ]
                                         ]
-                                    ]
-                                    Html.tbody [
-                                        Html.tr [ Html.td "Imp_I";      Html.td "(P ⟹ Q) ⟹ P ⟶ Q" ]
-                                        Html.tr [ Html.td "Imp_E";      Html.td "P ⟶ Q ⟹ P ⟹ Q" ]
-                                        Html.tr [ Html.td "Con_I";      Html.td "P ⟹ Q ⟹ P ∧ Q" ]
-                                        Html.tr [ Html.td "Con_E1";     Html.td "P ∧ Q ⟹ P" ]
-                                        Html.tr [ Html.td "Con_E2";     Html.td "P ∧ Q ⟹ Q" ]
-                                        Html.tr [ Html.td "Dis_I1";     Html.td "P ⟹ P ∨ Q" ]
-                                        Html.tr [ Html.td "Dis_I2";     Html.td "Q ⟹ P ∨ Q" ]
-                                        Html.tr [ Html.td "Dis_E";      Html.td "P ∨ Q ⟹ (P ⟹ R) ⟹ (Q ⟹ R) ⟹ R" ]
-                                        Html.tr [ Html.td "Neg_I";      Html.td "(P ⟹ ⊥) ⟹ ¬P" ]
-                                        Html.tr [ Html.td "Neg_E";      Html.td "¬P ⟹ P ⟹ Q" ]
-                                        Html.tr [ Html.td "Iff_I";      Html.td "(P ⟹ Q) ⟹ (Q ⟹ P) ⟹ P ⟷ Q" ]
-                                        Html.tr [ Html.td "Iff_E1";     Html.td "P ⟷ Q ⟹ P ⟹ Q" ]
-                                        Html.tr [ Html.td "Iff_E2";     Html.td "P ⟷ Q ⟹ Q ⟹ P" ]
-                                        Html.tr [ Html.td "Falsity_E";  Html.td "⊥ ⟹ P" ]
-                                        Html.tr [ Html.td "Truth_I";    Html.td "⊥ ⟶ ⊥ ⟹ ⊤" ]
-                                        Html.tr [ Html.td "LEM";        Html.td "P ∨ ¬P" ]
+                                        Bulma.tab [
+                                            if active = 1 then tab.isActive
+                                            prop.onClick (fun _ -> setActive(1))
+                                            prop.children [
+                                                Html.a [
+                                                    Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-code" ] ] ]
+                                                    Html.span [ Html.text "Language Reference" ]
+                                                ]
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
+                            match active with
+                            | 1 -> Language_Reference.Language_Reference()
+                            | _ -> Rules.Rules()
                         ]
                     ]
                 ]
