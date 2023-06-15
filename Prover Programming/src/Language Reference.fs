@@ -67,7 +67,7 @@ let Language_Reference() =
                         Html.td [ Html.strong "S" ]
                         Html.td [
                             formatKeyword("assume"); Html.strong " F"; formatSubcript("M"); Html.text " ["; formatKeyword("and"); Html.strong " F"; formatSubcript("M"); Html.text "]+"
-                            Html.text " | "
+                            separator()
                             Html.strong "C"; formatSubcript("H")
                         ]
                     ]
