@@ -10,7 +10,7 @@ let Language_Reference() =
     let theme = React.useContext(Contexts.themeContext)
     let accent = React.useContext(Contexts.accentContext)
     
-    let formatSubcript(string: string) = Html.sub [ prop.key 0; prop.children [ Html.strong string ] ]
+    let formatSubcript(string: string) = Html.sub [ Html.strong string ]
     
     let formatKeyword(string: string) =
         match string with
