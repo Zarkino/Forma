@@ -56,7 +56,7 @@ module Proof =
     
     let proof, proofRef = createParserForwardedToRef()
     
-    let name = spaces >>. manyMinMaxSatisfy 1 10 (function ' ' | '\n' | ':' | '(' | ')' -> false | _ -> true)
+    let name = spaces >>. manyMinMaxSatisfyL 1 10 (fun c -> isDigit c || isLetter c || c = '_') "A digit, letter or '_'"
     
     let method_rule = between (pchar '(') (pchar ')') (spaces >>. pstring "rule" >>. spaces1 >>. name .>> spaces) |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
