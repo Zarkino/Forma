@@ -26,10 +26,10 @@ let private evaluate (lemmas: Lemma list) =
                 | None          -> rules
                 | Some(name)    -> Map.add name lemma.Goal rules
                 |> (fun rules' ->  (rules', fun tail -> cont (Ok(lemma)::tail))))
-    |> fun (_, cont) -> cont [] |> List.map (function Ok(lemma) -> $"Successful Lemma %s{lemma.ToString()}" | Error(msg) -> msg) |> String.concat "\n"
+    |> snd <| []
 
 let private format(msg: string option, list: Lemma list) =
-    let output = evaluate list
+    let output = evaluate list |> List.map (function Ok(lemma) -> $"Successful Lemma %s{lemma.ToString()}" | Error(msg) -> msg) |> String.concat "\n"
     match msg, list with
     | None, []      -> System.String.Empty
     | None, _       -> output
