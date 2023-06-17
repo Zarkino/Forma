@@ -15,11 +15,9 @@ let Home() =
             let rec inner string cont =
                 match Parsec.runString Language.Proof.lemma () string with
                 | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
-                | Ok(lemma, r, _)   ->  (Parsec.StringSegment.toString r)
-                                        |> (fun remaining ->
-                                            match remaining.Trim().Length with
-                                            | 0 -> None, cont [lemma]
-                                            | _ -> inner remaining (fun tail -> cont (lemma::tail)))
+                | Ok(lemma, r, _)   ->  match r.Value.Trim() with
+                                        | str when str.Length = 0   -> None, cont [lemma]
+                                        | remaining                 -> inner remaining (fun tail -> cont (lemma::tail))
             if string.Trim().Length > 0 then inner string id else None, []
         
         let evaluate (lemmas: Proof_Interface.Lemma list) =
