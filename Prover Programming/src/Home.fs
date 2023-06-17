@@ -41,15 +41,12 @@ let Home() =
     let theme = React.useContext(Contexts.themeContext)
     
     let (input, setInput) = React.useState(Browser.WebStorage.sessionStorage.getItem("input") |> function null -> System.String.Empty | x -> x)
-    let (output, setOutput) = React.useState(System.String.Empty)
+    let (output, setOutput) = React.useState((None, List.empty))
     
     React.useEffect(fun () ->
         Browser.WebStorage.sessionStorage.setItem("input", input)
         
-        input
-        |> parse
-        |> format
-        |> setOutput
+        setOutput(parse(input))
     , [|box input|])
     
     React.fragment [
@@ -84,7 +81,7 @@ let Home() =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Monaco_Editor.Editor(output, (fun _ -> ()), true)
+                                    Monaco_Editor.Editor(format(output), (fun _ -> ()), true)
                                 ]
                             ]
                         ]
