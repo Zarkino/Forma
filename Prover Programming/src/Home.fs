@@ -7,7 +7,7 @@ open Feliz.Bulma
 let Home() =
     let theme = React.useContext(Contexts.themeContext)
     
-    let (input, setInput) = React.useState(Browser.WebStorage.localStorage.getItem("input") |> function null -> System.String.Empty | x -> x)
+    let (input, setInput) = React.useState(Browser.WebStorage.sessionStorage.getItem("input") |> function null -> System.String.Empty | x -> x)
     let (output, setOutput) = React.useState(System.String.Empty)
     
     React.useEffect(fun () ->
@@ -35,7 +35,7 @@ let Home() =
                         |> (fun rules' ->  (rules', fun tail -> cont ($"Successful Lemma %s{lemma.ToString()}"::tail))))
             |> (fun (_, cont) -> String.concat "\n" (cont []))
         
-        Browser.WebStorage.localStorage.setItem("input", input)
+        Browser.WebStorage.sessionStorage.setItem("input", input)
         
         System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
         |> parse
