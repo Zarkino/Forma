@@ -47,7 +47,7 @@ let Home() =
             | Some(msg), [] -> msg
             | Some(msg), _  -> $"%s{output}\n%s{msg}"
         |> setOutput
-    , [|input :> obj|])
+    , [|box input|])
     
     React.fragment [
         Button_Level.Button_Level(input, setInput)
