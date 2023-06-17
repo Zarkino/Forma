@@ -2,6 +2,39 @@
 
 open Feliz
 open Feliz.Bulma
+open Proof_Interface
+
+let private parse (input: string) =
+    let rec inner string cont =
+        match Parsec.runString Language.Proof.lemma () string with
+        | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
+        | Ok(lemma, r, _)   ->  match r.Value.Trim() with
+                                | str when str.Length = 0   -> None, cont [lemma]
+                                | remaining                 -> inner remaining (fun tail -> cont (lemma::tail))
+    
+    System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
+    |> fun string -> string.Trim() |> function str when str.Length > 0 -> inner str id | _ -> None, List.empty
+
+let private evaluate (lemmas: Lemma list) =
+    ((rules, id), lemmas)
+    ||> List.fold
+        (fun (rules, cont) lemma ->
+            match prove(lemma.Goal, lemma.Proof, List.empty, rules) with
+            | Error(msg)    -> (rules, fun tail -> cont (Error(msg)::tail))
+            | Ok _          ->
+                match lemma.Name with
+                | None          -> rules
+                | Some(name)    -> Map.add name lemma.Goal rules
+                |> (fun rules' ->  (rules', fun tail -> cont (Ok(lemma)::tail))))
+    |> fun (_, cont) -> cont [] |> List.map (function Ok(lemma) -> $"Successful Lemma %s{lemma.ToString()}" | Error(msg) -> msg) |> String.concat "\n"
+
+let private format(msg: string option, list: Lemma list) =
+    let output = evaluate list
+    match msg, list with
+    | None, []      -> System.String.Empty
+    | None, _       -> output
+    | Some(msg), [] -> msg
+    | Some(msg), _  -> $"%s{output}\n%s{msg}"
 
 [<ReactComponent>]
 let Home() =
@@ -11,39 +44,11 @@ let Home() =
     let (output, setOutput) = React.useState(System.String.Empty)
     
     React.useEffect(fun () ->
-        let parse (string: string) =
-            let rec inner string cont =
-                match Parsec.runString Language.Proof.lemma () string with
-                | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
-                | Ok(lemma, r, _)   ->  match r.Value.Trim() with
-                                        | str when str.Length = 0   -> None, cont [lemma]
-                                        | remaining                 -> inner remaining (fun tail -> cont (lemma::tail))
-            if string.Trim().Length > 0 then inner string id else None, []
-        
-        let evaluate (lemmas: Proof_Interface.Lemma list) =
-            ((Proof_Interface.rules, id), lemmas)
-            ||> List.fold
-                (fun (rules, cont) lemma ->
-                    match Proof_Interface.prove(lemma.Goal, lemma.Proof, List.empty, rules) with
-                    | Error(msg)    -> (rules, fun tail -> cont (msg::tail))
-                    | Ok _          ->
-                        match lemma.Name with
-                        | None          -> rules
-                        | Some(name)    -> Map.add name lemma.Goal rules
-                        |> (fun rules' ->  (rules', fun tail -> cont ($"Successful Lemma %s{lemma.ToString()}"::tail))))
-            |> (fun (_, cont) -> String.concat "\n" (cont []))
-        
         Browser.WebStorage.sessionStorage.setItem("input", input)
         
-        System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
+        input
         |> parse
-        |> fun (msg, list) ->
-            let output = evaluate list
-            match msg, list with
-            | None, []      -> System.String.Empty
-            | None, _       -> output
-            | Some(msg), [] -> msg
-            | Some(msg), _  -> $"%s{output}\n%s{msg}"
+        |> format
         |> setOutput
     , [|box input|])
     
