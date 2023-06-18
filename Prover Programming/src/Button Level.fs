@@ -134,6 +134,7 @@ let Button_Level(input, setInput, output) =
     let theme = React.useContext(Contexts.themeContext)
     let accent = React.useContext(Contexts.accentContext)
     
+    let (format, setFormat) = React.useState(false)
     let (download, setDownload) = React.useState(false)
     let (help, setHelp) = React.useState(false)
     
@@ -149,7 +150,12 @@ let Button_Level(input, setInput, output) =
                     prop.style [ style.color "white"; style.backgroundColor accent ]
                     prop.onClick (fun _ ->
                         match output with
-                        | Some _, _     -> ()
+                        | Some _, _     ->
+                            setFormat(true)
+                            async {
+                                do! Async.Sleep(3000)
+                                setFormat(false)
+                            } |> Async.StartImmediate
                         | None, list    ->
                             list
                             |> List.map Proof_Interface.toPlaintext
@@ -159,6 +165,21 @@ let Button_Level(input, setInput, output) =
                     prop.children [
                         Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-pencil" ] ] ]
                         Html.span [ Html.text "Format" ]
+                    ]
+                ]
+                Bulma.notification [
+                    Bulma.color.isDanger
+                    prop.style [
+                        if not format then style.display.none
+                        style.position.absolute
+                        style.right 10
+                        style.bottom 10
+                        style.zIndex 1
+                    ]
+                    prop.children [
+                        Bulma.delete [ prop.onClick (fun _ -> setFormat(false)) ]
+                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-triangle-exclamation" ] ] ]
+                        Html.span [ Html.text "Cannot format due to parsing error!" ]
                     ]
                 ]
                 Bulma.button.button [
