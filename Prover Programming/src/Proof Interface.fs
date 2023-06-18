@@ -169,8 +169,7 @@ let rec prove (goal: Meta, (method, statements): Proof, facts: Meta list, rules:
                         | Ok(f)         ->
                             match statement with
                             | Intermediate _    -> Ok(f::fs, assumptions, conclusions)
-                            | Conclusion _      -> Ok(fs, assumptions, Set.add (build (assumptions@[f])) conclusions)
-                            | _                 -> Error("Something went wrong"))
+                            | _                 -> Ok(fs, assumptions, Set.add (build (assumptions@[f])) conclusions))
     |> function
         | Error(msg)            -> Error(msg)
         | Ok(_, _, conclusions) -> tryApply(conclusions, goal, method, rules)
