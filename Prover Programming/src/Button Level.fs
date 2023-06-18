@@ -152,7 +152,7 @@ let Button_Level(input, setInput, output) =
                         | Some _, _     -> ()
                         | None, list    ->
                             list
-                            |> List.map (fun (lemma: Proof_Interface.Lemma) -> Proof_Interface.toPlaintext(lemma))
+                            |> List.map Proof_Interface.toPlaintext
                             |> String.concat "\n\n"
                             |> setInput
                     )
