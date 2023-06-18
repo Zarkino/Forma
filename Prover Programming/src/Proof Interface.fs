@@ -35,7 +35,7 @@ with
     override this.ToString() = Lemma.ToString this
 
 let toPlaintext(lemma: Lemma) =
-    let rec indent n = if n > 0 then "\t" + indent(n-1) else System.String.Empty
+    let rec indent n = String.replicate n "\t"
     
     let rec outer((method, statements): Proof, depth: int) =
         let indentation = indent depth
