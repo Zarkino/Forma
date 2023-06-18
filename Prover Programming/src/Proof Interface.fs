@@ -7,6 +7,13 @@ type Method =
     | Trivial
     | This
     | Rule of string
+with
+    static member ToString method =
+        match method with
+        | Trivial       -> "none"
+        | This          -> "this"
+        | Rule(name)    -> $"(rule %s{name})"
+    override this.ToString() = Method.ToString this
 
 type Proof = Method * Statement list
 and Statement =
@@ -26,6 +33,41 @@ type Lemma = {
 with
     static member ToString lemma = (lemma.Name |> function Some(name) -> $"%s{name}: " | _ -> System.String.Empty) |> (fun s -> $"%s{s}%s{lemma.Goal.ToString()}")
     override this.ToString() = Lemma.ToString this
+
+let toPlaintext(lemma: Lemma) =
+    let rec indent n = if n > 0 then "\t" + indent(n-1) else System.String.Empty
+    
+    let rec outer((method, statements): Proof, depth: int) =
+        let indentation = indent depth
+        sprintf "%sproof %s {\n%s\n%s}"
+            indentation
+            (method.ToString())
+            (List.map (fun statement -> inner(statement, depth+1)) statements |> String.concat "\n")
+            indentation
+    and inner(statement: Statement, depth: int) =
+            let indentation = indent depth
+            match statement with
+            | Next                  -> sprintf "%snext" (indent(depth-1))
+            | Assumption(fs)        -> sprintf "%sassume %s" indentation (List.map Meta.ToString fs |> String.concat " and ")
+            | Intermediate(command)
+            | Conclusion(command)   ->
+                let keyword = statement |> function Intermediate _ -> "have" | _ -> "show"
+                match command with
+                | Instant(fs, g, m) ->
+                    sprintf "%s%s%s %s by %s"
+                        indentation
+                        (fs |> function Some(fs') -> sprintf "from %s " (List.map Meta.ToString fs' |> String.concat " and ") | None -> System.String.Empty)
+                        keyword
+                        (g.ToString())
+                        (m.ToString())
+                | Delayed(g, p)     ->
+                    sprintf "%s%s %s\n%s"
+                        indentation
+                        keyword
+                        (g.ToString())
+                        (outer(p, depth))
+    
+    $"lemma %s{lemma.ToString()}\n%s{outer(lemma.Proof, 0)}"
 
 let rules = Map.ofList [
     "Falsity_E",    Implication(Entity(Constant(false)), Entity(Variable("0")))

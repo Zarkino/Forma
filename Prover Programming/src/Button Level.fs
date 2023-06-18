@@ -130,7 +130,7 @@ type Modal =
         ]
 
 [<ReactComponent>]
-let Button_Level(input, setInput) =
+let Button_Level(input, setInput, output) =
     let theme = React.useContext(Contexts.themeContext)
     let accent = React.useContext(Contexts.accentContext)
     
@@ -147,7 +147,17 @@ let Button_Level(input, setInput) =
                 Bulma.button.button [
                     prop.className "mx-1"
                     prop.style [ style.color "white"; style.backgroundColor accent ]
+                    prop.onClick (fun _ ->
+                        match output with
+                        | Some _, _     -> ()
+                        | None, list    ->
+                            list
+                            |> List.map (fun (lemma: Proof_Interface.Lemma) -> Proof_Interface.toPlaintext(lemma))
+                            |> String.concat "\n\n"
+                            |> setInput
+                    )
                     prop.children [
+                        Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-pencil" ] ] ]
                         Html.span [ Html.text "Format" ]
                     ]
                 ]

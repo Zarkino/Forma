@@ -50,7 +50,7 @@ let Home() =
     , [|box input|])
     
     React.fragment [
-        Button_Level.Button_Level(input, setInput)
+        Button_Level.Button_Level(input, setInput, output)
         Bulma.columns [
             columns.isGapless
             prop.className theme
