@@ -13,7 +13,7 @@
         <Compile Include="Meta Logic.fs" />
         <Compile Include="Proof Interface.fs" />
         <Compile Include="Language.fs" />
-        <Compile Include="Libs\Monaco.fs" />
+        <Compile Include="Monaco.fs" />
         <Compile Include="Extensions.fs" />
         
         <Compile Include="Contexts.fs" />
