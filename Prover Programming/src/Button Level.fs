@@ -8,6 +8,7 @@ let examples = [|
     "lemma P --> ~~P\nproof (rule Imp_I) {\n\tassume P\n\tshow ~~P\n\tproof (rule Neg_I) {\n\t\tassume ~P\n\t\tfrom ~P and P show F by (rule Neg_E)\n\t}\n}"
     "lemma ((P --> Q) & ~Q) --> ~P\nproof (rule Imp_I) {\n\tassume (P --> Q) & ~Q\n\tshow ~P\n\tproof (rule Neg_I) {\n\t\tassume P\n\t\tfrom (P --> Q) & ~Q have P --> Q by (rule Con_E1)\n\t\tfrom (P --> Q) & ~Q have ~Q by (rule Con_E2)\n\t\tfrom P --> Q and P have Q by (rule Imp_E)\n\t\tfrom ~Q and Q show F by (rule Neg_E)\n\t}\n}"
     "lemma (P <--> Q) <--> (Q <--> P)\nproof (rule Iff_I) {\n\tassume P <--> Q\n\tshow Q <--> P\n\tproof (rule Iff_I) {\n\t\tassume Q\n\t\tshow P by (rule Iff_E2)\n\tnext\n\t\tassume P\n\t\tshow Q by (rule Iff_E1)\n\t}\nnext\n\tassume Q <--> P\n\tshow P <--> Q\n\tproof (rule Iff_I) {\n\t\tassume P\n\t\tshow Q by (rule Iff_E2)\n\tnext\n\t\tassume Q\n\t\tshow P by (rule Iff_E1)\n\t}\n}"
+    "lemma classical: (~P ==> P) ==> P\nproof none {\n\tassume ~P ==> P\n\thave P ==> P by this\n\thave P | ~P by (rule LEM)\n\tshow P by (rule Dis_E)\n}\n\nlemma ccontr: (~P ==> F) ==> P\nproof none {\n\tassume ~P ==> F\n\thave ~P ==> P\n\tproof none {\n\t\tassume ~P\n\t\thave ~P --> F by (rule Imp_I)\n\t\thave F by (rule Imp_E)\n\t\tshow P by (rule Falsity_E)\n\t}\n\tshow P by (rule classical)\n}"
 |]
 
 type Modal =
