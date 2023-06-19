@@ -50,9 +50,9 @@ let About() =
                             style.justifyContent.spaceBetween
                         ]
                         prop.children [
-                            Html.p "This tool is a great starting point as it is much simpler to use. One of the obvious examples is simplified syntax. We only use symbols present on the keyboard and avoid syntax menus that the user needs to tab through to find a correct Unicode character. Another is a streamlined, modern and minimal user interface."
-                            Html.p "By removing clutter we are able to reduce the uncertainty that new users feel while shortening the amount of time they need to familiarise themselves with the user interface. This ties in with being minimal, as a smaller UI is naturally faster to familiarise oneself with."
-                            Html.p "Finally, Forma is more accessible since it can simply be hosted and accessed from any modern browser, with no need to download and install a heavy piece of software, potentially with dependencies."
+                            Html.p "Forma is a great starting point when moving from pen-and-paper proofs to proof assistants due to its more user-friendly environment. One of the obvious examples is simplified syntax. We only use symbols present on a standard keyboard and avoid tedious syntax menus that the user needs to tab through to find the correct unicode character."
+                            Html.p "Another point is a streamlined, modern and minimal user interface. By removing clutter we are able to reduce the uncertainty that new users feel while shortening the amount of time they need to familiarize themselves with the user interface. This ties in with being minimal, as a smaller UI is naturally faster to familiarize oneself with."
+                            Html.p "Finally, Forma is more accessible since it can simply be hosted and accessed from any modern browser — no need to download and install a heavy piece of software with annoying dependencies."
                         ]
                     ]
                     
@@ -71,7 +71,7 @@ let About() =
                         ]
                         prop.children [
                             Html.p "Forma is developed by Fredrik Haarklou Veileborg and Jónas Mittún Peltonen at the Technical University of Denmark."
-                            Html.p "It is a product of the Bachelor Project \"Forma - A Web-Based Proof Assistant (Prover Programming)\"."
+                            Html.p "It is a product of the bachelor project \"Forma - A Web-Based Proof Assistant\" about Prover Programming."
                             Html.p "Supervised by Assoc. Prof. Jørgen Villadsen and Phd. Student Frederik Krogsdal Jacobsen."
                         ]
                     ]
