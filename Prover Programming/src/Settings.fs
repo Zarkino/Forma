@@ -26,16 +26,15 @@ let Settings(setAccent, setTheme) =
         prop.className [ theme; "settings" ]
         prop.children [
             Bulma.container [
+                prop.className [ "pt-3"; "px-3" ]
                 prop.style [
                     style.display.flex
                     style.flexDirection.column
-                    style.justifyContent.spaceBetween
                     style.alignItems.center
                 ]
                 prop.children [
                     Bulma.title [
                         title.is3
-                        prop.className "pt-1"
                         prop.text "Appearance"
                     ]
                     Bulma.title [

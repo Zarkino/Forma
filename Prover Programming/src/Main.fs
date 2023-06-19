@@ -31,6 +31,7 @@ let Main () =
                     router.children [
                         match currentUrl with
                         | [ "settings" ]    -> Settings.Settings(setAccent, setTheme)
+                        | [ "about" ]       -> About.About()
                         | _                 -> Home.Home()
                     ]
                 ]

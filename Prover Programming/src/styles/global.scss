@@ -27,12 +27,16 @@ html {
 }
 
 div.editor {
-  height: calc(100vh - 72px - 56px - 24px);
+  height: calc(100vh - 72px - 56px - 20px);
   //72 navbar, 56 buttongroup, 24 footer
 }
 
 div.settings {
-  height: calc(100vh - 72px - 24px);
+  height: calc(100vh - 72px - 20px);
+}
+
+div.about {
+  height: calc(100vh - 72px - 20px);
 }
 
 div.dark {

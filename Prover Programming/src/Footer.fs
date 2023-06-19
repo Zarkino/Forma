@@ -16,12 +16,6 @@ let Footer() =
                 style.backgroundColor accent
             ]
             prop.children [
-                Html.p [
-                    Html.text "Developed by "
-                    Html.b "s204433"
-                    Html.text " and "
-                    Html.b "s204442"
-                    Html.text " at the Technical University of Denmark"
-                ]
+                Html.div [ prop.style [ style.height 20 ] ]
             ]
         ]

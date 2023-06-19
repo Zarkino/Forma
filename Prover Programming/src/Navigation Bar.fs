@@ -23,7 +23,7 @@ let Navigation() =
                 Bulma.navbarStart.div [
                     Bulma.navbarItem.a [ prop.href "/"; prop.text "Home" ]
                     Bulma.navbarItem.a [ prop.href "/settings"; prop.text "Settings" ]
-                    Bulma.navbarItem.a [ prop.text "About" ]
+                    Bulma.navbarItem.a [ prop.href "/about"; prop.text "About" ]
                 ]
             ]
         ]
