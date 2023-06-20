@@ -72,7 +72,7 @@ let About() =
                         prop.children [
                             Html.p "Forma is developed by Fredrik Haarklou Veileborg and Jónas Mittún Peltonen at the Technical University of Denmark."
                             Html.p "It is a product of the bachelor project \"Forma - A Web-Based Proof Assistant\" about Prover Programming."
-                            Html.p "Supervised by Assoc. Prof. Jørgen Villadsen and Phd. Student Frederik Krogsdal Jacobsen."
+                            Html.p "Supervised by Assoc. Prof. Jørgen Villadsen and PhD student Frederik Krogsdal Jacobsen."
                         ]
                     ]
                 ]
