@@ -106,12 +106,12 @@ let rec build list =
     | x::x'::xs -> Implication(x, build (x'::xs))
     | _         -> failwith "Could not build formula"
 
-let tryApply (assumptions, result, method, ruleset) =
+let tryApply (fs, result, method, ruleset) =
     match method with
-    | Method.Trivial    -> if Set.contains result assumptions then Ok() else Error($"Could not achieve %s{result.ToString()} by none")
+    | Method.Trivial    -> if Set.contains result fs then Ok() else Error($"Could not achieve %s{result.ToString()} by none")
     | Method.This       ->
-        assumptions
-        |> Set.exists (fun x -> Logic.ML.split x |> function a', r' when r' = result && List.forall (fun a -> Set.contains a assumptions) a' -> true | _ -> false)
+        fs
+        |> Set.exists (fun x -> Logic.ML.split x |> function a', r' when r' = result && List.forall (fun a -> Set.contains a fs) a' -> true | _ -> false)
         |> function
             | true  -> Ok()
             | false ->
@@ -125,7 +125,7 @@ let tryApply (assumptions, result, method, ruleset) =
             match split meta result with
             | Error _       -> Error($"Could not achieve %s{result.ToString()} by rule %s{rule}")
             | Ok(list, map) ->
-                match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) assumptions)) list with
+                match List.tryFind (fun x -> not (Set.exists (fun y -> unify x y map |> fst) fs)) list with
                 | None      ->  Ok()
                 | Some(x)   ->  sprintf "Could not apply rule %s: Not all conditions were met\n - Required conditions: [%s]\n - Current assumptions: [%A]\n - Missing %s"
                                     rule
