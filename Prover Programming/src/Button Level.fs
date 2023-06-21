@@ -143,7 +143,7 @@ let Button_Level(input, setInput, output) =
     
     Bulma.level [
         prop.className [ theme; "py-2" ]
-        prop.style [style.margin 0]
+        prop.style [ style.margin 0 ]
         prop.children [
             Bulma.levelLeft [
                 Bulma.button.button [
