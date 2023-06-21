@@ -19,7 +19,7 @@ let private evaluate (lemmas: Lemma list) =
     ((rules, id), lemmas)
     ||> List.fold
         (fun (rules, cont) lemma ->
-            match prove(lemma.Goal, lemma.Proof, List.empty, rules) with
+            match prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
             | Error(msg)    -> (rules, fun tail -> cont (Error(msg)::tail))
             | Ok _          ->
                 match lemma.Name with
