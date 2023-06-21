@@ -13,13 +13,8 @@ let Main () =
     
     let (currentUrl, updateUrl) = React.useState(Router.currentUrl())
     
-    React.useEffect(fun () ->
-        Browser.WebStorage.localStorage.setItem("theme", theme)
-    , [|box theme|])
-    
-    React.useEffect(fun () ->
-        Browser.WebStorage.localStorage.setItem("accent", accent)
-    , [|box accent|])
+    React.useEffect((fun () -> Browser.WebStorage.localStorage.setItem("theme", theme)), [|box theme|])
+    React.useEffect((fun () -> Browser.WebStorage.localStorage.setItem("accent", accent)), [|box accent|])
     
     React.contextProvider(Contexts.themeContext, theme,
         React.contextProvider(Contexts.accentContext, accent,
