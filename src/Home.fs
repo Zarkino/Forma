@@ -9,11 +9,14 @@ let private parse (input: string) =
         match Parsec.runString Language.Proof.lemma () string with
         | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
         | Ok(lemma, r, _)   ->  match r.Value.Trim() with
-                                | str when str.Length = 0   -> None, cont [lemma]
-                                | remaining                 -> inner remaining (fun tail -> cont (lemma::tail))
+                                | str when str.Length > 0   -> inner str (fun tail -> cont (lemma::tail))
+                                | _                         -> None, cont [lemma]
     
     System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
-    |> fun string -> string.Trim() |> function str when str.Length > 0 -> inner str id | _ -> None, List.empty
+    |> fun string ->
+        match string.Trim() with
+        |str when str.Length > 0    -> inner str id
+        | _                         -> None, List.empty
 
 let private evaluate (lemmas: Lemma list) =
     ((rules, id), lemmas)
