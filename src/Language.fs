@@ -8,7 +8,7 @@ module PL =
     let (formula: Parser<Formula, obj>), formulaRef = createParserForwardedToRef()
     
     let constant = (anyOf ['T'; '⊤'] >>% Constant(true)) <|> (anyOf ['F'; '⊥'] >>% Constant(false))
-    let var = many1Chars (satisfy (fun c -> isLetter c || isDigit c)) |>> string
+    let var = many1Chars (satisfyL (fun c -> isLetter c || isDigit c) "a letter or digit") |>> string
     let variable = var |>> Variable
     let negation = (anyOf ['~'; '¬']) >>. spaces >>. (constant <|> variable <|> formula) |>> Negation
     let binaryFormula operator = operator >>. spaces >>. formula
@@ -56,7 +56,7 @@ module Proof =
     
     let proof, proofRef = createParserForwardedToRef()
     
-    let name = spaces >>. manyMinMaxSatisfyL 1 10 (fun c -> isDigit c || isLetter c || c = '_') "A digit, letter or '_'"
+    let name = spaces >>. manyMinMaxSatisfyL 1 10 (fun c -> isLetter c || isDigit c || c = '_') "a letter, digit or '_'"
     
     let method_rule = between (pchar '(') (pchar ')') (spaces >>. pstring "rule" >>. spaces1 >>. name .>> spaces) |>> Method.Rule
     let method_this = pstring "this" >>% Method.This
