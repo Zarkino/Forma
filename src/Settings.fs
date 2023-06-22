@@ -70,7 +70,7 @@ let Settings(setAccent, setTheme) =
                                                             style.width 180
                                                             style.height 140
                                                         ]
-                                                        prop.src "./images/assets/web-appearance-light.svg"
+                                                        prop.src "assets/web-appearance-light.svg"
                                                     ]
                                                 ]
                                             ]
@@ -120,7 +120,7 @@ let Settings(setAccent, setTheme) =
                                                             style.width 180
                                                             style.height 140
                                                         ]
-                                                        prop.src "./images/assets/web-appearance-dark.svg"
+                                                        prop.src "assets/web-appearance-dark.svg"
                                                     ]
                                                 ]
                                             ]

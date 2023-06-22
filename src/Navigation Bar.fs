@@ -15,7 +15,7 @@ let Navigation() =
                 Bulma.navbarItem.a [
                     prop.href "/"
                     prop.children [
-                        Html.img [ prop.src "https://i.postimg.cc/j2NrVSFS/logo.png"; prop.height 28; prop.width 148; ]
+                        Html.img [ prop.src "assets/logo.png"; prop.height 28; prop.width 148; ]
                     ]
                 ]
             ]
