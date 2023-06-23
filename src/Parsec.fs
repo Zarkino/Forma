@@ -154,6 +154,42 @@ module ParseError =
           | Message msg -> yield sprintf "  %s\n" msg
     ]
     |> String.concat ""
+  let format ((es, _): ParseError<_>) =
+    let inner (unexpected: string option, msgs: ErrorType list list) =
+      let messages =
+        msgs
+        |> List.map (fun msg -> msg |> List.map (function Expected(label) -> $"%s{label}" | Message(msg) -> $"%s{msg}" | _ -> System.String.Empty) |> System.String.Concat)
+        |> List.distinct
+        |> String.concat ", "
+      
+      match unexpected with
+      | Some(value)  -> sprintf "\tUnexpected: %s\n\tExpected: %s" value messages
+      | None         -> sprintf "\tExpected: %s" messages
+    
+    let outer (pos: Position, xs, ys) = 
+      let x = xs |> List.map inner |> String.concat "\n\n"
+      let y = ys |> List.map inner |> String.concat "\n\n"
+      
+      sprintf "Error at line %i, column %i:\n%s"
+        (pos.Line+1)
+        pos.Col
+        (match xs, ys with
+        | [], []  -> System.String.Empty
+        | _, []   -> x
+        | [], _   -> y
+        | _, _    -> sprintf "%s\n\n%s" x y)
+    
+    es
+    |> List.groupBy fst
+    |> List.map
+      (fun (pos, list) ->
+        list
+        |> List.map snd
+        |> List.groupBy (fun msgs -> List.tryPick (function Unexpected(msg) -> (if msg.Length = 1 then $"'%s{msg}'" else msg) |> Some | _ -> None) msgs)
+        |> List.partition (fun (x, _) -> x |> function Some _ -> true | None -> false)
+        |> (fun (xs, ys) -> outer(pos, xs, ys))
+      )
+    |> String.concat "\n\n"
 
 let inline run       (p: Parser<'a, 's>) state input =
   p (state, input) |> Result.mapError ParseError.sort

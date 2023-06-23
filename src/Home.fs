@@ -7,7 +7,7 @@ open Proof_Interface
 let private parse (input: string) =
     let rec inner string cont =
         match Parsec.runString Language.Proof.lemma () string with
-        | Error(msg)        ->  Some($"Error: %A{msg}"), cont []
+        | Error(msg)        ->  Parsec.ParseError.format msg |> Some, cont []
         | Ok(lemma, r, _)   ->  match r.Value.Trim() with
                                 | str when str.Length > 0   -> inner str (fun tail -> cont (lemma::tail))
                                 | _                         -> None, cont [lemma]
