@@ -179,13 +179,15 @@ module ParseError =
         | [], _   -> y
         | _, _    -> sprintf "%s\n\n%s" x y)
     
+    let escape = function "\n" -> "\\n" | "\r" -> "\\r" | "\t" -> "\\t" | x -> x
+    
     es
     |> List.groupBy fst
     |> List.map
       (fun (pos, list) ->
         list
         |> List.map snd
-        |> List.groupBy (fun msgs -> List.tryPick (function Unexpected(msg) -> (if msg.Length = 1 then $"'%s{msg}'" else msg) |> Some | _ -> None) msgs)
+        |> List.groupBy (fun msgs -> List.tryPick (function Unexpected(msg) -> (if msg.Length = 1 then $"'%s{escape msg}'" else msg) |> Some | _ -> None) msgs)
         |> List.partition (fun (x, _) -> x |> function Some _ -> true | None -> false)
         |> (fun (xs, ys) -> outer(pos, xs, ys))
       )
