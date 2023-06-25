@@ -150,15 +150,16 @@ let Button_Level(input, setInput, output) =
                     prop.className "mx-1"
                     prop.style [ style.color "white"; style.backgroundColor accent ]
                     prop.onClick (fun _ ->
-                        match output with
-                        | Some _, _     ->
+                        match List.exists (function Error _ -> true | _ -> false) output with
+                        | true     ->
                             setFormat(true)
                             async {
                                 do! Async.Sleep(3000)
                                 setFormat(false)
                             } |> Async.StartImmediate
-                        | None, list    ->
-                            list
+                        | false    ->
+                            output
+                            |> List.collect (function Error _ -> [] | Ok(lemma) -> [lemma])
                             |> List.map Proof_Interface.toPlaintext
                             |> String.concat "\n\n"
                             |> setInput
