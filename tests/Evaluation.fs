@@ -10,7 +10,7 @@ let evaluating_Proofs =
     let evaluate goal proof =
         match runString Language.Proof.proof () proof with
             | Error _       ->  Test.failtest "Could not be parsed"
-            | Ok(v, _, _)   ->  match prove(Logic.ML.Entity(goal), v, List.empty, rules) with
+            | Ok(v, _, _)   ->  match prove(Logic.ML.Entity(goal), v, Set.empty, rules) with
                                 | Ok _  -> Expect.pass()
                                 | _     -> Test.failtest "Evaluation failed"
 
