@@ -41,7 +41,15 @@ let Language_Reference() =
                     Html.tr [
                         Html.td [ Html.strong "P" ]
                         Html.td [
-                            formatKeyword("proof"); Html.strong " M"; formatSubcript("R"); Html.text " { ["; Html.strong "S"; Html.text "]+ "; Html.strong "C"; formatSubcript("S"); Html.text " }"
+                            formatKeyword("proof"); Html.strong " M"; formatSubcript("R"); Html.text " { "; Html.strong "B"; Html.text " }"
+                        ]
+                    ]
+                    Html.tr [
+                        Html.td [ Html.strong "B" ]
+                        Html.td [
+                            Html.strong "B "; formatKeyword("next"); Html.strong " B"
+                            separator()
+                            Html.text "["; Html.strong "S"; Html.text "]+ "; Html.strong "C"; formatSubcript("S")
                         ]
                     ]
                     Html.tr [
