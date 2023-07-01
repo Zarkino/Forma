@@ -118,11 +118,22 @@ type Modal =
                                                 ]
                                             ]
                                         ]
+                                        Bulma.tab [
+                                            if active = 2 then tab.isActive
+                                            prop.onClick (fun _ -> setActive(2))
+                                            prop.children [
+                                                Html.a [
+                                                    Html.span [ prop.className "icon"; prop.children [ Html.i [ prop.className "fa-solid fa-not-equal" ] ] ]
+                                                    Html.span [ Html.text "Associativity & Precedence" ]
+                                                ]
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
                             match active with
                             | 1 -> Language_Reference.Language_Reference()
+                            | 2 -> Parsing_Help.Parsing_Help()
                             | _ -> Rules.Rules()
                         ]
                     ]

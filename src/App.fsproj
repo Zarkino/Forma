@@ -22,6 +22,7 @@
         <Compile Include="Color Picker.fs" />
         <Compile Include="Rules.fs" />
         <Compile Include="Language Reference.fs" />
+        <Compile Include="Parsing Help.fs" />
         <Compile Include="Button Level.fs" />
         <Compile Include="Footer.fs" />
         <Compile Include="Monaco Editor.fs" />
