@@ -50,7 +50,7 @@ let Settings(setAccent, setTheme) =
                                     style.borderStyle.solid
                                     style.borderWidth 1
                                     style.borderRadius 5
-                                    style.width 300
+                                    style.width (length.vw 16)
                                     style.marginBottom 0
                                 ]
                                 prop.children [
@@ -67,8 +67,7 @@ let Settings(setAccent, setTheme) =
                                                     Html.img [
                                                         prop.style [
                                                             style.borderRadius 5
-                                                            style.width 180
-                                                            style.height 140
+                                                            style.width (length.vw 10)
                                                         ]
                                                         prop.src "assets/web-appearance-light.svg"
                                                     ]
@@ -100,7 +99,7 @@ let Settings(setAccent, setTheme) =
                                     style.borderStyle.solid
                                     style.borderWidth 1
                                     style.borderRadius 5
-                                    style.width 300
+                                    style.width (length.vw 16)
                                     style.marginBottom 0
                                 ]
                                 prop.children [
@@ -117,8 +116,7 @@ let Settings(setAccent, setTheme) =
                                                     Html.img [
                                                         prop.style [
                                                             style.borderRadius 5
-                                                            style.width 180
-                                                            style.height 140
+                                                            style.width (length.vw 10)
                                                         ]
                                                         prop.src "assets/web-appearance-dark.svg"
                                                     ]
