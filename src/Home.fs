@@ -19,7 +19,7 @@ let private parse (input: string) =
     System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
     |> fun string ->
         match string.Trim() with
-        |str when str.Length > 0    -> inner str id
+        | str when str.Length > 0   -> inner str id
         | _                         -> List.empty
 
 let private evaluate (list: Result<Lemma, Parsec.ParseError<_>> list) =
