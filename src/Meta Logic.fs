@@ -32,13 +32,3 @@ module ML =
         | Universal(x, m), Universal(x', m')        ->  if x = x' then unify m m' map
                                                         else false, map
         | _, _                                      ->  false, map
-    
-    /// <summary>Splits metalogic into assumptions and conclusion.</summary>
-    let split meta =
-        let rec f x cont =
-            match x with
-            | Implication(p, q) -> f q (fun tail -> p::tail)
-            | q                 -> cont [], q
-        match meta with
-        | Implication(p, q) -> f q (fun tail -> p::tail)
-        | p                 -> [], p

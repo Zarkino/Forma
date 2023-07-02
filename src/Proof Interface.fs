@@ -100,6 +100,16 @@ let split rule goal =
     | true, map -> Ok(List.empty, map)
     | false, _  -> f rule List.empty
 
+let search meta pattern =
+    let rec f x set =
+        match pattern(set, x) with
+        | true  -> true
+        | false ->
+            match x with
+            | Implication(p, q) -> f q (Set.add p set)
+            | _                 -> false
+    f meta Set.empty
+
 let rec build list =
     match list with
     | [x]       -> x
@@ -110,14 +120,12 @@ let tryApply (fs, result, method, ruleset) =
     match method with
     | Method.Trivial    -> if Set.contains result fs then Ok() else Error($"Could not achieve %s{result.ToString()} by none")
     | Method.This       ->
-        fs
-        |> Set.exists (fun x -> Logic.ML.split x |> function a', r' when r' = result && List.forall (fun a -> Set.contains a fs) a' -> true | _ -> false)
-        |> function
+        match search result (fun (a', r') -> Set.contains r' a') with
+        | true  -> Ok()
+        | false ->
+            match Set.exists (fun x -> search x (fun (a', r') -> r' = result && Set.forall (fun a -> Set.contains a fs) a')) fs with
             | true  -> Ok()
-            | false ->
-                match result with
-                | Implication(p, p') when p = p'    -> Ok()
-                | _                                 -> Error($"Could not achieve %s{result.ToString()} by this")
+            | false -> Error($"Could not achieve %s{result.ToString()} by this")
     | Method.Rule(rule) ->
         match Map.tryFind rule ruleset with
         | None          -> Error($"Rule \"%s{rule}\" does not exist")
