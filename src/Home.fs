@@ -4,23 +4,23 @@ open Feliz
 open Feliz.Bulma
 open Proof_Interface
 
+type System.String with
+    member this.TrimOrDefault(?defaultValue) = if System.String.IsNullOrWhiteSpace(this) then defaultArg defaultValue null else this.Trim()
+
 let private parse (input: string) =
-    let rec inner string cont =
-        match Parsec.runString Language.Proof.lemma () string with
-        | Error(msg)        ->
-            match string[1..].IndexOf("lemma") with
-            | -1    -> cont [Error(msg)]
-            | i     -> inner string[1+i..] (fun tail -> cont (Error(msg)::tail))
-        | Ok(lemma, r, _)   ->
-            match r.Value.Trim() with
-            | str when str.Length > 0   -> inner str (fun tail -> cont (Ok(lemma)::tail))
-            | _                         -> cont [Ok(lemma)]
-    
+    let rec inner (string: string) cont =
+        match string.TrimOrDefault() with
+        | null      -> cont []
+        | segment   ->
+            match Parsec.runString Language.Proof.lemma () segment with
+            | Ok(lemma, rest, _)    -> inner (Parsec.StringSegment.toString rest) (fun tail -> cont (Ok(lemma)::tail))
+            | Error(msg)            ->
+                match segment[1..].IndexOf("lemma") with
+                | -1    -> cont [Error(msg)]
+                | i     -> inner segment[1+i..] (fun tail -> cont (Error(msg)::tail))
+
     System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
-    |> fun string ->
-        match string.Trim() with
-        | str when str.Length > 0   -> inner str id
-        | _                         -> List.empty
+    |> fun string -> inner string id
 
 let private evaluate (list: Result<Lemma, Parsec.ParseError<_>> list) =
     ((rules, System.Text.StringBuilder()), list)
