@@ -1,4 +1,4 @@
-﻿// Type definitions for monaco-editor v0.39.0
+﻿// Type definitions for monaco-editor v0.40.0
 // generated with ts2fable from /node_modules/monaco-editor/monaco.d.ts
 
 // ts2fable 0.9.0
@@ -866,6 +866,8 @@ module Editor =
         abstract LineRangeMapping: LineRangeMappingStatic
         /// Maps a range in the original text model to a range in the modified text model.
         abstract RangeMapping: RangeMappingStatic
+        abstract MovedText: MovedTextStatic
+        abstract SimpleLineRangeMapping: SimpleLineRangeMappingStatic
         /// <summary>The type of the <c>IEditor</c>.</summary>
         abstract EditorType: {| ICodeEditor: string; IDiffEditor: string |}
         /// An event describing that the configuration of the editor has changed.
@@ -1261,6 +1263,8 @@ module Editor =
         abstract stickiness: TrackedRangeStickiness option with get, set
         /// CSS class name describing the decoration.
         abstract className: string option with get, set
+        /// Indicates whether the decoration should span across the entire line when it continues onto the next line.
+        abstract shouldFillLineOnLineBreak: bool option with get, set
         abstract blockClassName: string option with get, set
         /// Indicates if this block should be rendered after the last line.
         /// In this case, the range must be empty and set to the last line.
@@ -1742,6 +1746,8 @@ module Editor =
         abstract ignoreTrimWhitespace: bool with get, set
         /// A diff computation should throw if it takes longer than this value.
         abstract maxComputationTimeMs: float with get, set
+        /// If set, the diff computation should compute moves in addition to insertions and deletions.
+        abstract computeMoves: bool with get, set
 
     /// Represents a diff between two text models.
     type [<AllowNullLiteral>] IDocumentDiff =
@@ -1751,6 +1757,9 @@ module Editor =
         abstract quitEarly: bool
         /// Maps all modified line ranges in the original to the corresponding line ranges in the modified text model.
         abstract changes: ResizeArray<LineRangeMapping>
+        /// Sorted by original line ranges.
+        /// The original line ranges and the modified line ranges must be disjoint (but can be touching).
+        abstract moves: ResizeArray<MovedText>
 
     /// A range of lines (1-based).
     type [<AllowNullLiteral>] LineRange =
@@ -1777,10 +1786,13 @@ module Editor =
         abstract equals: b: LineRange -> bool
         abstract toInclusiveRange: unit -> Range option
         abstract toExclusiveRange: unit -> Range
+        abstract mapToLineArray: f: (float -> 'T) -> ResizeArray<'T>
+        abstract includes: lineNumber: float -> bool
 
     /// A range of lines (1-based).
     type [<AllowNullLiteral>] LineRangeStatic =
         abstract fromRange: range: Range -> LineRange
+        abstract subtract: a: LineRange * b: LineRange option -> ResizeArray<LineRange>
         /// <param name="lineRanges">An array of sorted line ranges.</param>
         abstract joinMany: lineRanges: ResizeArray<ResizeArray<LineRange>> -> ResizeArray<LineRange>
         /// <param name="lineRanges1">Must be sorted.</param>
@@ -1802,6 +1814,7 @@ module Editor =
         abstract innerChanges: ResizeArray<RangeMapping> option
         abstract toString: unit -> string
         abstract changedLineCount: obj option
+        abstract flip: unit -> LineRangeMapping
 
     /// Maps a line range in the original text model to a line range in the modified text model.
     type [<AllowNullLiteral>] LineRangeMappingStatic =
@@ -1815,10 +1828,31 @@ module Editor =
         /// The modified range.
         abstract modifiedRange: Range
         abstract toString: unit -> string
+        abstract flip: unit -> RangeMapping
 
     /// Maps a range in the original text model to a range in the modified text model.
     type [<AllowNullLiteral>] RangeMappingStatic =
         [<EmitConstructor>] abstract Create: originalRange: Range * modifiedRange: Range -> RangeMapping
+
+    type [<AllowNullLiteral>] MovedText =
+        abstract lineRangeMapping: SimpleLineRangeMapping
+        /// The diff from the original text to the moved text.
+        /// Must be contained in the original/modified line range.
+        /// Can be empty if the text didn't change (only moved).
+        abstract changes: ResizeArray<LineRangeMapping>
+        abstract flip: unit -> MovedText
+
+    type [<AllowNullLiteral>] MovedTextStatic =
+        [<EmitConstructor>] abstract Create: lineRangeMapping: SimpleLineRangeMapping * changes: ResizeArray<LineRangeMapping> -> MovedText
+
+    type [<AllowNullLiteral>] SimpleLineRangeMapping =
+        abstract originalRange: LineRange
+        abstract modifiedRange: LineRange
+        abstract toString: unit -> string
+        abstract flip: unit -> SimpleLineRangeMapping
+
+    type [<AllowNullLiteral>] SimpleLineRangeMappingStatic =
+        [<EmitConstructor>] abstract Create: originalRange: LineRange * modifiedRange: LineRange -> SimpleLineRangeMapping
 
     type [<AllowNullLiteral>] IDimension =
         abstract width: float with get, set
@@ -1878,6 +1912,10 @@ module Editor =
         /// Modified model.
         abstract modified: ITextModel with get, set
 
+    type [<AllowNullLiteral>] IDiffEditorViewModel =
+        abstract model: IDiffEditorModel
+        abstract waitForDiff: unit -> Promise<unit>
+
     /// <summary>An event describing that an editor has had its model reset (i.e. <c>editor.setModel()</c>).</summary>
     type [<AllowNullLiteral>] IModelChangedEvent =
         /// <summary>The <c>uri</c> of the previous model or null.</summary>
@@ -1903,7 +1941,7 @@ module Editor =
         abstract run: ?args: obj -> Promise<unit>
 
     type IEditorModel =
-        U2<ITextModel, IDiffEditorModel>
+        U3<ITextModel, IDiffEditorModel, IDiffEditorViewModel>
 
     /// A (serializable) state of the cursors.
     type [<AllowNullLiteral>] ICursorState =
@@ -1931,6 +1969,7 @@ module Editor =
     type [<AllowNullLiteral>] IDiffEditorViewState =
         abstract original: ICodeEditorViewState option with get, set
         abstract modified: ICodeEditorViewState option with get, set
+        abstract modelState: obj option with get, set
 
     /// An editor view state.
     type IEditorViewState =
@@ -2293,6 +2332,8 @@ module Editor =
         /// Defaults to false.
         /// </summary>
         abstract readOnly: bool option with get, set
+        /// The message to display when the editor is readonly.
+        abstract readOnlyMessage: IMarkdownString option with get, set
         /// <summary>
         /// Should the textarea used for input use the DOM <c>readonly</c> attribute.
         /// Defaults to false.
@@ -2423,6 +2464,8 @@ module Editor =
         abstract links: bool option with get, set
         /// Enable inline color decorators and color picker rendering.
         abstract colorDecorators: bool option with get, set
+        /// Controls what is the condition to spawn a color picker from a color dectorator
+        abstract colorDecoratorsActivatedOn: IExportsEditorOptionsColorDecoratorActivatedOnIEditorOption option with get, set
         /// Controls the max number of color decorators that can be rendered in an editor at once.
         abstract colorDecoratorsLimit: float option with get, set
         /// Control the behaviour of comments in the editor.
@@ -2674,15 +2717,15 @@ module Editor =
         abstract diffAlgorithm: U2<IDocumentDiffProvider, string> option with get, set
         /// Whether the diff editor aria label should be verbose.
         abstract accessibilityVerbose: bool option with get, set
-        abstract experimental: {| collapseUnchangedRegions: bool option |} option with get, set
+        abstract experimental: {| collapseUnchangedRegions: bool option; showMoves: bool option; showEmptyDecorations: bool option |} option with get, set
+        /// Is the diff editor inside another editor
+        /// Defaults to false
+        abstract isInEmbeddedEditor: bool option with get, set
 
     /// Configuration options for the diff editor.
     type [<AllowNullLiteral>] IDiffEditorOptions =
         inherit IEditorOptions
         inherit IDiffEditorBaseOptions
-        /// Is the diff editor inside another editor
-        /// Defaults to false
-        abstract isInEmbeddedEditor: bool option with get, set
 
     /// An event describing that the configuration of the editor has changed.
     type [<AllowNullLiteral>] ConfigurationChangedEvent =
@@ -3189,6 +3232,7 @@ module Editor =
 
     type [<AllowNullLiteral>] ISmartSelectOptions =
         abstract selectLeadingAndTrailingWhitespace: bool option with get, set
+        abstract selectSubwords: bool option with get, set
 
     /// Describes how to indent wrapped lines.
     type WrappingIndent =
@@ -3315,60 +3359,62 @@ module Editor =
         | QuickSuggestions = 86
         | QuickSuggestionsDelay = 87
         | ReadOnly = 88
-        | RenameOnType = 89
-        | RenderControlCharacters = 90
-        | RenderFinalNewline = 91
-        | RenderLineHighlight = 92
-        | RenderLineHighlightOnlyWhenFocus = 93
-        | RenderValidationDecorations = 94
-        | RenderWhitespace = 95
-        | RevealHorizontalRightPadding = 96
-        | RoundedSelection = 97
-        | Rulers = 98
-        | Scrollbar = 99
-        | ScrollBeyondLastColumn = 100
-        | ScrollBeyondLastLine = 101
-        | ScrollPredominantAxis = 102
-        | SelectionClipboard = 103
-        | SelectionHighlight = 104
-        | SelectOnLineNumbers = 105
-        | ShowFoldingControls = 106
-        | ShowUnused = 107
-        | SnippetSuggestions = 108
-        | SmartSelect = 109
-        | SmoothScrolling = 110
-        | StickyScroll = 111
-        | StickyTabStops = 112
-        | StopRenderingLineAfter = 113
-        | Suggest = 114
-        | SuggestFontSize = 115
-        | SuggestLineHeight = 116
-        | SuggestOnTriggerCharacters = 117
-        | SuggestSelection = 118
-        | TabCompletion = 119
-        | TabIndex = 120
-        | UnicodeHighlighting = 121
-        | UnusualLineTerminators = 122
-        | UseShadowDOM = 123
-        | UseTabStops = 124
-        | WordBreak = 125
-        | WordSeparators = 126
-        | WordWrap = 127
-        | WordWrapBreakAfterCharacters = 128
-        | WordWrapBreakBeforeCharacters = 129
-        | WordWrapColumn = 130
-        | WordWrapOverride1 = 131
-        | WordWrapOverride2 = 132
-        | WrappingIndent = 133
-        | WrappingStrategy = 134
-        | ShowDeprecated = 135
-        | InlayHints = 136
-        | EditorClassName = 137
-        | PixelRatio = 138
-        | TabFocusMode = 139
-        | LayoutInfo = 140
-        | WrappingInfo = 141
-        | DefaultColorDecorators = 142
+        | ReadOnlyMessage = 89
+        | RenameOnType = 90
+        | RenderControlCharacters = 91
+        | RenderFinalNewline = 92
+        | RenderLineHighlight = 93
+        | RenderLineHighlightOnlyWhenFocus = 94
+        | RenderValidationDecorations = 95
+        | RenderWhitespace = 96
+        | RevealHorizontalRightPadding = 97
+        | RoundedSelection = 98
+        | Rulers = 99
+        | Scrollbar = 100
+        | ScrollBeyondLastColumn = 101
+        | ScrollBeyondLastLine = 102
+        | ScrollPredominantAxis = 103
+        | SelectionClipboard = 104
+        | SelectionHighlight = 105
+        | SelectOnLineNumbers = 106
+        | ShowFoldingControls = 107
+        | ShowUnused = 108
+        | SnippetSuggestions = 109
+        | SmartSelect = 110
+        | SmoothScrolling = 111
+        | StickyScroll = 112
+        | StickyTabStops = 113
+        | StopRenderingLineAfter = 114
+        | Suggest = 115
+        | SuggestFontSize = 116
+        | SuggestLineHeight = 117
+        | SuggestOnTriggerCharacters = 118
+        | SuggestSelection = 119
+        | TabCompletion = 120
+        | TabIndex = 121
+        | UnicodeHighlighting = 122
+        | UnusualLineTerminators = 123
+        | UseShadowDOM = 124
+        | UseTabStops = 125
+        | WordBreak = 126
+        | WordSeparators = 127
+        | WordWrap = 128
+        | WordWrapBreakAfterCharacters = 129
+        | WordWrapBreakBeforeCharacters = 130
+        | WordWrapColumn = 131
+        | WordWrapOverride1 = 132
+        | WordWrapOverride2 = 133
+        | WrappingIndent = 134
+        | WrappingStrategy = 135
+        | ShowDeprecated = 136
+        | InlayHints = 137
+        | EditorClassName = 138
+        | PixelRatio = 139
+        | TabFocusMode = 140
+        | LayoutInfo = 141
+        | WrappingInfo = 142
+        | DefaultColorDecorators = 143
+        | ColorDecoratorsActivatedOn = 144
 
     type EditorOptionsType =
         obj
@@ -3525,6 +3571,25 @@ module Editor =
         /// Get the placement of the overlay widget.
         /// If null is returned, the overlay widget is responsible to place itself.
         abstract getPosition: unit -> IOverlayWidgetPosition option
+
+    /// A glyph margin widget renders in the editor glyph margin.
+    type [<AllowNullLiteral>] IGlyphMarginWidget =
+        /// Get a unique identifier of the glyph widget.
+        abstract getId: unit -> string
+        /// Get the dom node of the glyph widget.
+        abstract getDomNode: unit -> HTMLElement
+        /// Get the placement of the glyph widget.
+        abstract getPosition: unit -> IGlyphMarginWidgetPosition
+
+    /// A position for rendering glyph margin widgets.
+    type [<AllowNullLiteral>] IGlyphMarginWidgetPosition =
+        /// The glyph margin lane where the widget should be shown.
+        abstract lane: GlyphMarginLane with get, set
+        /// The priority order of the widget, used for determining which widget
+        /// to render when there are multiple.
+        abstract zIndex: float with get, set
+        /// The editor range that this widget applies to.
+        abstract range: IRange with get, set
 
     /// Type of hit element with the mouse in the editor.
     type MouseTargetType =
@@ -3692,8 +3757,7 @@ module Editor =
 
     type [<AllowNullLiteral>] IDiffEditorConstructionOptions =
         inherit IDiffEditorOptions
-        /// The initial editor dimension (to avoid measuring the container).
-        abstract dimension: IDimension option with get, set
+        inherit IEditorConstructionOptions
         /// Place overflow widgets inside an external DOM node.
         /// Defaults to an internal DOM node.
         abstract overflowWidgetsDomNode: HTMLElement option with get, set
@@ -3884,6 +3948,13 @@ module Editor =
         abstract layoutOverlayWidget: widget: IOverlayWidget -> unit
         /// Remove an overlay widget.
         abstract removeOverlayWidget: widget: IOverlayWidget -> unit
+        /// Add a glyph margin widget. Widgets must have unique ids, otherwise they will be overwritten.
+        abstract addGlyphMarginWidget: widget: IGlyphMarginWidget -> unit
+        /// Layout/Reposition a glyph margin widget. This is a ping to the editor to call widget.getPosition()
+        /// and update appropriately.
+        abstract layoutGlyphMarginWidget: widget: IGlyphMarginWidget -> unit
+        /// Remove a glyph margin widget.
+        abstract removeGlyphMarginWidget: widget: IGlyphMarginWidget -> unit
         /// Change the view zones. View zones are lost when a new model is attached to the editor.
         abstract changeViewZones: callback: (IViewZoneChangeAccessor -> unit) -> unit
         /// <summary>
@@ -3912,10 +3983,6 @@ module Editor =
         abstract applyFontInfo: target: HTMLElement -> unit
         abstract setBanner: bannerDomNode: HTMLElement option * height: float -> unit
 
-    /// Information about a line in the diff editor
-    type [<AllowNullLiteral>] IDiffLineInformation =
-        abstract equivalentLineNumber: float
-
     /// A rich diff editor.
     type [<AllowNullLiteral>] IDiffEditor =
         inherit IEditor
@@ -3931,27 +3998,24 @@ module Editor =
         abstract restoreViewState: state: IDiffEditorViewState option -> unit
         /// Type the getModel() of IEditor.
         abstract getModel: unit -> IDiffEditorModel option
+        abstract createViewModel: model: IDiffEditorModel -> IDiffEditorViewModel
         /// Sets the current model attached to this editor.
         /// If the previous model was created by the editor via the value key in the options
         /// literal object, it will be destroyed. Otherwise, if the previous model was set
         /// via setModel, or the model key in the options literal object, the previous model
         /// will not be destroyed.
         /// It is safe to call setModel(null) to simply detach the current model from the editor.
-        abstract setModel: model: IDiffEditorModel option -> unit
+        abstract setModel: model: U2<IDiffEditorModel, IDiffEditorViewModel> option -> unit
         /// <summary>Get the <c>original</c> editor.</summary>
         abstract getOriginalEditor: unit -> ICodeEditor
         /// <summary>Get the <c>modified</c> editor.</summary>
         abstract getModifiedEditor: unit -> ICodeEditor
         /// Get the computed diff information.
         abstract getLineChanges: unit -> ResizeArray<ILineChange> option
-        /// Get information based on computed diff about a line number from the original model.
-        /// If the diff computation is not finished or the model is missing, will return null.
-        abstract getDiffLineInformationForOriginal: lineNumber: float -> IDiffLineInformation option
-        /// Get information based on computed diff about a line number from the modified model.
-        /// If the diff computation is not finished or the model is missing, will return null.
-        abstract getDiffLineInformationForModified: lineNumber: float -> IDiffLineInformation option
         /// Update the editor's options after the editor has been created.
         abstract updateOptions: newOptions: IDiffEditorOptions -> unit
+        abstract diffReviewNext: unit -> unit
+        abstract diffReviewPrev: unit -> unit
 
     type [<AllowNullLiteral>] FontInfo =
         inherit BareFontInfo
@@ -4016,6 +4080,11 @@ module Editor =
         | Never
         | Quotes
         | Brackets
+
+    type [<StringEnum>] [<RequireQualifiedAccess>] IExportsEditorOptionsColorDecoratorActivatedOnIEditorOption =
+        | ClickAndHover
+        | Click
+        | Hover
 
     type [<StringEnum>] [<RequireQualifiedAccess>] IExportsEditorOptionsCursorSmoothCaretAnimationIEditorOption =
         | On
@@ -4150,6 +4219,7 @@ module Editor =
         abstract codeLensFontFamily: IEditorOption<EditorOption, string> with get, set
         abstract codeLensFontSize: IEditorOption<EditorOption, float> with get, set
         abstract colorDecorators: IEditorOption<EditorOption, bool> with get, set
+        abstract colorDecoratorActivatedOn: IEditorOption<EditorOption, IExportsEditorOptionsColorDecoratorActivatedOnIEditorOption> with get, set
         abstract colorDecoratorsLimit: IEditorOption<EditorOption, float> with get, set
         abstract columnSelection: IEditorOption<EditorOption, bool> with get, set
         abstract comments: IEditorOption<EditorOption, obj> with get, set
@@ -4220,6 +4290,7 @@ module Editor =
         abstract quickSuggestions: IEditorOption<EditorOption, InternalQuickSuggestionsOptions> with get, set
         abstract quickSuggestionsDelay: IEditorOption<EditorOption, float> with get, set
         abstract readOnly: IEditorOption<EditorOption, bool> with get, set
+        abstract readOnlyMessage: IEditorOption<EditorOption, obj option> with get, set
         abstract renameOnType: IEditorOption<EditorOption, bool> with get, set
         abstract renderControlCharacters: IEditorOption<EditorOption, bool> with get, set
         abstract renderFinalNewline: IEditorOption<EditorOption, IExportsEditorOptionsRenderFinalNewlineIEditorOption> with get, set
