@@ -2,32 +2,43 @@
 
 open Feliz
 open Feliz.Bulma
+open Parsec
 open Proof_Interface
+open System.Text.RegularExpressions
 
-type System.String with
-    member this.TrimOrDefault(?defaultValue) = if System.String.IsNullOrWhiteSpace(this) then defaultArg defaultValue null else this.Trim()
+module Seq =
+    let count x = Seq.filter ((=) x) >> Seq.length
 
 let private parse (input: string) =
-    let rec inner (string: string) cont =
-        match string.TrimOrDefault() with
-        | null      -> cont []
-        | segment   ->
-            match Parsec.runString Language.Proof.lemma () segment with
-            | Ok(lemma, rest, _)    -> inner (Parsec.StringSegment.toString rest) (fun tail -> cont (Ok(lemma)::tail))
-            | Error(msg)            ->
-                match segment[1..].IndexOf("lemma") with
-                | -1    -> cont [Error(msg)]
-                | i     -> inner segment[1+i..] (fun tail -> cont (Error(msg)::tail))
+    let rec inner string cont acc =
+        match System.String.IsNullOrWhiteSpace(string) with
+        | true  -> cont []
+        | false ->
+            let line = acc + (string |> Seq.takeWhile System.Char.IsWhiteSpace |> Seq.count '\n')
+            let segment = string.TrimStart()
+            
+            match runString Language.Proof.lemma () segment with
+            | Ok(lemma, rest, _)    -> inner (StringSegment.toString rest) (fun tail -> cont (Ok(lemma)::tail)) (line + rest.startLine)
+            | Error(msgs, state)    ->
+                let msgs' = msgs |> List.map (fun (pos, msg) -> { pos with Line = pos.Line + line }, msg)
+                
+                Regex.Matches(segment, "(^|[ \t]+)lemma", RegexOptions.Multiline)
+                |> Seq.tryFind (fun m -> m.Index > 0)
+                |> function
+                    | None      -> cont [Error(msgs', state)]
+                    | Some(m)   ->
+                        let next = Seq.count '\n' segment[..m.Index]
+                        inner segment[m.Index..] (fun tail -> cont (Error(msgs', state)::tail)) (line + next)
+    
+    Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*\/)", MatchEvaluator(fun m -> String.replicate (Seq.count '\n' m.Value) "\n"))
+    |> fun string -> inner string id 1
 
-    System.Text.RegularExpressions.Regex.Replace(input, "(\/\/.*)|(\/\*[\s\S]*?\*/)", System.String.Empty)
-    |> fun string -> inner string id
-
-let private evaluate (list: Result<Lemma, Parsec.ParseError<_>> list) =
+let private evaluate (list: Result<Lemma, ParseError<_>> list) =
     ((rules, System.Text.StringBuilder()), list)
     ||> List.fold
         (fun (rules, sb) result ->
             match result with
-            | Error(msg)    -> (rules, sb.AppendLine(Parsec.ParseError.format msg))
+            | Error(msg)    -> (rules, sb.AppendLine(ParseError.format msg))
             | Ok(lemma)     ->
                 match prove(lemma.Goal, lemma.Proof, Set.empty, rules) with
                 | Error(msg)    -> (rules, sb.AppendLine(msg))

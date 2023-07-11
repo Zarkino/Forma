@@ -166,12 +166,12 @@ module ParseError =
       | Some(value)  -> sprintf "\tUnexpected: %s\n\tExpected: %s" value messages
       | None         -> sprintf "\tExpected: %s" messages
     
-    let outer (pos: Position, xs, ys) = 
+    let outer (pos: Position, xs, ys) =
       let x = xs |> List.map inner |> String.concat "\n\n"
       let y = ys |> List.map inner |> String.concat "\n\n"
       
       sprintf "Error at line %i, column %i:\n%s"
-        (pos.Line+1)
+        pos.Line
         pos.Col
         (match xs, ys with
         | [], []  -> System.String.Empty
