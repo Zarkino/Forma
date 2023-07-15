@@ -1,4 +1,6 @@
-﻿// ts2fable 0.9.0
+﻿// Type definitions for @uiw/color-convert v1.3.2
+
+// ts2fable 0.9.0
 module rec Color_Convert
 
 #nowarn "3390" // disable warnings for invalid XML comments
