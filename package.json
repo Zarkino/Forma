@@ -22,7 +22,7 @@
         "@vitejs/plugin-react": "^4.0.3",
         "mocha": "^10.2.0",
         "rimraf": "^5.0.1",
-        "sass": "^1.63.6",
+        "sass": "^1.65.1",
         "vite": "^4.4.9",
         "vite-plugin-singlefile": "^0.13.5"
     },
