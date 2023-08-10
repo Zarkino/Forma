@@ -1,4 +1,4 @@
-﻿// Type definitions for @uiw/color-convert v1.3.2
+﻿// Type definitions for @uiw/color-convert v1.3.3
 
 // ts2fable 0.9.0
 module rec Color_Convert
@@ -88,5 +88,5 @@ type [<AllowNullLiteral>] HslaColor =
     abstract a: float with get, set
 
 type [<StringEnum>] [<RequireQualifiedAccess>] GetContrastingColor =
-    | [<CompiledName("#fff")>] ``#fff``
-    | [<CompiledName("#000")>] ``#000``
+    | [<CompiledName("#ffffff")>] ``#ffffff``
+    | [<CompiledName("#000000")>] ``#000000``
