@@ -1,4 +1,4 @@
-﻿// Type definitions for monaco-editor v0.40.0
+﻿// Type definitions for monaco-editor v0.41.0
 // generated with ts2fable from /node_modules/monaco-editor/monaco.d.ts
 
 // ts2fable 0.9.0
@@ -1678,8 +1678,10 @@ module Editor =
         abstract applyEdits: operations: ResizeArray<IIdentifiedSingleEditOperation> -> unit
         [<Emit("$0.applyEdits($1,false)")>] abstract applyEdits_false: operations: ResizeArray<IIdentifiedSingleEditOperation> -> unit
         [<Emit("$0.applyEdits($1,true)")>] abstract applyEdits_true: operations: ResizeArray<IIdentifiedSingleEditOperation> -> ResizeArray<IValidEditOperation>
+        /// <summary>
         /// Change the end of line sequence without recording in the undo stack.
-        /// This can have dire consequences on the undo stack! See @pushEOL for the preferred way.
+        /// This can have dire consequences on the undo stack! See
+        /// </summary>
         abstract setEOL: eol: EndOfLineSequence -> unit
         /// <summary>An event emitted when the contents of the model have changed.</summary>
         abstract onDidChangeContent: listener: (IModelContentChangedEvent -> unit) -> IDisposable
@@ -1787,6 +1789,7 @@ module Editor =
         abstract toInclusiveRange: unit -> Range option
         abstract toExclusiveRange: unit -> Range
         abstract mapToLineArray: f: (float -> 'T) -> ResizeArray<'T>
+        abstract forEach: f: (float -> unit) -> unit
         abstract includes: lineNumber: float -> bool
 
     /// A range of lines (1-based).
@@ -1846,13 +1849,13 @@ module Editor =
         [<EmitConstructor>] abstract Create: lineRangeMapping: SimpleLineRangeMapping * changes: ResizeArray<LineRangeMapping> -> MovedText
 
     type [<AllowNullLiteral>] SimpleLineRangeMapping =
-        abstract originalRange: LineRange
-        abstract modifiedRange: LineRange
+        abstract original: LineRange
+        abstract modified: LineRange
         abstract toString: unit -> string
         abstract flip: unit -> SimpleLineRangeMapping
 
     type [<AllowNullLiteral>] SimpleLineRangeMappingStatic =
-        [<EmitConstructor>] abstract Create: originalRange: LineRange * modifiedRange: LineRange -> SimpleLineRangeMapping
+        [<EmitConstructor>] abstract Create: original: LineRange * modified: LineRange -> SimpleLineRangeMapping
 
     type [<AllowNullLiteral>] IDimension =
         abstract width: float with get, set
@@ -2268,6 +2271,8 @@ module Editor =
         abstract inDiffEditor: bool option with get, set
         /// The aria label for the editor's textarea (when it is focused).
         abstract ariaLabel: string option with get, set
+        /// Whether the aria-required attribute should be set on the editors textarea.
+        abstract ariaRequired: bool option with get, set
         /// Control whether a screen reader announces inline suggestion content immediately.
         abstract screenReaderAnnounceInlineSuggestion: bool option with get, set
         /// <summary>The <c>tabindex</c> property of the editor's textarea</summary>
@@ -2721,6 +2726,8 @@ module Editor =
         /// Is the diff editor inside another editor
         /// Defaults to false
         abstract isInEmbeddedEditor: bool option with get, set
+        /// If the diff editor should only show the difference review mode.
+        abstract onlyShowAccessibleDiffViewer: bool option with get, set
 
     /// Configuration options for the diff editor.
     type [<AllowNullLiteral>] IDiffEditorOptions =
@@ -3275,146 +3282,147 @@ module Editor =
         | AccessibilitySupport = 2
         | AccessibilityPageSize = 3
         | AriaLabel = 4
-        | AutoClosingBrackets = 5
-        | ScreenReaderAnnounceInlineSuggestion = 6
-        | AutoClosingDelete = 7
-        | AutoClosingOvertype = 8
-        | AutoClosingQuotes = 9
-        | AutoIndent = 10
-        | AutomaticLayout = 11
-        | AutoSurround = 12
-        | BracketPairColorization = 13
-        | Guides = 14
-        | CodeLens = 15
-        | CodeLensFontFamily = 16
-        | CodeLensFontSize = 17
-        | ColorDecorators = 18
-        | ColorDecoratorsLimit = 19
-        | ColumnSelection = 20
-        | Comments = 21
-        | Contextmenu = 22
-        | CopyWithSyntaxHighlighting = 23
-        | CursorBlinking = 24
-        | CursorSmoothCaretAnimation = 25
-        | CursorStyle = 26
-        | CursorSurroundingLines = 27
-        | CursorSurroundingLinesStyle = 28
-        | CursorWidth = 29
-        | DisableLayerHinting = 30
-        | DisableMonospaceOptimizations = 31
-        | DomReadOnly = 32
-        | DragAndDrop = 33
-        | DropIntoEditor = 34
-        | EmptySelectionClipboard = 35
-        | ExperimentalWhitespaceRendering = 36
-        | ExtraEditorClassName = 37
-        | FastScrollSensitivity = 38
-        | Find = 39
-        | FixedOverflowWidgets = 40
-        | Folding = 41
-        | FoldingStrategy = 42
-        | FoldingHighlight = 43
-        | FoldingImportsByDefault = 44
-        | FoldingMaximumRegions = 45
-        | UnfoldOnClickAfterEndOfLine = 46
-        | FontFamily = 47
-        | FontInfo = 48
-        | FontLigatures = 49
-        | FontSize = 50
-        | FontWeight = 51
-        | FontVariations = 52
-        | FormatOnPaste = 53
-        | FormatOnType = 54
-        | GlyphMargin = 55
-        | GotoLocation = 56
-        | HideCursorInOverviewRuler = 57
-        | Hover = 58
-        | InDiffEditor = 59
-        | InlineSuggest = 60
-        | LetterSpacing = 61
-        | Lightbulb = 62
-        | LineDecorationsWidth = 63
-        | LineHeight = 64
-        | LineNumbers = 65
-        | LineNumbersMinChars = 66
-        | LinkedEditing = 67
-        | Links = 68
-        | MatchBrackets = 69
-        | Minimap = 70
-        | MouseStyle = 71
-        | MouseWheelScrollSensitivity = 72
-        | MouseWheelZoom = 73
-        | MultiCursorMergeOverlapping = 74
-        | MultiCursorModifier = 75
-        | MultiCursorPaste = 76
-        | MultiCursorLimit = 77
-        | OccurrencesHighlight = 78
-        | OverviewRulerBorder = 79
-        | OverviewRulerLanes = 80
-        | Padding = 81
-        | PasteAs = 82
-        | ParameterHints = 83
-        | PeekWidgetDefaultFocus = 84
-        | DefinitionLinkOpensInPeek = 85
-        | QuickSuggestions = 86
-        | QuickSuggestionsDelay = 87
-        | ReadOnly = 88
-        | ReadOnlyMessage = 89
-        | RenameOnType = 90
-        | RenderControlCharacters = 91
-        | RenderFinalNewline = 92
-        | RenderLineHighlight = 93
-        | RenderLineHighlightOnlyWhenFocus = 94
-        | RenderValidationDecorations = 95
-        | RenderWhitespace = 96
-        | RevealHorizontalRightPadding = 97
-        | RoundedSelection = 98
-        | Rulers = 99
-        | Scrollbar = 100
-        | ScrollBeyondLastColumn = 101
-        | ScrollBeyondLastLine = 102
-        | ScrollPredominantAxis = 103
-        | SelectionClipboard = 104
-        | SelectionHighlight = 105
-        | SelectOnLineNumbers = 106
-        | ShowFoldingControls = 107
-        | ShowUnused = 108
-        | SnippetSuggestions = 109
-        | SmartSelect = 110
-        | SmoothScrolling = 111
-        | StickyScroll = 112
-        | StickyTabStops = 113
-        | StopRenderingLineAfter = 114
-        | Suggest = 115
-        | SuggestFontSize = 116
-        | SuggestLineHeight = 117
-        | SuggestOnTriggerCharacters = 118
-        | SuggestSelection = 119
-        | TabCompletion = 120
-        | TabIndex = 121
-        | UnicodeHighlighting = 122
-        | UnusualLineTerminators = 123
-        | UseShadowDOM = 124
-        | UseTabStops = 125
-        | WordBreak = 126
-        | WordSeparators = 127
-        | WordWrap = 128
-        | WordWrapBreakAfterCharacters = 129
-        | WordWrapBreakBeforeCharacters = 130
-        | WordWrapColumn = 131
-        | WordWrapOverride1 = 132
-        | WordWrapOverride2 = 133
-        | WrappingIndent = 134
-        | WrappingStrategy = 135
-        | ShowDeprecated = 136
-        | InlayHints = 137
-        | EditorClassName = 138
-        | PixelRatio = 139
-        | TabFocusMode = 140
-        | LayoutInfo = 141
-        | WrappingInfo = 142
-        | DefaultColorDecorators = 143
-        | ColorDecoratorsActivatedOn = 144
+        | AriaRequired = 5
+        | AutoClosingBrackets = 6
+        | ScreenReaderAnnounceInlineSuggestion = 7
+        | AutoClosingDelete = 8
+        | AutoClosingOvertype = 9
+        | AutoClosingQuotes = 10
+        | AutoIndent = 11
+        | AutomaticLayout = 12
+        | AutoSurround = 13
+        | BracketPairColorization = 14
+        | Guides = 15
+        | CodeLens = 16
+        | CodeLensFontFamily = 17
+        | CodeLensFontSize = 18
+        | ColorDecorators = 19
+        | ColorDecoratorsLimit = 20
+        | ColumnSelection = 21
+        | Comments = 22
+        | Contextmenu = 23
+        | CopyWithSyntaxHighlighting = 24
+        | CursorBlinking = 25
+        | CursorSmoothCaretAnimation = 26
+        | CursorStyle = 27
+        | CursorSurroundingLines = 28
+        | CursorSurroundingLinesStyle = 29
+        | CursorWidth = 30
+        | DisableLayerHinting = 31
+        | DisableMonospaceOptimizations = 32
+        | DomReadOnly = 33
+        | DragAndDrop = 34
+        | DropIntoEditor = 35
+        | EmptySelectionClipboard = 36
+        | ExperimentalWhitespaceRendering = 37
+        | ExtraEditorClassName = 38
+        | FastScrollSensitivity = 39
+        | Find = 40
+        | FixedOverflowWidgets = 41
+        | Folding = 42
+        | FoldingStrategy = 43
+        | FoldingHighlight = 44
+        | FoldingImportsByDefault = 45
+        | FoldingMaximumRegions = 46
+        | UnfoldOnClickAfterEndOfLine = 47
+        | FontFamily = 48
+        | FontInfo = 49
+        | FontLigatures = 50
+        | FontSize = 51
+        | FontWeight = 52
+        | FontVariations = 53
+        | FormatOnPaste = 54
+        | FormatOnType = 55
+        | GlyphMargin = 56
+        | GotoLocation = 57
+        | HideCursorInOverviewRuler = 58
+        | Hover = 59
+        | InDiffEditor = 60
+        | InlineSuggest = 61
+        | LetterSpacing = 62
+        | Lightbulb = 63
+        | LineDecorationsWidth = 64
+        | LineHeight = 65
+        | LineNumbers = 66
+        | LineNumbersMinChars = 67
+        | LinkedEditing = 68
+        | Links = 69
+        | MatchBrackets = 70
+        | Minimap = 71
+        | MouseStyle = 72
+        | MouseWheelScrollSensitivity = 73
+        | MouseWheelZoom = 74
+        | MultiCursorMergeOverlapping = 75
+        | MultiCursorModifier = 76
+        | MultiCursorPaste = 77
+        | MultiCursorLimit = 78
+        | OccurrencesHighlight = 79
+        | OverviewRulerBorder = 80
+        | OverviewRulerLanes = 81
+        | Padding = 82
+        | PasteAs = 83
+        | ParameterHints = 84
+        | PeekWidgetDefaultFocus = 85
+        | DefinitionLinkOpensInPeek = 86
+        | QuickSuggestions = 87
+        | QuickSuggestionsDelay = 88
+        | ReadOnly = 89
+        | ReadOnlyMessage = 90
+        | RenameOnType = 91
+        | RenderControlCharacters = 92
+        | RenderFinalNewline = 93
+        | RenderLineHighlight = 94
+        | RenderLineHighlightOnlyWhenFocus = 95
+        | RenderValidationDecorations = 96
+        | RenderWhitespace = 97
+        | RevealHorizontalRightPadding = 98
+        | RoundedSelection = 99
+        | Rulers = 100
+        | Scrollbar = 101
+        | ScrollBeyondLastColumn = 102
+        | ScrollBeyondLastLine = 103
+        | ScrollPredominantAxis = 104
+        | SelectionClipboard = 105
+        | SelectionHighlight = 106
+        | SelectOnLineNumbers = 107
+        | ShowFoldingControls = 108
+        | ShowUnused = 109
+        | SnippetSuggestions = 110
+        | SmartSelect = 111
+        | SmoothScrolling = 112
+        | StickyScroll = 113
+        | StickyTabStops = 114
+        | StopRenderingLineAfter = 115
+        | Suggest = 116
+        | SuggestFontSize = 117
+        | SuggestLineHeight = 118
+        | SuggestOnTriggerCharacters = 119
+        | SuggestSelection = 120
+        | TabCompletion = 121
+        | TabIndex = 122
+        | UnicodeHighlighting = 123
+        | UnusualLineTerminators = 124
+        | UseShadowDOM = 125
+        | UseTabStops = 126
+        | WordBreak = 127
+        | WordSeparators = 128
+        | WordWrap = 129
+        | WordWrapBreakAfterCharacters = 130
+        | WordWrapBreakBeforeCharacters = 131
+        | WordWrapColumn = 132
+        | WordWrapOverride1 = 133
+        | WordWrapOverride2 = 134
+        | WrappingIndent = 135
+        | WrappingStrategy = 136
+        | ShowDeprecated = 137
+        | InlayHints = 138
+        | EditorClassName = 139
+        | PixelRatio = 140
+        | TabFocusMode = 141
+        | LayoutInfo = 142
+        | WrappingInfo = 143
+        | DefaultColorDecorators = 144
+        | ColorDecoratorsActivatedOn = 145
 
     type EditorOptionsType =
         obj
@@ -3982,6 +3990,9 @@ module Editor =
         /// <summary>Apply the same font settings as the editor to <c>target</c>.</summary>
         abstract applyFontInfo: target: HTMLElement -> unit
         abstract setBanner: bannerDomNode: HTMLElement option * height: float -> unit
+        /// Is called when the model has been set, view state was restored and options are updated.
+        /// This is the best place to compute data for the viewport (such as tokens).
+        abstract handleInitialized: unit -> unit
 
     /// A rich diff editor.
     type [<AllowNullLiteral>] IDiffEditor =
@@ -4014,8 +4025,8 @@ module Editor =
         abstract getLineChanges: unit -> ResizeArray<ILineChange> option
         /// Update the editor's options after the editor has been created.
         abstract updateOptions: newOptions: IDiffEditorOptions -> unit
-        abstract diffReviewNext: unit -> unit
-        abstract diffReviewPrev: unit -> unit
+        abstract accessibleDiffViewerNext: unit -> unit
+        abstract accessibleDiffViewerPrev: unit -> unit
 
     type [<AllowNullLiteral>] FontInfo =
         inherit BareFontInfo
@@ -4204,6 +4215,7 @@ module Editor =
         abstract accessibilitySupport: IEditorOption<EditorOption, AccessibilitySupport> with get, set
         abstract accessibilityPageSize: IEditorOption<EditorOption, float> with get, set
         abstract ariaLabel: IEditorOption<EditorOption, string> with get, set
+        abstract ariaRequired: IEditorOption<EditorOption, bool> with get, set
         abstract screenReaderAnnounceInlineSuggestion: IEditorOption<EditorOption, bool> with get, set
         abstract autoClosingBrackets: IEditorOption<EditorOption, IExportsEditorOptionsAutoClosingBracketsIEditorOption> with get, set
         abstract autoClosingDelete: IEditorOption<EditorOption, IExportsEditorOptionsAutoClosingDeleteIEditorOption> with get, set
@@ -5138,6 +5150,9 @@ module Languages =
         /// When set and the user types a suggestion without derivating from it, the inline suggestion is not updated.
         abstract enableForwardStability: bool option
 
+    type InlineCompletionProviderGroupId =
+        string
+
     type InlineCompletionsProvider =
         InlineCompletionsProvider<InlineCompletions>
 
@@ -5150,6 +5165,17 @@ module Languages =
         abstract handlePartialAccept: completions: 'T * item: obj * acceptedCharacters: float -> unit
         /// Will be called when a completions list is no longer in use and can be garbage-collected.
         abstract freeInlineCompletions: completions: 'T -> unit
+        /// <summary>
+        /// Only used for <see cref="yieldsToGroupIds" />.
+        /// Multiple providers can have the same group id.
+        /// </summary>
+        abstract groupId: InlineCompletionProviderGroupId option with get, set
+        /// <summary>
+        /// Returns a list of preferred provider <see cref="groupId" />s.
+        /// The current provider is only requested for completions if no provider with a preferred group id returned a result.
+        /// </summary>
+        abstract yieldsToGroupIds: ResizeArray<InlineCompletionProviderGroupId> option with get, set
+        abstract toString: unit -> string
 
     type [<AllowNullLiteral>] CodeAction =
         abstract title: string with get, set
