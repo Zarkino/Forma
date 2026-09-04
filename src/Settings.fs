@@ -69,7 +69,7 @@ let Settings(setAccent, setTheme) =
                                                             style.borderRadius 5
                                                             style.width (length.vw 10)
                                                         ]
-                                                        prop.src "assets/web-appearance-light.svg"
+                                                        prop.src $"%s{Env.Vite.BASE_URL}assets/web-appearance-light.svg"
                                                     ]
                                                 ]
                                             ]
@@ -118,7 +118,7 @@ let Settings(setAccent, setTheme) =
                                                             style.borderRadius 5
                                                             style.width (length.vw 10)
                                                         ]
-                                                        prop.src "assets/web-appearance-dark.svg"
+                                                        prop.src $"%s{Env.Vite.BASE_URL}assets/web-appearance-dark.svg"
                                                     ]
                                                 ]
                                             ]
