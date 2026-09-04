@@ -1,0 +1,10 @@
+{
+    "name": "@tests/forma-common",
+    "version": "0.1.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "pretest": "dotnet tool restore && dotnet fable",
+        "test": "mocha **/*.test.fs.js"
+    }
+}

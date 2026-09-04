@@ -6,28 +6,16 @@
         <None Include="index.html" />
         <TypeScriptCompile Include="language\language.ts" />
         <Compile Include="Env.fs" />
-
-        <Compile Include="Parsec.fs" />
-        <Compile Include="Logic.fs" />
-        <Compile Include="Propositional Logic.fs" />
-        <Compile Include="First-order Logic.fs" />
-        <Compile Include="Meta Logic.fs" />
-        <Compile Include="Proof Interface.fs" />
-        <Compile Include="Language.fs" />
-        <Compile Include="Monaco.fs" />
         <Compile Include="Extensions.fs" />
 
         <Compile Include="Contexts.fs" />
-
-        <Compile Include="Color Convert.fs" />
-        <Compile Include="Color Picker.fs" />
         <Compile Include="Rules.fs" />
         <Compile Include="Language Reference.fs" />
         <Compile Include="Parsing Help.fs" />
         <Compile Include="Button Level.fs" />
         <Compile Include="Footer.fs" />
-        <Compile Include="Monaco Editor.fs" />
         <Compile Include="Navigation Bar.fs" />
+        <Compile Include="Editor.fs" />
 
         <Compile Include="About.fs" />
         <Compile Include="Settings.fs" />
@@ -35,6 +23,13 @@
 
         <Compile Include="Main.fs" />
     </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Forma.Common\Forma.Common.fsproj" />
+        <ProjectReference Include="..\Uiw.ReactColor\Uiw.ReactColor.fsproj" />
+        <ProjectReference Include="..\React.MonacoEditor\React.MonacoEditor.fsproj" />
+    </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="Feliz" Version="2.9.0" />
         <PackageReference Include="Feliz.Bulma" Version="4.2.0" />

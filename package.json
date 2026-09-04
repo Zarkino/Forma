@@ -1,12 +1,15 @@
 {
-    "private": true,
     "type": "module",
+    "private": true,
+    "workspaces": [
+        "src/*",
+        "tests/*"
+    ],
     "scripts": {
-        "start": "dotnet tool restore && dotnet fable watch src --runFast vite",
-        "build": "dotnet tool restore && dotnet fable src --run vite build",
+        "start": "npm run start --workspace @forma/app",
+        "build": "npm run build --workspace @forma/app",
         "clean": "dotnet fable clean --yes",
-        "pretest": "dotnet fable tests",
-        "test": "mocha tests"
+        "test": "npm run test --workspaces --if-present"
     },
     "dependencies": {
         "@monaco-editor/react": "^4.5.1",

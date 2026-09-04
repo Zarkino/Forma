@@ -5,11 +5,11 @@ open Fable.Core.JsInterop
 open Feliz
 
 [<StringEnum>]
-type private Theme =
+type Theme =
     | [<CompiledName("vs-dark")>] Dark
     | [<CompiledName("light")>] Light
 
-type private Props =
+type Props =
     /// Default value of the current model
     static member inline defaultValue (defaultValue: string) = Interop.mkAttr "defaultValue" defaultValue
     /// Default language of the current model
@@ -81,29 +81,4 @@ type private Props =
     /// Defaults to "noop"
     static member inline onValidate (onValidate: ResizeArray<Monaco.Editor.IMarker> -> unit) = Interop.mkAttr "onValidate" onValidate
 
-let private create props = Interop.reactApi.createElement (import "default" "@monaco-editor/react", createObj !!props)
-
-[<ImportMember("./language/language.ts")>]
-let private beforeMount(monaco: obj): unit = jsNative
-
-[<ReactComponent>]
-let Editor(value, setValue, readonly) =
-    let theme = React.useContext(Contexts.themeContext)
-    
-    create [
-        Props.value value
-        Props.language "logi-lang"
-        Props.theme (if theme.Equals("dark") then !^"logi-theme-dark" else !^"logi-theme-light")
-        Props.options
-            (jsOptions<Monaco.Editor.IStandaloneEditorConstructionOptions>(fun o ->
-                o.minimap <- Some (jsOptions<Monaco.Editor.IEditorMinimapOptions>(fun oMinimap ->
-                    oMinimap.enabled <- Some false
-                ))
-                o.unicodeHighlight <- Some (jsOptions<Monaco.Editor.IUnicodeHighlightOptions>(fun oUnicodeHighlight ->
-                    oUnicodeHighlight.ambiguousCharacters <- Some false
-                ))
-                o.readOnly <- Some readonly
-            ))
-        Props.beforeMount beforeMount
-        Props.onChange setValue
-    ]
+let create props = Interop.reactApi.createElement (import "default" "@monaco-editor/react", createObj !!props)

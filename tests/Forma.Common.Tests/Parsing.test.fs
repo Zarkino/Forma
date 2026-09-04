@@ -45,6 +45,8 @@ let parsing_PL =
         }
     ]
 
+Mocha.runTests parsing_PL |> ignore
+
 open Proof_Interface
 open Logic.ML
 
@@ -74,6 +76,8 @@ let parsing_Proofs =
         }
     ]
 
+Mocha.runTests parsing_Proofs |> ignore
+
 let parsing_ML =
     let parse input =
         match runString Language.ML.meta () input with
@@ -92,3 +96,5 @@ let parsing_ML =
             Expect.equal (parse "!!x. p") (Some(Universal(["x"], Entity(Variable("p")))), "") error_msg
         }
     ]
+
+Mocha.runTests parsing_ML |> ignore

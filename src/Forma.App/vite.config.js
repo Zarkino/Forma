@@ -9,9 +9,9 @@ export default defineConfig(({command,mode,ssrBuild}) => {
     return {
         base: base,
         plugins: [react()],
-        root: "./src",
         build: {
-            outDir: "../dist",
+            outDir: "../../dist",
+            emptyOutDir: true
         }
     }
 })

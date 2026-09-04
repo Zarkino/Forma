@@ -6,13 +6,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Parsing.fs" />
-        <Compile Include="Evaluation.fs" />
-        <Compile Include="Tests.fs" />
+        <Compile Include="Parsing.test.fs" />
+        <Compile Include="Evaluation.test.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\src\App.fsproj" />
+        <ProjectReference Include="..\..\src\Forma.Common\Forma.Common.fsproj" />
     </ItemGroup>
     
     <ItemGroup>

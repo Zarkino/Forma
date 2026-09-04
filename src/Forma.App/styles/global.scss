@@ -1,7 +1,7 @@
 // Overwrite navigation bar breakpoint
 $navbar-breakpoint: "0";
 
-@import "../../node_modules/bulma/bulma.sass";
+@import "../../../node_modules/bulma/bulma.sass";
 
 :root {
   --dark-main-color: #1E1E1E;

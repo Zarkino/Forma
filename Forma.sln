@@ -1,8 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "App", "src\App.fsproj", "{EAA37573-D8DC-4856-A641-345198F71EBA}"
+#
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Forma.Common.Tests", "tests\Forma.Common.Tests\Forma.Common.Tests.fsproj", "{95D69F3D-689D-4D20-B86F-747E65E13B0E}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "tests\Tests.fsproj", "{85081F1B-9A9B-4668-BCDD-000A13225B1B}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Forma.App", "src\Forma.App\Forma.App.fsproj", "{666BCF1D-288F-455C-BA21-F98EB88B4AD7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Forma.Common", "src\Forma.Common\Forma.Common.fsproj", "{392AD579-B303-4866-B8D9-B8329401D0E3}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Uiw.ReactColor", "src\Uiw.ReactColor\Uiw.ReactColor.fsproj", "{5D8622D6-54F4-4243-BAF5-4884CB2C5D1C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "React.MonacoEditor", "src\React.MonacoEditor\React.MonacoEditor.fsproj", "{EB063FBF-682F-4F7A-9896-189C5BB99D7F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +17,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EAA37573-D8DC-4856-A641-345198F71EBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EAA37573-D8DC-4856-A641-345198F71EBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EAA37573-D8DC-4856-A641-345198F71EBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EAA37573-D8DC-4856-A641-345198F71EBA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{85081F1B-9A9B-4668-BCDD-000A13225B1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85081F1B-9A9B-4668-BCDD-000A13225B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85081F1B-9A9B-4668-BCDD-000A13225B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85081F1B-9A9B-4668-BCDD-000A13225B1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95D69F3D-689D-4D20-B86F-747E65E13B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95D69F3D-689D-4D20-B86F-747E65E13B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95D69F3D-689D-4D20-B86F-747E65E13B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95D69F3D-689D-4D20-B86F-747E65E13B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{666BCF1D-288F-455C-BA21-F98EB88B4AD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{666BCF1D-288F-455C-BA21-F98EB88B4AD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{666BCF1D-288F-455C-BA21-F98EB88B4AD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{666BCF1D-288F-455C-BA21-F98EB88B4AD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{392AD579-B303-4866-B8D9-B8329401D0E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{392AD579-B303-4866-B8D9-B8329401D0E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{392AD579-B303-4866-B8D9-B8329401D0E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{392AD579-B303-4866-B8D9-B8329401D0E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D8622D6-54F4-4243-BAF5-4884CB2C5D1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D8622D6-54F4-4243-BAF5-4884CB2C5D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D8622D6-54F4-4243-BAF5-4884CB2C5D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D8622D6-54F4-4243-BAF5-4884CB2C5D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB063FBF-682F-4F7A-9896-189C5BB99D7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB063FBF-682F-4F7A-9896-189C5BB99D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB063FBF-682F-4F7A-9896-189C5BB99D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB063FBF-682F-4F7A-9896-189C5BB99D7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

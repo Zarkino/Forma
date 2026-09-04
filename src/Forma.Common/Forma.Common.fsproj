@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Parsec.fs" />
+        <Compile Include="Logic.fs" />
+        <Compile Include="Propositional Logic.fs" />
+        <Compile Include="First-order Logic.fs" />
+        <Compile Include="Meta Logic.fs" />
+        <Compile Include="Proof Interface.fs" />
+        <Compile Include="Language.fs" />
+    </ItemGroup>
+
+</Project>

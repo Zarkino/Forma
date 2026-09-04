@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Color Convert.fs" />
+        <Compile Include="Color Picker.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Fable.Core" Version="3.7.1" />
+      <PackageReference Include="Feliz" Version="2.9.0" />
+    </ItemGroup>
+
+</Project>

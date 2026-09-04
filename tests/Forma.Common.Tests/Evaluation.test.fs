@@ -66,3 +66,5 @@ let evaluating_Proofs =
             evaluate goal proof
         }
     ]
+
+Mocha.runTests evaluating_Proofs |> ignore

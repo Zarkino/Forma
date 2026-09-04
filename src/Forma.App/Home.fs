@@ -80,7 +80,7 @@ let Home() =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Monaco_Editor.Editor(input, (fun value -> setInput(value.ToString())), false)
+                                    Editor.Editor(input, (fun value -> setInput(value.ToString())), false)
                                 ]
                             ]
                         ]
@@ -94,7 +94,7 @@ let Home() =
                                 column.isFull
                                 prop.className "editor"
                                 prop.children [
-                                    Monaco_Editor.Editor(evaluate(output), (fun _ -> ()), true)
+                                    Editor.Editor(evaluate(output), (fun _ -> ()), true)
                                 ]
                             ]
                         ]
