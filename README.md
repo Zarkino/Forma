@@ -31,3 +31,16 @@ npm start
 ```
 
 The web application will be accessible at [http://localhost:5173](http://localhost:5173).
+
+## Other commands
+
+```bash
+# Run the test suite
+npm test
+
+# Build a static site into dist/
+npm run build
+
+# Build the whole application as a single self-contained HTML file
+npm run build-single-file
+```
