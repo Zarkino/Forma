@@ -5,7 +5,8 @@
     <ItemGroup>
         <None Include="index.html" />
         <TypeScriptCompile Include="language\language.ts" />
-        
+        <Compile Include="Env.fs" />
+
         <Compile Include="Parsec.fs" />
         <Compile Include="Logic.fs" />
         <Compile Include="Propositional Logic.fs" />
@@ -15,9 +16,9 @@
         <Compile Include="Language.fs" />
         <Compile Include="Monaco.fs" />
         <Compile Include="Extensions.fs" />
-        
+
         <Compile Include="Contexts.fs" />
-        
+
         <Compile Include="Color Convert.fs" />
         <Compile Include="Color Picker.fs" />
         <Compile Include="Rules.fs" />
@@ -27,11 +28,11 @@
         <Compile Include="Footer.fs" />
         <Compile Include="Monaco Editor.fs" />
         <Compile Include="Navigation Bar.fs" />
-        
+
         <Compile Include="About.fs" />
         <Compile Include="Settings.fs" />
         <Compile Include="Home.fs" />
-        
+
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
