@@ -21,7 +21,6 @@ let Main () =
             React.fragment [
                 Navigation_Bar.Navigation()
                 React.router [
-                    router.pathMode
                     router.onUrlChanged updateUrl
                     router.children [
                         match currentUrl with
