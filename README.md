@@ -40,7 +40,4 @@ npm test
 
 # Build a static site into dist/
 npm run build
-
-# Build the whole application as a single self-contained HTML file
-npm run build-single-file
 ```
