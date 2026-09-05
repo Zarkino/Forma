@@ -15,21 +15,22 @@
         "@monaco-editor/react": "^4.5.1",
         "@uiw/color-convert": "^1.3.3",
         "@uiw/react-color-colorful": "^1.3.3",
-        "bulma": "^0.9.4",
+        "bulma": "^1.0.4",
         "monaco-editor": "^0.41.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@vitejs/plugin-react": "^4.0.4",
+        "@vitejs/plugin-react": "^6.1.1",
         "mocha": "^10.2.0",
-        "sass": "^1.65.1",
-        "vite": "^4.4.9"
+        "sass": "^1.94.2",
+        "vite": "^8.2.2"
     },
     "allowScripts": {
-        "esbuild": true
+        "esbuild": true,
+        "@parcel/watcher": true
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=22.12.0"
     }
 }

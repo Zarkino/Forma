@@ -14,7 +14,6 @@ let examples = [|
 type Modal =
     [<ReactComponent>]
     static member Download (id: string, active: bool, setActive: bool -> unit, input: string) =
-        let theme = React.useContext(Contexts.themeContext)
         let accent = React.useContext(Contexts.accentContext)
         
         let (filename, setFilename) = React.useState("File1")
@@ -27,10 +26,10 @@ type Modal =
                 Bulma.modalClose [ prop.onClick (fun _ -> setActive(false)) ]
                 Bulma.modalContent [
                     Bulma.box [
-                        prop.className theme
                         prop.children [
-                            Html.h1 [
-                                prop.className [ "title"; "is-4" ]
+                            Bulma.title [
+                                title.is4
+                                text.hasTextWeightSemibold
                                 prop.text "Save this file"
                             ]
                             Bulma.field.div [
@@ -66,7 +65,7 @@ type Modal =
                                     ]
                                     Bulma.control.p [
                                         Bulma.button.button [
-                                            prop.className theme
+                                            color.isDanger
                                             prop.onClick (fun _ -> setActive(false))
                                             prop.children [ Html.span [ Html.text "Cancel" ] ]
                                         ]
@@ -81,8 +80,6 @@ type Modal =
 
     [<ReactComponent>]
     static member Help (id: string, help: bool, setHelp: bool -> unit) =
-        let theme = React.useContext(Contexts.themeContext)
-        
         let (active, setActive) = React.useState(0)
         
         Bulma.modal [
@@ -93,7 +90,6 @@ type Modal =
                 Bulma.modalClose [ prop.onClick (fun _ -> setHelp(false)) ]
                 Bulma.modalContent [
                     Bulma.box [
-                        prop.className theme
                         prop.children [
                             Bulma.tabs [
                                 prop.children [
@@ -143,7 +139,6 @@ type Modal =
 
 [<ReactComponent>]
 let Button_Level(input, setInput, output) =
-    let theme = React.useContext(Contexts.themeContext)
     let accent = React.useContext(Contexts.accentContext)
     
     let (format, setFormat) = React.useState(false)
@@ -153,7 +148,7 @@ let Button_Level(input, setInput, output) =
     let reader = Browser.Dom.FileReader.Create()
     
     Bulma.level [
-        prop.className [ theme; "py-2" ]
+        prop.className "py-2"
         prop.style [ style.margin 0 ]
         prop.children [
             Bulma.levelLeft [
@@ -208,7 +203,7 @@ let Button_Level(input, setInput, output) =
                 ]
                 Modal.Download("modal-download", download, setDownload, input)
                 Bulma.file [
-                    prop.className "mx-1"
+                    prop.className [ "mx-1"; "mb-0" ]
                     prop.children [
                         Bulma.fileLabel.label [
                             prop.children [
@@ -271,7 +266,6 @@ let Button_Level(input, setInput, output) =
                             prop.role "menu"
                             prop.children [
                                 Bulma.dropdownContent [
-                                    prop.className theme
                                     prop.children
                                         (examples |> Array.mapi (fun i ex ->
                                         Bulma.dropdownItem.a [

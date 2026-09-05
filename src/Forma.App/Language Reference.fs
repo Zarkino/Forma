@@ -29,7 +29,6 @@ let Language_Reference() =
         Bulma.table [
             table.isFullWidth
             table.isNarrow
-            prop.className theme
             prop.children [
                 Html.tbody [
                     Html.tr [
@@ -135,8 +134,9 @@ let Language_Reference() =
                 ]
             ]
         ]
-        Html.h1 [
-            prop.className [ "title"; "is-5" ]
+        Bulma.title [
+            title.is5
+            text.hasTextWeightSemibold
             prop.style [ style.marginBottom 0 ]
             prop.text "Notes"
         ]

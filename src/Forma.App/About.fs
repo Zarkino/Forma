@@ -5,10 +5,8 @@ open Feliz.Bulma
 
 [<ReactComponent>]
 let About() =
-    let theme = React.useContext(Contexts.themeContext)
-    
     Html.div [
-        prop.className [ theme; "about" ]
+        prop.className "about"
         prop.children [
             Bulma.container [
                 prop.className [ "pt-3"; "px-3" ]
@@ -20,6 +18,7 @@ let About() =
                 prop.children [
                     Bulma.title [
                         title.is3
+                        text.hasTextWeightSemibold
                         prop.text "What is Forma?"
                     ]
                     Bulma.block [
@@ -38,6 +37,7 @@ let About() =
                     
                     Bulma.title [
                         title.is3
+                        text.hasTextWeightSemibold
                         prop.className "pt-2"
                         prop.text "Why use Forma?"
                     ]
@@ -58,6 +58,7 @@ let About() =
                     
                     Bulma.title [
                         title.is3
+                        text.hasTextWeightSemibold
                         prop.className "pt-2"
                         prop.text "Credits"
                     ]

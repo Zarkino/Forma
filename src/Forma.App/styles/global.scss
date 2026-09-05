@@ -1,7 +1,7 @@
 // Overwrite navigation bar breakpoint
 $navbar-breakpoint: "0";
 
-@import "../../../node_modules/bulma/bulma.sass";
+@use "bulma/bulma";
 
 :root {
   --dark-main-color: #1E1E1E;
@@ -9,6 +9,37 @@ $navbar-breakpoint: "0";
   --dark-text-primary: #FFFFFF;
   --dark-text-secondary: #DCDCDC;
   --dark-text-tertiary: #9F9F9F;
+
+  --navbar-height: 72px;
+  --button-level-height: 56px;
+  --footer-height: 20px;
+}
+
+[data-theme="dark"] {
+  --bulma-scheme-main: var(--dark-main-color);
+
+  .navbar-item {
+    --bulma-navbar-item-color: var(--dark-text-primary);
+  }
+
+  a.dropdown-item {
+    background-color: transparent;
+  }
+
+  table {
+    background-color: var(--dark-main-color);
+  }
+
+  table > thead > tr > th {
+    color: var(--dark-text-secondary);
+  }
+
+  table > tbody > tr > td {
+    color: var(--dark-text-tertiary);
+    strong {
+      color: var(--dark-text-tertiary);
+    }
+  }
 }
 
 html {
@@ -23,28 +54,19 @@ html {
 }
 
 .navbar {
-  min-height: 72px;
+  min-height: var(--navbar-height);
 }
 
 div.editor {
-  height: calc(100vh - 72px - 56px - 20px);
-  //72 navbar, 56 buttongroup, 24 footer
+  height: calc(100vh - var(--navbar-height) - var(--button-level-height) - var(--footer-height));
 }
 
 div.settings {
-  height: calc(100vh - 72px - 20px);
+  height: calc(100vh - var(--navbar-height) - var(--footer-height));
 }
 
 div.about {
-  height: calc(100vh - 72px - 20px);
-}
-
-div.dark {
-  background-color: var(--dark-main-color);
-}
-
-nav.dark {
-  background-color: var(--dark-main-color);
+  height: calc(100vh - var(--navbar-height) - var(--footer-height));
 }
 
 a.navbar-item {
@@ -53,7 +75,6 @@ a.navbar-item {
 
 a.navbar-item:hover,
 a.navbar-item:focus {
-  color: white;
   background-color: transparent;
   backdrop-filter: brightness(0.8);
 }
@@ -61,71 +82,9 @@ a.navbar-item:focus {
 .button,
 .button:hover,
 .button:focus {
-  background-color: unset;
   border-color: transparent;
 }
 
 .button:hover {
   opacity: 0.8;
-}
-
-button.dark,
-button.dark:hover {
-  background-color: #2F2F2F;
-  border-color: transparent;
-  color: var(--dark-text-primary);
-}
-
-button.dark:focus {
-  color: var(--dark-text-primary);
-}
-
-button.light,
-button.light:hover {
-  border-color: hsl(0, 0%, 71%);
-  color: hsl(0, 0%, 21%);
-}
-
-.dropdown-content.dark a {
-  color: var(--dark-text-tertiary);
-}
-
-.dropdown-content.dark a:hover {
-  color: var(--dark-text-primary);
-  background-color: #252525;
-}
-
-table.dark {
-  background-color: var(--dark-main-color);
-}
-
-table.dark > thead > tr > th {
-  color: var(--dark-text-secondary);
-}
-
-table.dark > tbody > tr > td {
-  color: var(--dark-text-tertiary);
-  strong {
-    color: var(--dark-text-tertiary);
-  }
-}
-
-.dark h1, a {
-  color: var(--dark-text-primary);
-}
-
-.dark .field label {
-  color: var(--dark-text-primary);
-}
-
-.dark > .tabs > ul > li > a:not(li.is-active a, a:hover) {
-  color: var(--dark-text-secondary);
-}
-
-.dark p {
-  color: var(--dark-text-tertiary);
-}
-
-.dark .content > ul > li span {
-  color: var(--dark-text-tertiary);
 }

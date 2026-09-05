@@ -5,13 +5,10 @@ open Feliz.Bulma
 
 [<ReactComponent>]
 let Rules() =
-    let theme = React.useContext(Contexts.themeContext)
-    
     Bulma.content [
         Bulma.table [
             table.isFullWidth
             table.isNarrow
-            prop.className theme
             prop.children [
                 Html.thead [ Html.tr [ Html.th [ Html.abbr "Rule" ]; Html.th [ Html.abbr "Definition" ] ] ]
                 Html.tbody [

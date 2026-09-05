@@ -51,8 +51,6 @@ let private evaluate (list: Result<Lemma, ParseError<_>> list) =
 
 [<ReactComponent>]
 let Home() =
-    let theme = React.useContext(Contexts.themeContext)
-    
     let (input, setInput) = React.useState(Browser.WebStorage.sessionStorage.getItem("input") |> function null -> System.String.Empty | x -> x)
     let (output, setOutput) = React.useState(List.empty)
     
@@ -66,7 +64,6 @@ let Home() =
         Button_Level.Button_Level(input, setInput, output)
         Bulma.columns [
             columns.isGapless
-            prop.className theme
             prop.style [
                 style.marginBottom 0
                 style.paddingBottom (length.rem 1.5)

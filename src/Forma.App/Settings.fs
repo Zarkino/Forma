@@ -23,7 +23,7 @@ let Settings(setAccent, setTheme) =
     let active, setActive = React.useState(false)
     
     Html.div [
-        prop.className [ theme; "settings" ]
+        prop.className "settings"
         prop.children [
             Bulma.container [
                 prop.className [ "pt-3"; "px-3" ]
@@ -35,10 +35,12 @@ let Settings(setAccent, setTheme) =
                 prop.children [
                     Bulma.title [
                         title.is3
+                        text.hasTextWeightSemibold
                         prop.text "Appearance"
                     ]
                     Bulma.title [
                         title.is5
+                        text.hasTextWeightSemibold
                         prop.text "Choose your theme"
                     ]
                     Bulma.field.div [
@@ -146,6 +148,7 @@ let Settings(setAccent, setTheme) =
                     ]
                     Bulma.title [
                         title.is5
+                        text.hasTextWeightSemibold
                         prop.className "mt-3"
                         prop.text "Choose your accent color"
                     ]
@@ -164,7 +167,8 @@ let Settings(setAccent, setTheme) =
                             colorButton("#0ABB91", setAccent)
                             colorButton("#3F90F7", setAccent)
                             Bulma.button.button [
-                                prop.className [ "mx-1"; theme ]
+                                prop.className "mx-1"
+                                prop.style [ style.color "white"; style.backgroundColor accent ]
                                 prop.target "modal-picker"
                                 prop.onClick (fun _  -> setActive(true))
                                 prop.onKeyDown (key.escape, fun _ -> setActive(false))
@@ -183,7 +187,6 @@ let Settings(setAccent, setTheme) =
                                         ]
                                         prop.children [
                                             Bulma.box [
-                                                prop.className theme
                                                 prop.style [ style.width.maxContent ]
                                                 prop.children [
                                                     Color_Picker.Color_Picker(!^accent, setAccent)
