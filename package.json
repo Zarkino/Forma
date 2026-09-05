@@ -8,6 +8,7 @@
     "scripts": {
         "start": "npm run start --workspace @forma/app",
         "build": "npm run build --workspace @forma/app",
+        "preview": "npm run preview --workspace @forma/app",
         "clean": "dotnet fable clean --yes",
         "test": "npm run test --workspaces --if-present"
     },

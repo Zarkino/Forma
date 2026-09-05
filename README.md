@@ -38,6 +38,9 @@ The web application will be accessible at [http://localhost:5173](http://localho
 # Run the test suite
 npm test
 
-# Build a static site into dist/
+# Build the application
 npm run build
+
+# Preview the production build
+npm run preview
 ```

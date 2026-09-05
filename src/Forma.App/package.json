@@ -5,6 +5,7 @@
     "private": true,
     "scripts": {
         "start": "dotnet tool restore && dotnet fable watch --run vite",
-        "build": "dotnet tool restore && dotnet fable --run vite build"
+        "build": "dotnet tool restore && dotnet fable --run vite build",
+        "preview": "vite preview"
     }
 }
